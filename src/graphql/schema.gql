@@ -1,0 +1,18 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Query {
+  getTask: TaskModel!
+}
+
+type TaskModel {
+  id: Int!
+  name: String!
+  options: [TaskOptionsModel!]!
+}
+
+type TaskOptionsModel {
+  id: Int!
+  name: String!
+}
