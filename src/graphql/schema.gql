@@ -2,11 +2,16 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Mutation {
+  submitTask(answer: String!): Boolean!
+}
+
 type Query {
   getTask: TaskModel!
 }
 
 type TaskModel {
+  correct: String!
   id: Int!
   name: String!
   options: [TaskOptionsModel!]!

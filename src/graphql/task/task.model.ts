@@ -11,6 +11,9 @@ export class TaskModel {
   @Field({ nullable: false })
   name: string;
 
+  @Field({ nullable: false })
+  correct: string;
+
   @Field(type => [TaskOptionsModel])
   options: TaskOptionsModel[];
 }
