@@ -1,31 +1,29 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { TaskModel } from './task.model';
+import { GraphQLInt, GraphQLString } from 'graphql';
+import { TaskService } from './task.service';
 
 @Resolver(of => TaskModel)
 export class TaskResolver {
 
+  constructor(
+    private taskService: TaskService
+  ) {}
+
   @Query(() => TaskModel)
-  getTask(): TaskModel {
-    return {
-      id: 1,
-      name: 'pies',
-      correct: 'dog',
-      options: [{
-        id: 2,
-        name: 'dog'
-      }, {
-        id: 3,
-        name: 'cat'
-      }, {
-        id: 4,
-        name: 'mouse'
-      }]
-    };
+  getTask(): Promise<TaskModel> {
+    console.log('randomize task');
+    return this.taskService.randomizeTask();
   }
 
   @Mutation(returns => Boolean)
-  submitTask(@Args({name: 'answer', type: () => String}) answer: string) {
+  submitTask(
+    @Args({name: 'taskId', type: () => GraphQLInt}) taskId: number,
+    @Args({name: 'answer', type: () => GraphQLString}) answer: string
+) {
+    console.log('taskId: ', taskId);
     console.log('answer: ', answer);
-    return answer === 'dog';
+    return this.taskService.submitTask(taskId, answer);
+    //return answer === 'dog';
   }
 }
