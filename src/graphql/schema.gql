@@ -3,6 +3,7 @@
 # ------------------------------------------------------
 
 type Mutation {
+  startFindGame(playerName: String!): Boolean!
   submitTask(answer: String!, taskId: Int!): Boolean!
 }
 
