@@ -32,6 +32,10 @@ export default class WsGateway implements OnGatewayInit {
           })
         });
         console.log('white true: ', ++counter);
+        let player1 = await redis.lpop("findMatchQueue");
+        let player2 = await redis.lpop("findMatchQueue");
+        console.log('player1: ', player1);
+        console.log('player2: ', player2);
       }
     }, 8000);
   }

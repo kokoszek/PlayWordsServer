@@ -34,7 +34,7 @@ export class FindMatchResolver {
     @Args({name: 'playerName', type: () => GraphQLString}) playerName: string
   ) {
     console.log('releasing semaphore');
-    await redis.lpush("findMatchQueue", playerName);
+    await redis.rpush("findMatchQueue", playerName);
     sem.leave()
     return true;
   }
