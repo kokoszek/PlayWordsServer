@@ -40,6 +40,7 @@ export default class WsGateway implements OnGatewayInit {
         let player1 = await redis.lpop("findMatchQueue");
         let player2 = await redis.lpop("findMatchQueue");
         const game = this.gameService.createGame();
+        console.log('emmiting event: ', 'game-found-for-' + player1);
         this.server.emit('game-found-for-' + player1, {
           matchFound: true,
           opponentName: player2,
