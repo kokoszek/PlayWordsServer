@@ -13,19 +13,12 @@ export class FindMatchResolver {
 
   private semaphore;
   constructor() {
-    // this.semaphore = new MultiSemaphore(redis, 'findMatchQueue', 10, 1, {
-    //   lockTimeout: undefined,
-    //   acquireTimeout: undefined
-    // })
     setTimeout(async ()=> {
-      for(let i=0; i<10; i++) {
-        await new Promise<void>(resolve => {
-          sem.take(1, function() {
-            resolve();
-          })
-        });
-        console.log('ctr taking sem: ', i + 1);
-      }
+      await new Promise<void>(resolve => {
+        sem.take(10, function() {
+          resolve();
+        })
+      });
     }, 0);
   }
 

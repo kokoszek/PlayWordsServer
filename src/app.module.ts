@@ -5,7 +5,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { TaskModule } from './graphql/task/task.module';
 import { ProducerModule } from './as-producer/producer.module';
-import { WsModule } from './find-match/websocket.module';
+import { WsModule } from './game-service/websocket.module';
 
 const path = require('path');
 
