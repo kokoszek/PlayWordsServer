@@ -133,9 +133,11 @@ export default class GameService {
     return this.tasks.find(task => task.id === taskId)?.solution === solution;
   }
 
+  gameId = 1;
+
   public createGame() {
     return {
-      gameId: 1
+      gameId: this.gameId++
     }
   }
 }
