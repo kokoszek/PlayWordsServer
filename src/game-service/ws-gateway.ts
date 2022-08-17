@@ -100,7 +100,7 @@ export default class WsGateway implements OnGatewayInit {
     };
   }
 
-  private sendTaskResoltMsg(
+  private sendTaskResultMsg(
     toPlayer: string,
     winOrLost: 'task-lost!' | 'task-won!' | 'game-won!' | 'game-lost!',
     reason:
@@ -138,7 +138,7 @@ export default class WsGateway implements OnGatewayInit {
       return !!opponent.solvedTaskIds.find(taskId => taskId == data.taskId);
     }
     if(hasOpponentAlreadySolvedThisTask()) {
-      this.sendTaskResoltMsg(
+      this.sendTaskResultMsg(
         playerName, 'task-lost!','task-solved-by-opponent', me,  opponent);
     } else {
       if(solved) {
@@ -146,21 +146,21 @@ export default class WsGateway implements OnGatewayInit {
         me.score += 1;
         if(this.gameService.isGameFinished(gameId)) {
           console.log('game is finished');
-          this.sendTaskResoltMsg(
+          this.sendTaskResultMsg(
             playerName, 'game-won!','limit-achieved', me,  opponent);
-          this.sendTaskResoltMsg(
+          this.sendTaskResultMsg(
             opponentName, 'game-lost!','limit-achieved', opponent, me);
           return;
         }
-        this.sendTaskResoltMsg(
+        this.sendTaskResultMsg(
           playerName, 'task-won!','task-solved-by-myself', me,  opponent);
-        this.sendTaskResoltMsg(
+        this.sendTaskResultMsg(
           opponentName, 'task-lost!','task-solved-by-opponent', opponent, me);
       } else { // wrong answer
         opponent.score += 1;
-        this.sendTaskResoltMsg(
+        this.sendTaskResultMsg(
           playerName, 'task-lost!','wrong-solution', me,  opponent);
-        this.sendTaskResoltMsg(
+        this.sendTaskResultMsg(
           opponentName, 'task-won!','opponents-wrong-solution', opponent, me);
       }
     }
