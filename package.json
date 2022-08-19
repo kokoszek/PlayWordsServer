@@ -40,6 +40,7 @@
     "graphql-ws": "^5.10.0",
     "ioredis": "^5.2.2",
     "mysql2": "^2.3.3",
+    "pdf2json": "^2.0.1",
     "redis-semaphore": "^5.0.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
