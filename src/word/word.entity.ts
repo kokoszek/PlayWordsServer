@@ -5,14 +5,23 @@ export class WordEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({
+    nullable: true
+  })
   lang_polish: string;
 
-  @Column()
+  @Column({
+    unique: true
+  })
   lang_english: string;
 
+  @Column({
+    nullable: true
+  })
+  level: string;
+
   @Column()
-  level: number;
+  freq: number;
 
   @Column({
     nullable: true,

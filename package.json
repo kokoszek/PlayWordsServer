@@ -7,7 +7,7 @@
   "scripts": {
     "typeorm": "typeorm",
     "migration:run": "ts-node ./node_modules/.bin/typeorm migration:run -d ./src/data-source.ts",
-    "migration:generate": "/node_modules/.bin/typeorm migration:generate -d ./src/data-source.ts ./migrations/init",
+    "migration:generate": "ts-node ./node_modules/.bin/typeorm migration:generate -d ./src/data-source.ts ./migrations/init",
     "prebuild": "rimraf dist",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
