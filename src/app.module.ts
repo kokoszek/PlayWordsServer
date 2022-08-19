@@ -5,12 +5,19 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { TaskModule } from './graphql/task/task.module';
 import { ProducerModule } from './as-producer/producer.module';
-import { WsModule } from './game-service/websocket.module';
+import { WsModule } from './game/game-service.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { WordEntity } from './word/word.entity';
+import { WordModule } from './word/word.module';
+
+import * as ormconfig from '../ormconfig';
 
 const path = require('path');
 
 @Module({
   imports: [
+    WordModule,
+    TypeOrmModule.forRoot(ormconfig),
     TaskModule,
     ProducerModule,
     WsModule,

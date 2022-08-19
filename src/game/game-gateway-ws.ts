@@ -18,7 +18,7 @@ const redis = new Redis(6380);
 const { sem } = require('./semaphore');
 
 @WebSocketGateway(8080, { namespace: 'find-game'})
-export default class WsGateway implements OnGatewayInit {
+export default class GameGatewayWs implements OnGatewayInit {
 
   @WebSocketServer()
   server: Server;

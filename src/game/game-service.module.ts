@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import WsGateway from './ws-gateway';
+import GameGatewayWs from './game-gateway-ws';
 import { FindMatchResolver } from './find-match.resolver';
 import GameService from './game-service';
 
 @Module({
-  providers: [WsGateway, FindMatchResolver, GameService],
+  providers: [GameGatewayWs, FindMatchResolver, GameService],
 })
 export class WsModule {}
