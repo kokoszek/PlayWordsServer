@@ -10,6 +10,9 @@ import { map } from 'rxjs/operators';
 import { Server, Socket } from 'socket.io';
 import GameService, { PlayerType } from './game-service';
 import { createRoomName } from './utils';
+import { WordEntity } from '../word/word.entity';
+import { Args, Mutation } from '@nestjs/graphql';
+import { GraphQLString } from 'graphql';
 
 const MultiSemaphore = require('redis-semaphore').MultiSemaphore
 const Redis = require('ioredis')
@@ -29,39 +32,60 @@ export default class GameGatewayWs implements OnGatewayInit {
 
   async afterInit(server: any): Promise<any> {
     let counter = 0;
-    setTimeout(async () => {
-      while(true) {
-        await new Promise<void>(resolve => {
-          sem.take(2, function() {
-            resolve();
-          })
-        });
-        console.log('found two players, loop counter: ', ++counter);
-        let player1 = await redis.lpop("findMatchQueue");
-        let player2 = await redis.lpop("findMatchQueue");
-        const game = this.gameService.createGame();
-        console.log('emmiting event: ', 'game-found-for-' + player1);
-        this.server.emit('game-found-for-' + player1, {
-          matchFound: true,
-          opponentName: player2,
-          gameId: game.gameId
-        });
-        this.server.emit('game-found-for-' + player2, {
-          matchFound: true,
-          opponentName: player1,
-          gameId: game.gameId
-        });
-      }
-    }, 3000);
+    setTimeout(async ()=> {
+      await new Promise<void>(resolve => {
+        sem.take(10, function() {
+          resolve();
+        })
+      });
+      setTimeout(async () => {
+        while(true) {
+          await new Promise<void>(resolve => {
+            sem.take(2, function() {
+              resolve();
+            })
+          });
+          console.log('found two matching players, loop counter: ', ++counter);
+          let player1 = await redis.lpop("findMatchQueue");
+          let player2 = await redis.lpop("findMatchQueue");
+          const game = this.gameService.createGame(player1, player2);
+          console.log('emiting event: ', 'game-found-for-' + player1);
+          this.server.emit('game-found-for-' + player1, {
+            matchFound: true,
+            opponentName: player2,
+            gameId: game.gameId
+          });
+          console.log('emiting event: ', 'game-found-for-' + player2);
+          this.server.emit('game-found-for-' + player2, {
+            matchFound: true,
+            opponentName: player1,
+            gameId: game.gameId
+          });
+        }
+      }, 0);
+    }, 0);
   }
 
   private emitNewTask(delayMs: number, gameId: number) {
     const roomName = createRoomName(gameId);
     setTimeout(async () => {
-      const task = this.gameService.generateTask(gameId);
+      const task = await this.gameService.generateTask(gameId);
       console.log('task: ', task);
       this.server.to(roomName).emit('newTask', task);
     }, delayMs);
+  }
+
+  @SubscribeMessage('startFindGame')
+  async startFindGame(
+    client: Socket,
+    data: {
+      playerName: string
+    }
+  ) {
+    console.log(data.playerName + 'started finding a game');
+    await redis.rpush("findMatchQueue", data.playerName);
+    sem.leave()
+    return true;
   }
 
   @SubscribeMessage('acceptGame')
@@ -125,25 +149,26 @@ export default class GameGatewayWs implements OnGatewayInit {
   @SubscribeMessage('solveTask')
   async solveTask(client: Socket, data: {
     gameId: number,
-    taskId: number,
+    word: WordEntity,
     solution: string,
     playerName: string,
     opponentName: string
   }) {
-    const { playerName, opponentName, taskId, solution, gameId } = data;
-    const solved = this.gameService.checkTaskSolution(data.taskId, data.solution);
+    console.log('data: ', data);
+    const { playerName, opponentName, word, solution, gameId } = data;
+    const solved = word.lang_english === data.solution;
     const opponent = this.gameService.getPlayer(data.gameId, data.opponentName);
     const me = this.gameService.getPlayer(data.gameId, data.playerName);
     const roomName = createRoomName(data.gameId);
     function hasOpponentAlreadySolvedThisTask() {
-      return !!opponent.solvedTaskIds.find(taskId => taskId == data.taskId);
+      return !!opponent.solvedWordsIds.find(wordId => wordId == word.id);
     }
     if(hasOpponentAlreadySolvedThisTask()) {
       this.sendTaskResultMsg(
         playerName, 'task-lost!','task-solved-by-opponent', me,  opponent);
     } else {
       if(solved) {
-        me.solvedTaskIds.push(data.taskId);
+        me.solvedWordsIds.push(word.id);
         me.score += 1;
         if(this.gameService.isGameFinished(gameId)) {
           console.log('game is finished');

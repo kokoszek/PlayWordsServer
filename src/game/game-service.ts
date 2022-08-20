@@ -1,87 +1,100 @@
 import { Injectable } from '@nestjs/common';
 import { createRoomName } from './utils';
+import { InjectRepository } from '@nestjs/typeorm';
+import { WordEntity } from '../word/word.entity';
+import { Repository } from 'typeorm';
 
 export type PlayerType = {
   name: string,
   score: number,
-  solvedTaskIds: number[]
+  solvedWordsIds: number[],
+  gameAccepted: boolean
+}
+
+export type TaskType = {
+  word: WordEntity,
+  options: {
+    text: string
+  }[]
+}
+
+export function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+export function getRandomIntExcept(min: number, max: number, except: number[]) {
+  while(true) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    let result = Math.floor(Math.random() * (max - min + 1)) + min;
+    console.log('randomized: ', result);
+    if(!except.includes(result)) {
+      return result;
+    }
+  }
 }
 
 @Injectable()
 export default class GameService {
 
-  private tasks = [
-    {
-      id: 1, name: 'pies', solution: 'dog',
-      options: [
-        {id: 1, name: 'octopus'},
-        {id: 2, name: 'cat'},
-        {id: 3, name: 'dog'},
-      ]
-    },
-    {
-      id: 2, name: 'dziedzictwo', solution: 'heritage',
-      options: [
-        {id: 1, name: 'heritage'},
-        {id: 2, name: 'kingdom'},
-        {id: 3, name: 'heir'},
-      ]
-    },
-    {
-      id: 3, name: 'włosy', solution: 'hair',
-      options: [
-        {id: 1, name: 'hair'},
-        {id: 2, name: 'sticks'},
-        {id: 3, name: 'lawyers'},
-      ]
-    },
-    {
-      id: 4, name: 'kot', solution: 'cat',
-      options: [
-        {id: 1, name: 'cat'},
-        {id: 2, name: 'frog'},
-        {id: 3, name: 'tiger'},
-      ]
-    },
-    {
-      id: 5, name: 'tron', solution: 'throne',
-      options: [
-        {id: 1, name: 'throne'},
-        {id: 2, name: 'chair'},
-        {id: 3, name: 'mug'},
-      ]
-    },
-  ];
+  constructor(
+    @InjectRepository(WordEntity)
+    private wordRepo: Repository<WordEntity>,
+  ) {}
 
-  private games: Record<string,
+  private games: Record<
+    string,
     {
       player1?: PlayerType,
       player2?: PlayerType,
     }> = {};
+
+  gameId = 1;
+
+  public createGame(player1: string, player2: string) {
+
+    console.log('createGame');
+    console.log('inmemory games: ', this.games);
+    let gameId = this.gameId++;
+    let roomName = createRoomName(gameId);
+    let newGame = {
+      gameId: gameId,
+      player1: {
+        name: player1,
+        score: 0,
+        solvedWordsIds: [],
+        gameAccepted: false
+      },
+      player2: {
+        name: player2,
+        score: 0,
+        solvedWordsIds: [],
+        gameAccepted: false
+      }
+    }
+    this.games[roomName] = newGame;
+    return newGame;
+  }
 
   public acceptGame(playerName: string, gameId: number) {
     if(this.isGameReady(gameId)) {
       return;
     }
     const roomName = createRoomName(gameId);
-    if(!this.games[roomName]) {
-      this.games[roomName] = {};
+    if(this.games[roomName].player1.name === playerName) {
+      this.games[roomName].player1.gameAccepted = true;
     }
-    const initialPlayer = {
-      name: playerName,
-      score: 0,
-      solvedTaskIds: []
-    };
-    if(this.games[roomName].player1) {
-      this.games[roomName].player2 = initialPlayer;
-    } else {
-      this.games[roomName].player1 = initialPlayer;
+    if(this.games[roomName].player2.name === playerName) {
+      this.games[roomName].player2.gameAccepted = true;
     }
   }
 
   public isGameReady(gameId: number): boolean {
     const roomName = createRoomName(gameId);
-    return !!this.games[roomName]?.player1 && !!this.games[roomName]?.player2;
+    return !!this.games[roomName]?.player1.gameAccepted &&
+      !!this.games[roomName]?.player2.gameAccepted;
   }
 
   public getPlayer(gameId: number, playerName: string) {
@@ -96,7 +109,7 @@ export default class GameService {
     return null;
   }
 
-  private taskLimit = 3;
+  private taskLimit = 5;
 
   public isGameFinished(gameId: number) {
     const roomName = createRoomName(gameId);
@@ -111,33 +124,47 @@ export default class GameService {
     return false;
   }
 
-  public generateTask(forGameId: number) {
+  public async generateTask(forGameId: number): Promise<TaskType> {
     const roomName = createRoomName(forGameId);
-    const usedTasks = this.games[roomName].player1.solvedTaskIds.concat(
-      this.games[roomName].player2.solvedTaskIds
+    const alreadyPlayedWordIds = this.games[roomName].player1.solvedWordsIds.concat(
+      this.games[roomName].player2.solvedWordsIds
     );
-    function getRandomInt(min, max) {
-      min = Math.ceil(min);
-      max = Math.floor(max);
-      return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-    while(true) {
-      let newTask = this.tasks[getRandomInt(0, this.tasks.length - 1)];
-      if(!usedTasks.includes(newTask.id)) {
-        return newTask;
+    let result = await this.wordRepo
+      .createQueryBuilder()
+      .select('COUNT(*) as count')
+      .getRawOne();
+    let count = Number.parseInt(result.count);
+    let numberOfWordsToRandomize = 8;
+    let randomizedWords: WordEntity[] = [];
+    while(numberOfWordsToRandomize--) {
+      let randomizedWord: WordEntity;
+      while(true) {
+        let randomInt = getRandomInt(0, count - 1);
+        randomizedWord = await this.wordRepo
+          .createQueryBuilder()
+          .orderBy('lang_english', 'ASC')
+          .limit(1)
+          .offset(randomInt)
+          .getOne();
+        if(!alreadyPlayedWordIds
+          .concat(randomizedWords.map(el => el.id))
+          .includes(randomizedWord.id)) {
+          break;
+        }
       }
+      randomizedWords.push(randomizedWord);
     }
+    return {
+      word: randomizedWords[getRandomInt(0, 7)],
+      options: randomizedWords.map(word => ({
+        text: word.lang_english
+      }))
+    };
   }
 
   public checkTaskSolution(taskId: number, solution: string): boolean {
-    return this.tasks.find(task => task.id === taskId)?.solution === solution;
+    //return this.tasks.find(task => task.id === taskId)?.solution === solution;
+    return true;
   }
 
-  gameId = 1;
-
-  public createGame() {
-    return {
-      gameId: this.gameId++
-    }
-  }
 }

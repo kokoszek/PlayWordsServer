@@ -13,22 +13,6 @@ export class FindMatchResolver {
 
   private semaphore;
   constructor() {
-    setTimeout(async ()=> {
-      await new Promise<void>(resolve => {
-        sem.take(10, function() {
-          resolve();
-        })
-      });
-    }, 0);
   }
 
-  @Mutation(returns => Boolean)
-  async startFindGame(
-    @Args({name: 'playerName', type: () => GraphQLString}) playerName: string
-  ) {
-    console.log('releasing semaphore');
-    await redis.rpush("findMatchQueue", playerName);
-    sem.leave()
-    return true;
-  }
 }

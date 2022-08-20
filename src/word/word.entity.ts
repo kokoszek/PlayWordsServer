@@ -10,9 +10,7 @@ export class WordEntity {
   })
   lang_polish: string;
 
-  @Column({
-    unique: true
-  })
+  @Column()
   lang_english: string;
 
   @Column({
@@ -27,6 +25,11 @@ export class WordEntity {
     nullable: true,
     default: ''
   })
-  desc: string;
+  origin: string;
+
+  @Column({
+    nullable: true,
+  })
+  desc_polish: string;
 
 }

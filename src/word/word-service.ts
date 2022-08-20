@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { createQueryBuilder, Repository } from 'typeorm';
 import { WordEntity } from './word.entity';
 import { log } from 'util';
+import { getRandomInt } from '../game/game-service';
 const axios = require("axios");
 
 const fs = require('fs');
@@ -133,7 +134,7 @@ export class WordService implements OnModuleInit {
       words.forEach(async word => {
         const wordEntity = this.wordRepo.create({
           lang_english: word,
-          desc: 'b1-cambridge-list.pdf',
+          origin: 'b1-cambridge-list.pdf',
           level: 'B1',
           freq: 1
         });
@@ -167,10 +168,35 @@ export class WordService implements OnModuleInit {
     })
   }
 
+  // async test() {
+  //   let result = await this.wordRepo
+  //     .createQueryBuilder()
+  //     .select('COUNT(*) as count')
+  //     .getRawOne();
+  //   let count = Number.parseInt(result.count);
+  //
+  //   let counter = 10;
+  //   let randomizedWordIds = [];
+  //   while(counter--) {
+  //     let randomInt;
+  //     let ordered = await this.wordRepo
+  //       .createQueryBuilder()
+  //       .orderBy('lang_english', 'ASC')
+  //       .limit(1)
+  //       .offset(randomInt)
+  //       .getOne();
+  //
+  //     randomizedWordIds.push(ordered.id);
+  //     console.log(ordered);
+  //   }
+  //
+  // }
+
   async onModuleInit(): Promise<any> {
     console.log('on module init');
     //await this.processPdfFile();
     // await this.translateWords();
+    // await this.test();
   }
 
 }
