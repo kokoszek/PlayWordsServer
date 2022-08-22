@@ -1,10 +1,15 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { createQueryBuilder, Repository } from 'typeorm';
-import { WordEntity } from './word.entity';
+import { MeaningEntity } from '../meaning/meaning.entity';
 import { log } from 'util';
 import { getRandomInt } from '../game/game-service';
 const axios = require("axios");
+
+import { parse } from 'node-html-parser';
+import { WordEntity } from './word.entity';
+
+const fetch = require('node-fetch');
 
 const fs = require('fs');
 const PDFParser = require("pdf2json");
@@ -133,10 +138,7 @@ export class WordService implements OnModuleInit {
       console.log('words: ', words);
       words.forEach(async word => {
         const wordEntity = this.wordRepo.create({
-          lang_english: word,
-          origin: 'b1-cambridge-list.pdf',
-          level: 'B1',
-          freq: 1
+          word
         });
         try {
           await this.wordRepo.save(wordEntity);
@@ -157,16 +159,16 @@ export class WordService implements OnModuleInit {
     //console.log('translated: ', translated);
   }
 
-  async translateWords() {
-    let words: WordEntity[] = await this.wordRepo
-      .createQueryBuilder("user")
-      .getMany();
-    words.forEach(async word => {
-      word.lang_polish = await this.translateWord(word.lang_english);
-      console.log('waord.lang.polish: ', word.lang_polish);
-      await this.wordRepo.save(word);
-    })
-  }
+  // async translateWords() {
+  //   let words: MeaningEntity[] = await this.wordRepo
+  //     .createQueryBuilder("user")
+  //     .getMany();
+  //   words.forEach(async word => {
+  //     word.lang_polish = await this.translateWord(word.lang_english);
+  //     console.log('waord.lang.polish: ', word.lang_polish);
+  //     await this.wordRepo.save(word);
+  //   })
+  // }
 
   // async test() {
   //   let result = await this.wordRepo
@@ -192,9 +194,49 @@ export class WordService implements OnModuleInit {
   //
   // }
 
+  async testDiki() {
+
+    fetch('https://www.diki.pl/slownik-angielskiego?q=ograniczony')
+      .then(async result => {
+        let html = await result.text();
+        const root = parse(html);
+        let dictionaryEntity = root.querySelector('.dictionaryEntity')
+        let titleNode = root.querySelector('.dictionaryEntity .hws .hw')
+        const title = titleNode.childNodes[0].rawText;
+        console.log('title: ', title);
+
+        let partOfSpeechNode = root.querySelector('.dictionaryEntity');
+        //console.log('node: ', partOfSpeechNode);
+        partOfSpeechNode.childNodes.map(el => {
+          let parsed = parse(el.toString())
+          if(parsed) {
+            let el = parsed.querySelector('.partOfSpeechSectionHeader .partOfSpeech')?.rawText
+            if(el) {
+              console.log('el: ', el);
+            }
+            let list = parsed.querySelector('.nativeToForeignEntrySlices');
+            if(list) {
+              let filteredList = list?.childNodes.map(el => el.rawText);
+              filteredList = filteredList.map(el => el.replaceAll(/\n +/ig, ''));
+              filteredList = filteredList.filter(el => !!el);
+              filteredList = filteredList.map(el => {
+                let regexpMatch = /^(\w+) .*/;
+                let match = el.match(regexpMatch);
+                return match ? match[1]: '';
+              });
+              console.log('list: ', filteredList);
+            }
+          }
+        });
+        //console.log('partOfSpeech: ', partOfSpeech);
+        //console.log('.dictionaryEntity', dictionaryEntity.toString());
+      })
+  }
+
   async onModuleInit(): Promise<any> {
     console.log('on module init');
-    //await this.processPdfFile();
+    // await this.testDiki();
+    // await this.processPdfFile();
     // await this.translateWords();
     // await this.test();
   }

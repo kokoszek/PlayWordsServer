@@ -40,6 +40,8 @@
     "graphql-ws": "^5.10.0",
     "ioredis": "^5.2.2",
     "mysql2": "^2.3.3",
+    "node-fetch": "^2.6.7",
+    "node-html-parser": "^5.4.2-0",
     "pdf2json": "^2.0.1",
     "redis-semaphore": "^5.0.0",
     "reflect-metadata": "^0.1.13",

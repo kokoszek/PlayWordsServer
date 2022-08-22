@@ -6,7 +6,7 @@ import { WordEntity } from './word.entity';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      WordEntity
+      WordEntity,
     ])
   ],
   providers: [WordService],

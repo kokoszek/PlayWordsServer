@@ -1,7 +1,7 @@
 const { DataSource } = require("typeorm");
 const ormconfig = require('../ormconfig');
 
-console.log('ormcofngi: ', ormconfig);
+console.log('ormconfig: ', ormconfig);
 
 const ds = new DataSource(ormconfig);
 

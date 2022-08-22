@@ -10,7 +10,7 @@ import { map } from 'rxjs/operators';
 import { Server, Socket } from 'socket.io';
 import GameService, { PlayerType } from './game-service';
 import { createRoomName } from './utils';
-import { WordEntity } from '../word/word.entity';
+import { MeaningEntity } from '../meaning/meaning.entity';
 import { Args, Mutation } from '@nestjs/graphql';
 import { GraphQLString } from 'graphql';
 
@@ -149,14 +149,14 @@ export default class GameGatewayWs implements OnGatewayInit {
   @SubscribeMessage('solveTask')
   async solveTask(client: Socket, data: {
     gameId: number,
-    word: WordEntity,
+    word: MeaningEntity,
     solution: string,
     playerName: string,
     opponentName: string
   }) {
     console.log('data: ', data);
     const { playerName, opponentName, word, solution, gameId } = data;
-    const solved = word.lang_english === data.solution;
+    const solved = true;
     const opponent = this.gameService.getPlayer(data.gameId, data.opponentName);
     const me = this.gameService.getPlayer(data.gameId, data.playerName);
     const roomName = createRoomName(data.gameId);

@@ -1,22 +1,21 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { MeaningEntity } from '../meaning/meaning.entity';
 
 @Entity()
 export class WordEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column()
+  word: string;
+
   @Column({
     nullable: true
   })
-  lang_polish: string;
+  desc: string;
 
   @Column()
-  lang_english: string;
-
-  @Column({
-    nullable: true
-  })
-  level: string;
+  lang: string;
 
   @Column()
   freq: number;
@@ -27,9 +26,9 @@ export class WordEntity {
   })
   origin: string;
 
-  @Column({
-    nullable: true,
-  })
-  desc_polish: string;
-
+  @ManyToOne(
+    () => MeaningEntity,
+    meaning => meaning.words
+  )
+  meaning: MeaningEntity;
 }

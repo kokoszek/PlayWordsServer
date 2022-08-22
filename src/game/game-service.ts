@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { createRoomName } from './utils';
 import { InjectRepository } from '@nestjs/typeorm';
-import { WordEntity } from '../word/word.entity';
+import { MeaningEntity } from '../meaning/meaning.entity';
 import { Repository } from 'typeorm';
 
 export type PlayerType = {
@@ -12,7 +12,7 @@ export type PlayerType = {
 }
 
 export type TaskType = {
-  word: WordEntity,
+  word: MeaningEntity,
   options: {
     text: string
   }[]
@@ -40,8 +40,8 @@ export function getRandomIntExcept(min: number, max: number, except: number[]) {
 export default class GameService {
 
   constructor(
-    @InjectRepository(WordEntity)
-    private wordRepo: Repository<WordEntity>,
+    @InjectRepository(MeaningEntity)
+    private wordRepo: Repository<MeaningEntity>,
   ) {}
 
   private games: Record<
@@ -135,9 +135,9 @@ export default class GameService {
       .getRawOne();
     let count = Number.parseInt(result.count);
     let numberOfWordsToRandomize = 8;
-    let randomizedWords: WordEntity[] = [];
+    let randomizedWords: MeaningEntity[] = [];
     while(numberOfWordsToRandomize--) {
-      let randomizedWord: WordEntity;
+      let randomizedWord: MeaningEntity;
       while(true) {
         let randomInt = getRandomInt(0, count - 1);
         randomizedWord = await this.wordRepo
@@ -157,7 +157,7 @@ export default class GameService {
     return {
       word: randomizedWords[getRandomInt(0, 7)],
       options: randomizedWords.map(word => ({
-        text: word.lang_english
+        text: ''
       }))
     };
   }

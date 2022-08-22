@@ -11,6 +11,11 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "incremental": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "exclude": ["client", "migrations"],
+    "include": ["src/**/*"],
+    "lib": [
+      "ES2021.String"
+    ]
   }
 }

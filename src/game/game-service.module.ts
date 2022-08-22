@@ -3,12 +3,12 @@ import GameGatewayWs from './game-gateway-ws';
 import { FindMatchResolver } from './find-match.resolver';
 import GameService from './game-service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { WordEntity } from '../word/word.entity';
+import { MeaningEntity } from '../meaning/meaning.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      WordEntity
+      MeaningEntity
     ])
   ],
   providers: [GameGatewayWs, FindMatchResolver, GameService],
