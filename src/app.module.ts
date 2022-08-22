@@ -27,6 +27,10 @@ const path = require('path');
       driver: ApolloDriver,
       autoSchemaFile: path.join(process.cwd(), 'src/graphql/schema.gql'),
       sortSchema: true,
+      cors: {
+        origin: 'http://localhost:3001',
+        credentials: true,
+      },
       // subscriptions: {
       //   'graphql-ws': true
       // },

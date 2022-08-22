@@ -7,9 +7,9 @@ const config = {
   "username": "app",
   "password": "password",
   "database": "playwords",
-  entities: [path.join(__dirname, 'src', '**', '*.entity.ts')],
+  "entities": [path.join(__dirname, 'dist', '**', '*.entity.js')],
   "migrationsTableName": "typeorm_migrations",
-  "migrations": ["./migrations/*.ts"],
+  "migrations": ["./migrations/*.js"],
 }
 
 module.exports = config;

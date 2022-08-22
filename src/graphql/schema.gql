@@ -2,11 +2,23 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type MeaningEntity {
+  category: String!
+  id: Int!
+  level: String!
+  meaning: String!
+  meaning_lang: String!
+  partOfSpeech: String!
+  words: [WordEntity!]!
+}
+
 type Mutation {
+  createMeaning(meaning: String!, words: [String!]): MeaningEntity!
   submitTask(answer: String!, taskId: Int!): Boolean!
 }
 
 type Query {
+  getMeaning(id: Int!): MeaningEntity!
   getTask: TaskModel!
 }
 
@@ -20,4 +32,14 @@ type TaskModel {
 type TaskOptionsModel {
   id: Int!
   name: String!
+}
+
+type WordEntity {
+  desc: String!
+  freq: Int!
+  id: Int!
+  lang: String!
+  meaning: WordEntity!
+  origin: String!
+  word: String!
 }

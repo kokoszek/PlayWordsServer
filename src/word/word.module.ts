@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { WordService } from './word-service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { WordEntity } from './word.entity';
+import { WordResolver } from './word.resolver';
 
 @Module({
   imports: [
@@ -9,6 +10,6 @@ import { WordEntity } from './word.entity';
       WordEntity,
     ])
   ],
-  providers: [WordService],
+  providers: [WordService, WordResolver],
 })
 export class WordModule {}

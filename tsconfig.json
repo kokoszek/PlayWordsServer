@@ -12,10 +12,10 @@
     "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
-    "exclude": ["client", "migrations"],
-    "include": ["src/**/*"],
     "lib": [
       "ES2021.String"
     ]
-  }
+  },
+  "exclude": ["client", "migrations"],
+  "include": ["src/**/*"],
 }

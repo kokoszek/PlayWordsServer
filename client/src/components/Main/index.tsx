@@ -1,6 +1,6 @@
 import Meaning from '../Meaning';
 
-export default function() {
+export default function Main() {
 
   return (
     <div>
