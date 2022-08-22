@@ -11,11 +11,15 @@ export class MeaningEntity {
   @Field(type => GraphQLInt)
   id: number;
 
-  @Column()
+  @Column({
+    nullable: false
+  })
   @Field(type => GraphQLString)
   meaning: string;
 
-  @Column()
+  @Column({
+    nullable: true
+  })
   @Field(type => GraphQLString)
   partOfSpeech: string;
 
@@ -31,14 +35,17 @@ export class MeaningEntity {
   meaning_lang: 'pl' | 'en';
 
   @Column({
-    nullable: false
+    nullable: true
   })
   @Field(type => GraphQLString)
   level: 'A1' | 'A2' | 'B1' | 'B2' | 'C1';
 
   @OneToMany(
     () => WordEntity,
-    meaning => meaning.meaning
+    meaning => meaning.meaning,
+    {
+      cascade: true
+    }
   )
   @Field(type => [WordEntity])
   words: WordEntity[];

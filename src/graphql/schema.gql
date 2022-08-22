@@ -14,7 +14,7 @@ type MeaningEntity {
 
 input MeaningInput {
   meaning: String!
-  words: [String!]!
+  words: [WordInput!]!
 }
 
 type Mutation {
@@ -25,6 +25,7 @@ type Mutation {
 type Query {
   getMeaning(id: Int!): MeaningEntity!
   getTask: TaskModel!
+  searchMeaning(search: String!): [MeaningEntity!]!
 }
 
 type TaskModel {
@@ -46,5 +47,10 @@ type WordEntity {
   lang: String!
   meaning: WordEntity!
   origin: String!
+  word: String!
+}
+
+input WordInput {
+  lang: String!
   word: String!
 }

@@ -5,12 +5,14 @@ import { WordService } from '../word/word-service';
 import { MeaningEntity } from './meaning.entity';
 import { MeaningResolver } from './meaning.resolver';
 import MeaningService from './meaning.service';
+import { WordModule } from '../word/word.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       MeaningEntity
-    ])
+    ]),
+    WordModule
   ],
   providers: [MeaningResolver, MeaningService],
 })

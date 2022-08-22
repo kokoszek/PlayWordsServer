@@ -5,10 +5,11 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 
 import { ApolloClient, InMemoryCache, ApolloProvider, gql } from '@apollo/client';
+import { ChosenEntityContextProvider } from './contexts/chosen-entity';
 
 const client = new ApolloClient({
   uri: 'http://localhost:3000/graphql',
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache()
 });
 
 const root = ReactDOM.createRoot(
@@ -17,7 +18,9 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <ApolloProvider client={client}>
-      <App />
+      <ChosenEntityContextProvider>
+        <App />
+      </ChosenEntityContextProvider>
     </ApolloProvider>
   </React.StrictMode>
 );

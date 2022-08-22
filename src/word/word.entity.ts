@@ -28,7 +28,9 @@ export class WordEntity {
   @Field(type => GraphQLString)
   lang: string;
 
-  @Column()
+  @Column({
+    default: 1
+  })
   @Field(type => GraphQLInt)
   freq: number;
 

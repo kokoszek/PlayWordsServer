@@ -11,5 +11,6 @@ import { WordResolver } from './word.resolver';
     ])
   ],
   providers: [WordService, WordResolver],
+  exports: [WordService]
 })
 export class WordModule {}

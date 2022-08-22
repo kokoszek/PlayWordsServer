@@ -47,6 +47,16 @@ export class WordService implements OnModuleInit {
     return result.data.data.translations[0].translatedText;
   }
 
+  async findAllByMeaningId(meaningId: number): Promise<WordEntity[]> {
+    let result = await this.wordRepo
+      .createQueryBuilder()
+      .where("meaningId = :meaningId", {
+        meaningId
+      })
+      .getMany();
+    return result;
+  }
+
   processB1CambridgeVocabularyLine(line: string[], prevLine: string[]) {
     let words = [];
     line.forEach(word => {

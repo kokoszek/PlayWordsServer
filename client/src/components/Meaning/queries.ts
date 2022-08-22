@@ -11,13 +11,9 @@ export const GET_MEANING = gql`
 `
 
 export const CREATE_MEANING = gql`
-    mutation CreateMeaning(
-        $meaning: String!
-    ) {
-        createMeaning(
-            meaning: String
-        ) {
-            id
+    mutation CreateMeaning($meaningInput: MeaningInput!) {
+        createMeaning( meaningInput: $meaningInput) {
+            meaning
         }
     }
 `
