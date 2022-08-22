@@ -2,6 +2,7 @@ import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { MeaningEntity } from './meaning.entity';
 import { GraphQLInt, GraphQLList, GraphQLString } from 'graphql';
 import MeaningService from './meaning.service';
+import { MeaningInput } from './meaning.input-type';
 
 @Resolver(of => MeaningEntity)
 export class MeaningResolver {
@@ -12,12 +13,11 @@ export class MeaningResolver {
 
   @Mutation(returns => MeaningEntity)
   async createMeaning(
-    @Args('meaning') meaning: string,
-    @Args({nullable: true, name: 'words', type: () => [String]}) words: String[]
+    @Args('meaningInput') meaningInput: MeaningInput,
 ) {
-    console.log('meaning: ', meaning);
-    console.log('words: ', words);
-    const meaningEntity = this.meaningService.createMeaning(meaning);
+    console.log('meaning: ', meaningInput.meaning);
+    console.log('words: ', meaningInput.words);
+    const meaningEntity = this.meaningService.createMeaning('asdf');
     return meaningEntity;
   }
 

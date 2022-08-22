@@ -12,8 +12,13 @@ type MeaningEntity {
   words: [WordEntity!]!
 }
 
+input MeaningInput {
+  meaning: String!
+  words: [String!]!
+}
+
 type Mutation {
-  createMeaning(meaning: String!, words: [String!]): MeaningEntity!
+  createMeaning(meaningInput: MeaningInput!): MeaningEntity!
   submitTask(answer: String!, taskId: Int!): Boolean!
 }
 

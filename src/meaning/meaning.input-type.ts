@@ -1,11 +1,11 @@
 import { Field, InputType } from '@nestjs/graphql';
 
 @InputType()
-class MeaningInput {
+export class MeaningInput {
 
   @Field()
   meaning: string;
 
-  @Field()
-  words: string[]
+  @Field(() => [String])
+  words: String[];
 }
