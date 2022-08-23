@@ -11,28 +11,20 @@ export class MeaningEntity {
   @Field(type => GraphQLInt)
   id: number;
 
-  @Field(type => GraphQLString)
-  @Column({
-    nullable: false,
-  })
+  @Field(type => GraphQLString, { nullable: true })
+  @Column({ nullable: true, })
   meaning_lang1_desc: string;
 
-  @Column({
-    nullable: false
-  })
-  @Field(type => GraphQLString)
+  @Column({ nullable: true })
+  @Field(type => GraphQLString, { nullable: true })
   meaning_lang1_language: 'pl' | 'en';
 
-  @Field(type => GraphQLString)
-  @Column({
-    nullable: true,
-  })
+  @Field(type => GraphQLString, {nullable: true})
+  @Column({ nullable: true, })
   meaning_lang2_desc: string;
 
-  @Column({
-    nullable: true,
-  })
-  @Field(type => GraphQLString)
+  @Column({ nullable: true, })
+  @Field(type => GraphQLString, {nullable: true})
   meaning_lang2_language: 'pl' | 'en';
 
   @Column({

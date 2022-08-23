@@ -5,17 +5,20 @@
 type MeaningEntity {
   category: String!
   id: Int!
-  meaning_lang1_desc: String!
-  meaning_lang1_language: String!
-  meaning_lang2_desc: String!
-  meaning_lang2_language: String!
+  meaning_lang1_desc: String
+  meaning_lang1_language: String
+  meaning_lang2_desc: String
+  meaning_lang2_language: String
   partOfSpeech: String!
   words: [WordEntity!]!
 }
 
 input MeaningInput {
   id: Int
-  meaning_desc: String!
+  meaning_lang1_desc: String
+  meaning_lang1_language: String
+  meaning_lang2_desc: String
+  meaning_lang2_language: String
   words: [WordInput!]!
 }
 
@@ -49,7 +52,7 @@ type WordEntity {
   id: Int!
   lang: String!
   level: String!
-  meanings: WordEntity!
+  meanings: [MeaningEntity!]!
   origin: String!
   word: String!
 }

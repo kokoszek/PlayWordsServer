@@ -20,7 +20,11 @@ export const CREATE_MEANING = gql`
 export const UPSERT_MEANING = gql`
     mutation UpsertMeaning($meaningInput: MeaningInput!) {
         upsertMeaning(meaningInput: $meaningInput) {
-            meaning_desc
+            id
+            meaning_lang1_desc
+            meaning_lang1_language
+            meaning_lang2_desc
+            meaning_lang2_language
         }
     }
 `

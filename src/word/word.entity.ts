@@ -54,6 +54,6 @@ export class WordEntity {
       onDelete: 'CASCADE'
     }
   )
-  @Field(type => WordEntity)
+  @Field(type => [MeaningEntity])
   meanings: MeaningEntity[];
 }

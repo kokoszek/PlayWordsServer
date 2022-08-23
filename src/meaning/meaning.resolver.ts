@@ -17,8 +17,6 @@ export class MeaningResolver {
   async createMeaning(
     @Args('meaningInput') meaningInput: MeaningInput,
   ) {
-    console.log('meaning: ', meaningInput.meaning_desc);
-    console.log('words: ', meaningInput.words);
     const meaningEntity = this.meaningService.upsertMeaning(meaningInput);
     return meaningEntity;
   }
@@ -49,7 +47,6 @@ export class MeaningResolver {
   @ResolveField()
   async words(@Parent() meaning: MeaningEntity) {
     const { id } = meaning;
-    console.log('meaning.id: ', id);
     const words = await this.wordService.findAllByMeaningId(id);
     return words;
   }

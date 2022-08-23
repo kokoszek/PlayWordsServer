@@ -10,8 +10,25 @@ export class MeaningInput {
   })
   id: number;
 
-  @Field()
-  meaning_desc: string;
+  @Field({
+    nullable: true
+  })
+  meaning_lang1_desc: string;
+
+  @Field({
+    nullable: true
+  })
+  meaning_lang1_language: 'pl' | 'en';
+
+  @Field({
+    nullable: true
+  })
+  meaning_lang2_desc: string;
+
+  @Field({
+    nullable: true
+  })
+  meaning_lang2_language: 'pl' | 'en';
 
   @Field(() => [WordInput])
   words: WordInput[];

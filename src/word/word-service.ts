@@ -50,22 +50,16 @@ export class WordService implements OnModuleInit {
   }
 
   async findAllByMeaningId(meaningId: number): Promise<WordEntity[]> {
-    // let result = await this.wordRepo
-    //   .createQueryBuilder()
-    //   .where("meaningId = :meaningId", {
-    //     meaningId
-    //   })
-    //   .getMany();
-
     let result = await
       this.meaningRepo
         .createQueryBuilder('meaning')
+        .select()
         .innerJoinAndSelect('meaning.words', 'words')
         .where({
           id: meaningId
         })
         .getOne();
-    console.log('result-: ', result);
+    console.log('wordService.findAllByMeaningId(), result: ', result);
     return result.words;
   }
 

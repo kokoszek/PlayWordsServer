@@ -1,9 +1,10 @@
+import './styles.scss';
 
 export default function Navigation() {
 
   return (
-    <div>
+    <nav className='main-navigation'>
       navigation
-    </div>
+    </nav>
   )
 }
