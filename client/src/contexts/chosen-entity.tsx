@@ -6,7 +6,7 @@ export const ChosenEntityContext = createContext({});
 export const ChosenEntityContextProvider = ({children}: any) => {
 
   const [meaning, setMeaning] = useState({
-    meaning: '',
+    meaning_desc: '',
     words: []
   });
   const [word, setWord] = useState(null);

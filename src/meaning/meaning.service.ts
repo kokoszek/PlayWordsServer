@@ -25,18 +25,19 @@ export default class MeaningService {
   async searchByText(search: string): Promise<MeaningEntity[]> {
     const result: MeaningEntity[] = await this.meaningRepo
       .createQueryBuilder()
-      .where('meaning LIKE :search', {
+      .where('meaning_desc LIKE :search', {
         search: search + '%'
       })
       .getMany();
     return result;
   }
 
-  async createMeaning(meaning: MeaningInput): Promise<MeaningEntity> {
+  async upsertMeaning(meaningInput: MeaningInput): Promise<MeaningEntity> {
     const newMeaning = this.meaningRepo.create({
-      ...meaning,
-      meaning_lang: 'pl',
-      words: meaning.words.map(wordInput => ({
+      ...meaningInput,
+      meaning_desc_lang: 'pl',
+      words: meaningInput.words.map(wordInput => ({
+        id: wordInput.id,
         lang: wordInput.lang,
         word: wordInput.word,
       }))

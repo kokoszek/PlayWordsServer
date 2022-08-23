@@ -1,4 +1,10 @@
 {
+  "ts-node": {
+    // these options are overrides used only by ts-node
+    "compilerOptions": {
+      "module": "commonjs"
+    }
+  },
   "compilerOptions": {
     "module": "commonjs",
     "declaration": true,
@@ -6,7 +12,7 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
-    "target": "es2017",
+    "target": "es2016",
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
@@ -16,6 +22,6 @@
       "ES2021.String"
     ]
   },
-  "exclude": ["client", "migrations"],
-  "include": ["src/**/*"],
+  "exclude": ["client"],
+  "include": ["src/**/*", "migrations/*", "tsconfig.json", "tsconfig.build.json"],
 }

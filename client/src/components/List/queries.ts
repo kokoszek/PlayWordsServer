@@ -5,9 +5,10 @@ export default function(){}
 export const GET_MEANINGS = gql`
     query SearchMeaning($search: String!) {
         searchMeaning(search: $search) {
-            meaning
+            meaning_desc
             id
             words {
+                id
                 word
                 lang
             }

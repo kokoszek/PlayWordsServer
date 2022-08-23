@@ -11,15 +11,24 @@ export class MeaningResolver {
   constructor(
     private meaningService: MeaningService,
     private wordService: WordService
-) {}
+  ) {}
 
   @Mutation(returns => MeaningEntity)
   async createMeaning(
     @Args('meaningInput') meaningInput: MeaningInput,
-) {
-    console.log('meaning: ', meaningInput.meaning);
+  ) {
+    console.log('meaning: ', meaningInput.meaning_desc);
     console.log('words: ', meaningInput.words);
-    const meaningEntity = this.meaningService.createMeaning(meaningInput);
+    const meaningEntity = this.meaningService.upsertMeaning(meaningInput);
+    return meaningEntity;
+  }
+
+  @Mutation(returns => MeaningEntity)
+  async upsertMeaning(
+    @Args('meaningInput') meaningInput: MeaningInput,
+  ) {
+    console.log('meaningInput: ', meaningInput);
+    const meaningEntity = this.meaningService.upsertMeaning(meaningInput);
     return meaningEntity;
   }
 
@@ -34,16 +43,14 @@ export class MeaningResolver {
   async getMeaning(
     @Args('id', { type: () => GraphQLInt }) id: number
   ): Promise<MeaningEntity> {
-
     return await this.meaningService.getById(id);
   }
 
   @ResolveField()
   async words(@Parent() meaning: MeaningEntity) {
     const { id } = meaning;
-    console.log('meaning id: ', id);
+    console.log('meaning.id: ', id);
     const words = await this.wordService.findAllByMeaningId(id);
-    console.log('words: ', words);
     return words;
   }
 }

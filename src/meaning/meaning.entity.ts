@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToMany, JoinTable } from 'typeorm';
 import { WordEntity } from '../word/word.entity';
 import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { GraphQLInt, GraphQLString } from 'graphql';
@@ -11,11 +11,15 @@ export class MeaningEntity {
   @Field(type => GraphQLInt)
   id: number;
 
-  @Column({
-    nullable: false
-  })
   @Field(type => GraphQLString)
-  meaning: string;
+  @Column({
+    nullable: false,
+  })
+  meaning_desc: string;
+
+  @Column()
+  @Field(type => GraphQLString)
+  meaning_desc_lang: 'pl' | 'en';
 
   @Column({
     nullable: true
@@ -30,23 +34,14 @@ export class MeaningEntity {
   @Field(type => GraphQLString)
   category: 'common' | 'colors';
 
-  @Column()
-  @Field(type => GraphQLString)
-  meaning_lang: 'pl' | 'en';
-
-  @Column({
-    nullable: true
-  })
-  @Field(type => GraphQLString)
-  level: 'A1' | 'A2' | 'B1' | 'B2' | 'C1';
-
-  @OneToMany(
+  @ManyToMany(
     () => WordEntity,
-    meaning => meaning.meaning,
+    word => word.meanings,
     {
       cascade: true
     }
   )
+  @JoinTable()
   @Field(type => [WordEntity])
   words: WordEntity[];
 

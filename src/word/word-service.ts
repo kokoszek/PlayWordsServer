@@ -20,6 +20,8 @@ export class WordService implements OnModuleInit {
   constructor(
     @InjectRepository(WordEntity)
     private wordRepo: Repository<WordEntity>,
+    @InjectRepository(MeaningEntity)
+    private meaningRepo: Repository<MeaningEntity>,
   ) {}
 
   private async translateWord(word: string): Promise<string> {
@@ -48,13 +50,23 @@ export class WordService implements OnModuleInit {
   }
 
   async findAllByMeaningId(meaningId: number): Promise<WordEntity[]> {
-    let result = await this.wordRepo
-      .createQueryBuilder()
-      .where("meaningId = :meaningId", {
-        meaningId
-      })
-      .getMany();
-    return result;
+    // let result = await this.wordRepo
+    //   .createQueryBuilder()
+    //   .where("meaningId = :meaningId", {
+    //     meaningId
+    //   })
+    //   .getMany();
+
+    let result = await
+      this.meaningRepo
+        .createQueryBuilder('meaning')
+        .innerJoinAndSelect('meaning.words', 'words')
+        .where({
+          id: meaningId
+        })
+        .getOne();
+    console.log('result-: ', result);
+    return result.words;
   }
 
   processB1CambridgeVocabularyLine(line: string[], prevLine: string[]) {

@@ -3,6 +3,7 @@ const path = require('path');
 const detectTSNode = require("detect-ts-node");
 
 console.log('detectTSNode: ', detectTSNode);
+console.log('entities path: ', path.join(__dirname, 'src', '**', '*.entity.ts'));
 
 const config = {
   "type": "mysql",
@@ -11,10 +12,12 @@ const config = {
   "username": "app",
   "password": "password",
   "database": "playwords",
-  "entities": [path.join(__dirname, 'dist', '**', '*.entity.js')],
+  "entities": [
+      path.join(__dirname, 'src', '**', '*.entity.ts')
+  ],
   "migrationsTableName": "typeorm_migrations",
   "migrations": [
-    detectTSNode ? "./migrations/*.ts" : "./migrations/*.js"
+    "./dist/migrations/*.js"
   ],
 }
 

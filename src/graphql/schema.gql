@@ -5,21 +5,22 @@
 type MeaningEntity {
   category: String!
   id: Int!
-  level: String!
-  meaning: String!
-  meaning_lang: String!
+  meaning_desc: String!
+  meaning_desc_lang: String!
   partOfSpeech: String!
   words: [WordEntity!]!
 }
 
 input MeaningInput {
-  meaning: String!
+  id: Int
+  meaning_desc: String!
   words: [WordInput!]!
 }
 
 type Mutation {
   createMeaning(meaningInput: MeaningInput!): MeaningEntity!
   submitTask(answer: String!, taskId: Int!): Boolean!
+  upsertMeaning(meaningInput: MeaningInput!): MeaningEntity!
 }
 
 type Query {
@@ -45,12 +46,14 @@ type WordEntity {
   freq: Int!
   id: Int!
   lang: String!
-  meaning: WordEntity!
+  level: String!
+  meanings: WordEntity!
   origin: String!
   word: String!
 }
 
 input WordInput {
+  id: Int
   lang: String!
   word: String!
 }
