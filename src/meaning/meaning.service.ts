@@ -35,7 +35,7 @@ export default class MeaningService {
   async upsertMeaning(meaningInput: MeaningInput): Promise<MeaningEntity> {
     const newMeaning = this.meaningRepo.create({
       ...meaningInput,
-      meaning_desc_lang: 'pl',
+      meaning_lang1_language: 'pl',
       words: meaningInput.words.map(wordInput => ({
         id: wordInput.id,
         lang: wordInput.lang,

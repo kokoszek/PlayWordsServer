@@ -23,6 +23,6 @@
       "ES2021.String"
     ]
   },
-  "exclude": ["client"],
-  "include": ["src/**/*", "migrations/*", "tsconfig.json", "tsconfig.build.json"],
+  "include": ["src/**/*"],
+  "exclude": ["client", "migrations"]
 }
