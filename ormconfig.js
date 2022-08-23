@@ -1,9 +1,10 @@
 const path = require('path');
+require('reflect-metadata');
 
 const detectTSNode = require("detect-ts-node");
 
 console.log('detectTSNode: ', detectTSNode);
-console.log('entities path: ', path.join(__dirname, 'src', '**', '*.entity.ts'));
+console.log('__dirname: ', __dirname);
 
 const config = {
   "type": "mysql",
@@ -13,11 +14,13 @@ const config = {
   "password": "password",
   "database": "playwords",
   "entities": [
-      path.join(__dirname, 'src', '**', '*.entity.ts')
+    detectTSNode ?
+      path.join(__dirname, 'src', '**', '*.entity.ts') :
+      path.join(__dirname, 'dist', '**', '*.entity.js')
   ],
   "migrationsTableName": "typeorm_migrations",
   "migrations": [
-    "./dist/migrations/*.js"
+    "./migrations/*.ts"
   ],
 }
 

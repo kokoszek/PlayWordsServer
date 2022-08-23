@@ -15,17 +15,31 @@ export class MeaningEntity {
   @Column({
     nullable: false,
   })
-  meaning_desc: string;
+  meaning_lang1_desc: string;
 
-  @Column()
+  @Column({
+    nullable: false
+  })
   @Field(type => GraphQLString)
-  meaning_desc_lang: 'pl' | 'en';
+  meaning_lang1_language: 'pl' | 'en';
+
+  @Field(type => GraphQLString)
+  @Column({
+    nullable: true,
+  })
+  meaning_lang2_desc: string;
+
+  @Column({
+    nullable: true,
+  })
+  @Field(type => GraphQLString)
+  meaning_lang2_language: 'pl' | 'en';
 
   @Column({
     nullable: true
   })
   @Field(type => GraphQLString)
-  partOfSpeech: string;
+  partOfSpeech: 'verb' | 'noun' | 'adj';
 
   @Column({
     nullable: false,
@@ -41,7 +55,9 @@ export class MeaningEntity {
       cascade: true
     }
   )
-  @JoinTable()
+  @JoinTable({
+    name: 'meaning_word_jointable'
+  })
   @Field(type => [WordEntity])
   words: WordEntity[];
 

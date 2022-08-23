@@ -6,8 +6,8 @@
   "license": "MIT",
   "scripts": {
     "typeorm": "typeorm",
-    "migration:run": "node ./node_modules/typeorm/cli.js migration:run -d ./dist/src/data-source.js",
-    "migration:generate": "node ./node_modules/typeorm/cli.js migration:generate -d ./dist/data-source.js ./migrations/init",
+    "migration:run": "ts-node ./node_modules/typeorm/cli.js migration:run -d ./src/data-source.ts",
+    "migration:generate": "ts-node ./node_modules/typeorm/cli.js migration:generate -d ./src/data-source.ts ./migrations/init",
     "prebuild": "rimraf dist",
     "build": "nest build && cp ormconfig.js ./dist/",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
