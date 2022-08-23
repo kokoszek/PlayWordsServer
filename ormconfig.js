@@ -20,7 +20,7 @@ const config = {
   ],
   "migrationsTableName": "typeorm_migrations",
   "migrations": [
-    "./migrations/*.ts"
+    detectTSNode ? "./migrations/*.ts" : ''
   ],
 }
 
