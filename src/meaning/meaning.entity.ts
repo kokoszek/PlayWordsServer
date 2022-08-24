@@ -3,42 +3,39 @@ import { WordEntity } from '../word/word.entity';
 import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { GraphQLInt, GraphQLString } from 'graphql';
 
+export type LangType = 'pl' | 'en'
+export type PartOfSpeechType = 'verb' | 'noun' | 'adj';
+export type CategoryType = 'common' | 'colors';
+
 @Entity()
-@ObjectType()
 export class MeaningEntity {
 
   @PrimaryGeneratedColumn()
-  @Field(type => GraphQLInt)
   id: number;
 
-  @Field(type => GraphQLString, { nullable: true })
   @Column({ nullable: true, })
   meaning_lang1_desc: string;
 
   @Column({ nullable: true })
-  @Field(type => GraphQLString, { nullable: true })
-  meaning_lang1_language: 'pl' | 'en';
+  meaning_lang1_language: LangType;
 
-  @Field(type => GraphQLString, {nullable: true})
   @Column({ nullable: true, })
   meaning_lang2_desc: string;
 
   @Column({ nullable: true, })
-  @Field(type => GraphQLString, {nullable: true})
-  meaning_lang2_language: 'pl' | 'en';
+  meaning_lang2_language: LangType;
 
   @Column({
     nullable: true
   })
-  @Field(type => GraphQLString)
-  partOfSpeech: 'verb' | 'noun' | 'adj';
+  partOfSpeech: PartOfSpeechType;
 
   @Column({
     nullable: false,
     default: 'common'
   })
   @Field(type => GraphQLString)
-  category: 'common' | 'colors';
+  category: CategoryType;
 
   @ManyToMany(
     () => WordEntity,
@@ -50,7 +47,5 @@ export class MeaningEntity {
   @JoinTable({
     name: 'meaning_word_jointable'
   })
-  @Field(type => [WordEntity])
   words: WordEntity[];
-
 }

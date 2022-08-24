@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MeaningEntity } from './meaning.entity';
 import { Repository } from 'typeorm';
-import { MeaningInput } from './meaning.input-type';
 
 @Injectable()
 export default class MeaningService {
@@ -35,12 +34,12 @@ export default class MeaningService {
     return result;
   }
 
-  async upsertMeaning(meaningInput: MeaningInput): Promise<MeaningEntity> {
+  async upsertMeaning(meaning: MeaningEntity): Promise<MeaningEntity> {
     const newMeaning = this.meaningRepo.create({
-      ...meaningInput,
+      ...meaning,
       // meaning_lang1_desc: meaningInput.meaning_lang1_desc,
       // meaning_lang1_language: meaningInput.meaning_lang1_language,
-      words: meaningInput.words.map(wordInput => ({
+      words: meaning.words.map(wordInput => ({
         id: wordInput.id,
         lang: wordInput.lang,
         word: wordInput.word,

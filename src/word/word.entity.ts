@@ -7,28 +7,24 @@ import { InputTypeFromEntity } from '../common/input-type';
 type WordInputType = InputTypeFromEntity<WordEntity>;
 
 @Entity()
-@ObjectType()
 export class WordEntity {
 
   @PrimaryGeneratedColumn()
-  @Field(type => GraphQLInt)
   id: number;
 
   @Column()
-  @Field(type => GraphQLString)
   word: string;
 
   @Column({
     nullable: true
   })
-  @Field(type => GraphQLString)
   desc: string;
 
   @Column({
     nullable: true
   })
   @Field(type => GraphQLString)
-  level: 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C1+';
+  level: 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C1+' | null;
 
   @Column()
   @Field(type => GraphQLString)

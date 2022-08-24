@@ -1,18 +1,9 @@
 import { useContext, useState } from 'react';
 import { useMutation, useQuery } from '@apollo/client';
 import { CREATE_MEANING, GET_MEANING, UPSERT_MEANING } from './queries';
-import { ChosenEntityContext, ChosenEntityContextType } from '../../contexts/chosen-entity';
+import { ChosenEntityContext } from '../../contexts/chosen-entity';
 import { GET_MEANINGS } from '../List/queries';
 import './styles.scss';
-import { MeaningInput } from '../../../../src/meaning/meaning.input-type';
-import { WordInput } from '../../../../src/word/word.input-type';
-
-function WordInput() {
-
-  return (
-    <input type='text' />
-  )
-}
 
 export default function Meaning() {
 
@@ -24,18 +15,21 @@ export default function Meaning() {
   const [createFunction, mutateObj] = useMutation(UPSERT_MEANING);
   // const [lang1Words, setLang1Words] = useState<any>([]);
   // const [lang2Words, setLang2Words] = useState<any>([]);
-  const { meaning, setMeaning } = useContext<ChosenEntityContextType>(ChosenEntityContext);
+  const { meaning, setMeaning } = useContext<any>(ChosenEntityContext);
 
   // @ts-ignore
-  const firstLang1Word: WordInput = meaning?.words
-    .filter((word) => word.lang === 'pl')[0];
+  const firstLang1Word = meaning?.words
+    .filter((word: any) => word.lang === 'pl')[0];
+  // @ts-ignore
+  // @ts-ignore
+  // @ts-ignore
   return (
     <div className='main-content'>
       <div className='meaning-content'>
         <label htmlFor='meaning-id'>id</label>
         <input id='meaning-id' disabled value={meaning?.id || '-'}/>
         <label>polskie słowo</label>
-        <input type='text' value={firstLang1Word.word}/>
+        <input type='text' value={firstLang1Word?.word}/>
         <label htmlFor='meaning'>opis słowa</label>
         <input id='meaning' type='text' value={meaning?.meaning_lang1_desc || ''}
                onChange={e => setMeaning({
@@ -45,30 +39,35 @@ export default function Meaning() {
         <h2>polski odpowiednik</h2>
         <ul>
           {
-            (meaning as MeaningInput)?.words
+            meaning?.words_lang1
               .filter((word: any) => word.lang === 'pl')
               .map((el: any, idx: number) => {
                 return (
                   <li key={idx}>
                     <input type='text' value={el.word}
                            onChange={e => {
-                             let lang1List = [...meaning.words].filter(el => el.lang === 'pl');
-                             let lang2List = [...meaning.words].filter(el => el.lang === 'en');
-                             lang1List[idx] = {...lang1List[idx]}; // copy becase its freezed
-                             lang1List[idx].word = e.target.value;
-                             setMeaning({
-                               words: [...lang1List, ...lang2List]
-                             })
+                             let lang1List = meaning?.words_lang1;
+                             if(lang1List) {
+                               lang1List[idx] = {...lang1List[idx]}; // copy becase its freezed
+                               lang1List[idx].word = e.target.value;
+                               setMeaning({
+                                 words_lang1: [...lang1List]
+                               })
+                             }
                            }}
                     />
                     <button
                       onClick={() => {
-                        let lang1List = [...meaning.words].filter(el => el.lang === 'pl');
-                        let lang2List = [...meaning.words].filter(el => el.lang === 'en');
-                        lang1List[idx] = null; // copy becase its freezed
-                        setMeaning({
-                          words: [...lang1List.filter(el => !!el), ...lang2List]
-                        })
+                        if(meaning) {
+                          // @ts-ignore
+                          let lang1List = [...meaning.words_lang1];
+                          if(lang1List) {
+                            lang1List.slice(idx, 1);
+                            setMeaning({
+                              words_lang1: lang1List
+                            })
+                          }
+                        }
                       }}>usuń</button>
                   </li>
                 )
@@ -76,41 +75,54 @@ export default function Meaning() {
           }
         </ul>
         <button onClick={() => {
-          let newWords = [...meaning.words];
-          setMeaning({
-            words: [...meaning.words, {
-              word: '',
-              lang: 'pl'
-            }]
-          })
+          if(meaning?.words_lang1) {
+            let newWords = [...meaning.words_lang1];
+            setMeaning({
+              meaning_lang1_desc: '',
+              words_lang1: [...newWords, {
+                id: null,
+                word: '',
+                lang: 'pl',
+                desc: '',
+                level: null,
+                freq: 1,
+                origin: 'web-interface',
+              }]
+            })
+          }
         }}>dodaj</button>
         <h2>angielski odpowiednik</h2>
         <ul>
           {
-            meaning.words
+            meaning?.words_lang2
               .filter((word: any) => word.lang === 'en')
               .map((el: any, idx: number) => {
                 return (
                   <li key={idx}>
                     <input type='text' value={el.word}
                            onChange={e => {
-                             let lang1List = [...meaning.words].filter(el => el.lang === 'pl');
-                             let lang2List = [...meaning.words].filter(el => el.lang === 'en');
-                             lang2List[idx] = {...lang2List[idx]}; // copy becase its freezed
-                             lang2List[idx].word = e.target.value;
-                             setMeaning({
-                               words: [...lang1List, ...lang2List]
-                             })
+                             let lang2List = meaning?.words_lang2;
+                             if(lang2List) {
+                               lang2List[idx] = {...lang2List[idx]}; // copy becase its freezed
+                               lang2List[idx].word = e.target.value;
+                               setMeaning({
+                                 words_lang2: [...lang2List]
+                               })
+                             }
                            }}
                     />
                     <button
                       onClick={() => {
-                        let lang1List = [...meaning.words].filter(el => el.lang === 'pl');
-                        let lang2List = [...meaning.words].filter(el => el.lang === 'en');
-                        lang2List[idx] = null; // copy becase its freezed
-                        setMeaning({
-                          words: [...lang1List, ...lang2List.filter(el => !!el)]
-                        })
+                        if(meaning) {
+                          // @ts-ignore
+                          let lang1List = [...meaning.words_lang1];
+                          if(lang1List) {
+                            lang1List.slice(idx, 1);
+                            setMeaning({
+                              words_lang1: lang1List
+                            })
+                          }
+                        }
                       }}
                     >usuń</button>
                   </li>
@@ -119,20 +131,33 @@ export default function Meaning() {
           }
         </ul>
         <button onClick={() => {
-          let newWords = [...meaning.words];
-          setMeaning({
-            words: [...meaning.words, {
-              word: '',
-              lang: 'en'
-            }]
-          })
+          if(meaning?.words_lang2) {
+            let newWords = [...meaning?.words_lang2];
+            setMeaning({
+              words_lang2: [...meaning?.words_lang2, {
+                id: null,
+                word: '',
+                lang: 'pl',
+                desc: '',
+                level: null,
+                freq: 1,
+                origin: 'web-interface',
+              }]
+            })
+          }
         }}>dodaj</button>
         <footer>
           <button onClick={() => {
             setMeaning({
+              category: undefined,
+              id: undefined,
+              meaning_lang2_desc: '',
+              meaning_lang2_language: undefined,
+              partOfSpeech: undefined,
+              words_lang2: [],
+              words_lang1: [],
               meaning_lang1_desc: '',
-              meaning_lang1_language: '',
-              words: []
+              meaning_lang1_language: 'en',
             });
           }}>wyczyść formularz</button>
           <button onClick={async () => {
@@ -142,7 +167,11 @@ export default function Meaning() {
                 meaningInput: {
                   ...meaning,
                   __typename: undefined,
-                  words: meaning.words.map((el: any) => ({
+                  words_lang1: meaning?.words_lang1?.map((el: any) => ({
+                    ...el,
+                    __typename: undefined
+                  })),
+                  words_lang2: meaning?.words_lang2?.map((el: any) => ({
                     ...el,
                     __typename: undefined
                   }))

@@ -1,18 +1,14 @@
 import React from 'react';
 import {createContext, useReducer, useState} from "react";
-import { MeaningEntity } from '../../../src/meaning/meaning.entity';
-import { WordEntity } from '../../../src/word/word.entity';
-import { MeaningInput } from '../../../src/meaning/meaning.input-type';
-import { WordInput } from '../../../src/word/word.input-type';
 
-export type ChosenEntityContextType = {
-  meaning: Partial<MeaningInput> | null,
-  setMeaning: (obj: Partial<MeaningInput>) => void,
-  word: Partial<WordInput> | null,
-  setWord: (obj: Partial<WordInput>) => void,
-}
+// export type ChosenEntityContextType = {
+//   meaning: Partial<MeaningInput> | null,
+//   setMeaning: (obj: Partial<MeaningInput>) => void,
+//   word: Partial<WordInput> | null,
+//   setWord: (obj: Partial<WordInput>) => void,
+// }
 
-export const ChosenEntityContext = createContext<ChosenEntityContextType>({
+export const ChosenEntityContext = createContext<any>({
   meaning: null,
   setMeaning: () => {},
   word: null,
@@ -21,23 +17,25 @@ export const ChosenEntityContext = createContext<ChosenEntityContextType>({
 
 export const ChosenEntityContextProvider = ({children}: any) => {
 
-  const [meaning, setMeaning] = useState<Partial<MeaningInput> | null>({
-    meaning_lang1_desc: '',
-    meaning_lang1_language: 'pl',
-    words: []
-  });
-  const [word, setWord] = useState<Partial<WordEntity> | null>(null);
+  // const [meaning, setMeaning] = useState<Partial<MeaningInput> | null>({
+  //   meaning_lang1_desc: '',
+  //   meaning_lang1_language: 'pl',
+  //   words_lang1: [],
+  //   words_lang2: []
+  // });
+  const [meaning, setMeaning] = useState<any>(null);
+  const [word, setWord] = useState<any>(null);
   return (
     <ChosenEntityContext.Provider value={{
       meaning,
-      setMeaning: (newMeaning: Partial<MeaningInput>) => {
+      setMeaning: (newMeaning: any) => {
         setMeaning({
           ...meaning,
           ...newMeaning
         })
       },
       word,
-      setWord: (newWord: Partial<WordInput>) => {
+      setWord: (newWord: any) => {
         setWord({
           ...word,
           ...newWord

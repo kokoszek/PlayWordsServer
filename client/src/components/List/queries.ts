@@ -8,7 +8,12 @@ export const GET_MEANINGS = gql`
             meaning_lang1_desc
             meaning_lang1_language
             id
-            words {
+            words_lang1 {
+                id
+                word
+                lang
+            }
+            words_lang2 {
                 id
                 word
                 lang

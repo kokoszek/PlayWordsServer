@@ -2,36 +2,40 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type MeaningEntity {
+input MeaningInput {
   category: String!
-  id: Int!
-  meaning_lang1_desc: String
-  meaning_lang1_language: String
-  meaning_lang2_desc: String
-  meaning_lang2_language: String
+  id: Int
+  meaning_lang1_desc: String!
+  meaning_lang1_language: String!
+  meaning_lang2_desc: String!
+  meaning_lang2_language: String!
   partOfSpeech: String!
-  words: [WordEntity!]!
+  words_lang1: [WordInput!]!
+  words_lang2: [WordInput!]!
 }
 
-input MeaningInput {
-  id: Int
+type MeaningType {
+  category: String
+  id: Int!
   meaning_lang1_desc: String
-  meaning_lang1_language: String
+  meaning_lang1_language: String!
   meaning_lang2_desc: String
-  meaning_lang2_language: String
-  words: [WordInput!]!
+  meaning_lang2_language: String!
+  partOfSpeech: String!
+  words_lang1: [WordType!]!
+  words_lang2: [WordType!]!
 }
 
 type Mutation {
-  createMeaning(meaningInput: MeaningInput!): MeaningEntity!
+  createMeaning(meaningInput: MeaningInput!): MeaningType!
   submitTask(answer: String!, taskId: Int!): Boolean!
-  upsertMeaning(meaningInput: MeaningInput!): MeaningEntity!
+  upsertMeaning(meaningInput: MeaningInput!): MeaningType!
 }
 
 type Query {
-  getMeaning(id: Int!): MeaningEntity!
+  getMeaning(id: Int!): MeaningType!
   getTask: TaskModel!
-  searchMeaning(search: String!): [MeaningEntity!]!
+  searchMeaning(search: String!): [MeaningType!]!
 }
 
 type TaskModel {
@@ -46,19 +50,16 @@ type TaskOptionsModel {
   name: String!
 }
 
-type WordEntity {
-  desc: String!
-  freq: Int!
-  id: Int!
-  lang: String!
-  level: String!
-  meanings: [MeaningEntity!]!
-  origin: String!
-  word: String!
-}
-
 input WordInput {
   id: Int
+}
+
+type WordType {
+  desc: String!
+  freq: Int!
+  id: ID!
   lang: String!
+  level: String!
+  origin: String!
   word: String!
 }
