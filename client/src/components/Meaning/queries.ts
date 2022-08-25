@@ -18,6 +18,16 @@ export const CREATE_MEANING = gql`
             meaning_lang1_language
             meaning_lang2_desc
             meaning_lang2_language
+            words_lang1 {
+                id
+                word
+                origin
+            }
+            words_lang2 {
+                id
+                word
+                origin
+            }
         }
     }
 `
@@ -29,6 +39,22 @@ export const UPDATE_MEANING = gql`
             meaning_lang1_language
             meaning_lang2_desc
             meaning_lang2_language
+            words_lang1 {
+                id
+                word
+                origin
+            }
+            words_lang2 {
+                id
+                word
+                origin
+            }
         }
     }
-`
+`;
+
+export const DELETE_MEANING = gql`
+    mutation DeleteMeaning($meaningId: Int!) {
+        deleteMeaning(meaningId: $meaningId)
+    }
+`;

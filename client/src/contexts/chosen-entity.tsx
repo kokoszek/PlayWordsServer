@@ -29,17 +29,11 @@ export const ChosenEntityContextProvider = ({children}: any) => {
     <ChosenEntityContext.Provider value={{
       meaning,
       setMeaning: (newMeaning: any) => {
-        setMeaning({
-          ...meaning,
-          ...newMeaning
-        })
+        setMeaning(newMeaning)
       },
       word,
       setWord: (newWord: any) => {
-        setWord({
-          ...word,
-          ...newWord
-        })
+        setWord(newWord)
       },
     }}>
       { children }

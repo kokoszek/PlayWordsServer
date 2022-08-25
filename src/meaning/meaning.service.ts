@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MeaningEntity } from './meaning.entity';
-import { Repository } from 'typeorm';
+import { DeepPartial, Repository } from 'typeorm';
+import { WordEntity } from '../word/word.entity';
+import { WordService } from '../word/word-service';
 
 @Injectable()
 export default class MeaningService {
@@ -9,8 +11,10 @@ export default class MeaningService {
   constructor(
     @InjectRepository(MeaningEntity)
     private meaningRepo: Repository<MeaningEntity>,
-  ) {
-  }
+    @InjectRepository(WordEntity)
+    private wordRepo: Repository<WordEntity>,
+    private wordService: WordService
+  ) {}
 
   async getById(id: number) {
     return await this.meaningRepo
@@ -34,18 +38,38 @@ export default class MeaningService {
     return result;
   }
 
-  async upsertMeaning(meaning: MeaningEntity): Promise<MeaningEntity> {
-    const newMeaning = this.meaningRepo.create({
-      ...meaning,
-      // meaning_lang1_desc: meaningInput.meaning_lang1_desc,
-      // meaning_lang1_language: meaningInput.meaning_lang1_language,
-      words: meaning.words.map(wordInput => ({
-        id: wordInput.id,
-        lang: wordInput.lang,
-        word: wordInput.word,
-      }))
-    });
+  async deleteMeaning(meaningId: number): Promise<boolean> {
+    const existingWordIds: number[] = (
+      await this.meaningRepo
+        .createQueryBuilder('meaning')
+        .innerJoinAndSelect('meaning.words', 'words')
+        .where({ id: meaningId })
+        .getOne()
+    ).words.map(el => el.id);
+    await this.meaningRepo.delete({
+      id: meaningId
+    })
+    for(let wordId in existingWordIds) {
+      await this.wordService.deleteWordIfOrphan(existingWordIds[wordId]);
+    }
+    return true;
+  }
+
+  async upsertMeaning(meaning: DeepPartial<MeaningEntity>): Promise<MeaningEntity> {
+    const newMeaning = meaning;
+    console.log('newMeaning to save: ', newMeaning);
+    const existingWordIds: number[] = (
+      await this.meaningRepo
+        .createQueryBuilder('meaning')
+        .innerJoinAndSelect('meaning.words', 'words')
+        .where({ id: meaning.id })
+        .getOne()
+    )?.words?.map(el => el.id) || [];
+    console.log('existingWordIds: ', existingWordIds);
     let meaningSaved = await this.meaningRepo.save(newMeaning);
+    for(let wordId in existingWordIds) {
+      await this.wordService.deleteWordIfOrphan(existingWordIds[wordId]);
+    }
     console.log('meaningSaved: ', meaningSaved);
     let reselectedMeaning = await this.meaningRepo
       .createQueryBuilder()
@@ -54,7 +78,6 @@ export default class MeaningService {
         id: meaningSaved.id
       })
       .getOne();
-    console.log('reselectedMeaning: ', reselectedMeaning);
     return reselectedMeaning;
   }
 }

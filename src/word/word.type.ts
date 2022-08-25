@@ -1,9 +1,10 @@
 import { WordEntity } from './word.entity';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { GraphQLID, GraphQLInt, GraphQLString } from 'graphql';
+import { Maybe } from 'graphql/jsutils/Maybe';
 
 @ObjectType()
-export class WordType implements Omit<WordEntity, 'meanings'> {
+export class WordType implements Omit<WordEntity, 'meanings' | 'lang'> {
 
     @Field(type => GraphQLInt)
     id: number;
@@ -15,10 +16,7 @@ export class WordType implements Omit<WordEntity, 'meanings'> {
     desc: string;
 
     @Field(type => GraphQLString)
-    level: 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C1+' | null;
-
-    @Field(type => GraphQLString)
-    lang: string;
+    level: Maybe<'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C1+'>;
 
     @Field(type => GraphQLInt)
     freq: number;

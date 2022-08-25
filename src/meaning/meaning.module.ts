@@ -10,7 +10,8 @@ import { WordModule } from '../word/word.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      MeaningEntity
+      MeaningEntity,
+      WordEntity
     ]),
     WordModule
   ],

@@ -1,25 +1,24 @@
 import { Args, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { MeaningEntity } from './meaning.entity';
-import { GraphQLInt, GraphQLList, GraphQLString } from 'graphql';
+import { GraphQLBoolean, GraphQLInt, GraphQLList, GraphQLString } from 'graphql';
 import MeaningService from './meaning.service';
 import { WordService } from '../word/word-service';
 import { NewMeaningInput } from './meaning.input.new';
 import { MeaningType } from './meaning.type';
 import { UpdateMeaningInput } from './meaning.input.update';
+import { DeepPartial } from 'typeorm';
 
-function GraphQLInput2Entity(input: NewMeaningInput): MeaningEntity {
+function GraphQLInput2Entity(input: NewMeaningInput): DeepPartial<MeaningEntity> {
   return {
     id: null,
     ...input,
     words: input.words_lang1.map(word => ({
       ...word,
       lang: input.meaning_lang1_language,
-      meanings: []
     }))
       .concat(input.words_lang2.map(word => ({
         ...word,
         lang: input.meaning_lang2_language,
-        meanings: []
       })))
   }
 }
@@ -27,8 +26,8 @@ function GraphQLInput2Entity(input: NewMeaningInput): MeaningEntity {
 function Entity2GraphQLType(typormEntity: MeaningEntity): MeaningType {
   return {
     ...typormEntity,
-    words_lang1: [],
-    words_lang2: []
+    words_lang1: null, // resolved in resolver
+    words_lang2: null, // resolved in resolver
   }
 }
 
@@ -46,7 +45,7 @@ export class MeaningResolver {
   ) {
 
     console.log('meaningInput: ', meaningInput);
-    let meaning: MeaningEntity = GraphQLInput2Entity(meaningInput);
+    let meaning: DeepPartial<MeaningEntity> = GraphQLInput2Entity(meaningInput);
     const saved = await this.meaningService.upsertMeaning(meaning);
     return saved;
   }
@@ -56,10 +55,21 @@ export class MeaningResolver {
     @Args('meaningInput') meaningInput: UpdateMeaningInput,
   ) {
     console.log('upsertMeaning -> input: ', meaningInput);
-    let meaning: MeaningEntity = GraphQLInput2Entity(meaningInput);
+    let meaning: DeepPartial<MeaningEntity> = GraphQLInput2Entity(meaningInput);
     const meaningEntity = await this.meaningService.upsertMeaning(meaning);
-    console.log('upsertMeaning -> result', meaningInput);
     return meaningEntity;
+  }
+
+  @Mutation(returns => GraphQLBoolean)
+  async deleteMeaning(
+    @Args('meaningId', { type: () => GraphQLInt }) meaningId: number
+  ) : Promise<boolean> {
+    try {
+      return await this.meaningService.deleteMeaning(meaningId);
+    } catch(e) {
+      console.log('error: ', e);
+      return false;
+    }
   }
 
   @Query(returns => [MeaningType])
@@ -67,7 +77,6 @@ export class MeaningResolver {
     @Args('search', { type: () => String }) search: string
   ): Promise<MeaningType[]> {
     let result = await this.meaningService.searchByText(search);
-    console.log('search result: ', result);
     return result.map(Entity2GraphQLType);
   }
 
@@ -82,7 +91,6 @@ export class MeaningResolver {
   @ResolveField()
   async words_lang1(@Parent() meaning: MeaningType) {
     const { id } = meaning;
-    console.log('words_lang1 -> meaning: ', meaning);
     const words = await this.wordService.findAllByMeaningId(id, meaning.meaning_lang1_language);
     return words;
   }
@@ -90,7 +98,6 @@ export class MeaningResolver {
   @ResolveField()
   async words_lang2(@Parent() meaning: MeaningType) {
     const { id } = meaning;
-    console.log('words_lang2 -> meaning: ', meaning);
     const words = await this.wordService.findAllByMeaningId(id, meaning.meaning_lang2_language);
     return words;
   }

@@ -18,9 +18,6 @@ export class WordInputUpdate implements Omit<WordType, ''> {
   @Field(type => GraphQLString, {nullable: true})
   level: 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C1+';
 
-  @Field(type => GraphQLString, {nullable: true})
-  lang: string;
-
   @Field(type => GraphQLInt, {nullable: true})
   freq: number;
 

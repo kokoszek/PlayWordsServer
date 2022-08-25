@@ -16,6 +16,7 @@ type MeaningType {
 
 type Mutation {
   createMeaning(meaningInput: NewMeaningInput!): MeaningType!
+  deleteMeaning(meaningId: Int!): Boolean!
   submitTask(answer: String!, taskId: Int!): Boolean!
   upsertMeaning(meaningInput: UpdateMeaningInput!): MeaningType!
 }
@@ -65,7 +66,6 @@ input WordInputUpdate {
   desc: String
   freq: Int
   id: Int
-  lang: String
   level: String
   origin: String
   word: String
@@ -75,7 +75,6 @@ type WordType {
   desc: String!
   freq: Int!
   id: Int!
-  lang: String!
   level: String!
   origin: String!
   word: String!

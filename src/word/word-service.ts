@@ -11,6 +11,8 @@ import { WordEntity } from './word.entity';
 
 const fetch = require('node-fetch');
 
+import { getManager, getConnectionManager } from 'typeorm';
+
 const fs = require('fs');
 const PDFParser = require("pdf2json");
 
@@ -23,6 +25,30 @@ export class WordService implements OnModuleInit {
     @InjectRepository(MeaningEntity)
     private meaningRepo: Repository<MeaningEntity>,
   ) {}
+
+  public async deleteWordIfOrphan(wordId: number): Promise<boolean> {
+
+    // let connections = getConnectionManager().connections;
+    // this.wordRepo.manager
+    //
+    // console.log('connections: ', connections);
+
+    //const entityManager = getManager();
+    let result = await this.wordRepo.manager.query(
+      `SELECT * FROM meaning_word_jointable WHERE wordEntityId = ?`,
+      [ wordId ]
+    );
+    console.log('result: ', result);
+    if(result.length === 0) {
+      console.log('word with id ' + wordId + ' is orphan, deleting...');
+      await this.wordRepo.delete({
+        id: wordId
+      })
+    } else {
+      console.log('word with id ' + wordId + ' is NOT orphan, skiping...');
+    }
+    return true;
+  }
 
   private async translateWord(word: string): Promise<string> {
 
@@ -61,7 +87,6 @@ export class WordService implements OnModuleInit {
           id: meaningId
         })
         .getOne();
-    console.log('wordService.findAllByMeaningId(), result: ', result);
     return result.words;
   }
 
@@ -253,6 +278,7 @@ export class WordService implements OnModuleInit {
 
   async onModuleInit(): Promise<any> {
     console.log('on module init');
+    //await this.deleteOrphanWords(5);
     // await this.testDiki();
     // await this.processPdfFile();
     // await this.translateWords();

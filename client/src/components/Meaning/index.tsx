@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { useMutation, useQuery } from '@apollo/client';
-import { CREATE_MEANING, GET_MEANING, UPDATE_MEANING } from './queries';
+import { CREATE_MEANING, GET_MEANING, UPDATE_MEANING, DELETE_MEANING } from './queries';
 import { ChosenEntityContext } from '../../contexts/chosen-entity';
 import { GET_MEANINGS } from '../List/queries';
 import './styles.scss';
@@ -24,7 +24,6 @@ function recursive(obj: any, func: any) {
   }
 }
 
-
 export default function Meaning() {
 
   // const {loading, data, error} = useQuery(GET_MEANING, {
@@ -34,21 +33,37 @@ export default function Meaning() {
   // });
   const [createMeaning, mutateObjCreate] = useMutation(CREATE_MEANING);
   const [updateMeaning, mutateObjUpdate] = useMutation(UPDATE_MEANING);
+  const [deleteMeaning, _mutateObjDelete] = useMutation(DELETE_MEANING);
   // const [lang1Words, setLang1Words] = useState<any>([]);
   // const [lang2Words, setLang2Words] = useState<any>([]);
   const { meaning, setMeaning } = useContext<any>(ChosenEntityContext);
+
+  console.log('meaning: ', meaning);
+
+  useEffect(() => {
+    console.log('useEffect create: ', mutateObjCreate.data);
+    if(mutateObjCreate.data) {
+      setMeaning(
+        mutateObjCreate.data.createMeaning
+      )
+    }
+  }, [mutateObjCreate.loading])
+
+  useEffect(() => {
+    console.log('useEffect update: ', mutateObjUpdate.data);
+    if(mutateObjUpdate.data) {
+      setMeaning(
+        mutateObjUpdate.data.upsertMeaning
+      )
+    }
+  }, [mutateObjUpdate.loading])
 
   useEffect(() => {
     setMeaning(newMeaning());
   },[]);
 
-  console.log('meaning: ', meaning);
   const firstLang1Word = meaning?.words_lang1[0];
-  console.log('firstLang1Word: ', firstLang1Word);
 
-  // @ts-ignore
-  // @ts-ignore
-  // @ts-ignore
   return (
     <div className='main-content'>
       <div className='meaning-content'>
@@ -62,11 +77,10 @@ export default function Meaning() {
         }}/>
         <label htmlFor='meaning'>opis słowa</label>
         <input id='meaning' type='text' value={meaning?.meaning_lang1_desc || ''}
-               onChange={e => setMeaning({
-                 meaning_lang1_desc: e.target.value,
-               })}
-        />
-        <h2>polski odpowiednik</h2>
+               onChange={e => setMeaning(produce(meaning, (draft: any) => {
+                 draft.meaning_lang1_desc = e.target.value;
+               }))} />
+        <h2>polskie synonimy</h2>
         <ul>
           {
             meaning?.words_lang1
@@ -95,11 +109,10 @@ export default function Meaning() {
         </ul>
         <button onClick={() => {
           setMeaning(produce(meaning, (draft: any) => {
-            draft.words_lang1.push(newWord('pl'))
+            draft.words_lang1.push(newWord())
           }));
         }}>dodaj</button>
-
-        <h2>angielski odpowiednik</h2>
+        <h2>angielskie synonimy</h2>
         <ul>
           {
             meaning?.words_lang2
@@ -126,38 +139,34 @@ export default function Meaning() {
         </ul>
         <button onClick={() => {
           setMeaning(produce(meaning, (draft: any) => {
-            draft.words_lang2.push(newWord('en'))
+            draft.words_lang2.push(newWord())
           }));
         }}>dodaj</button>
-
         <footer>
           <button onClick={() => {
-            setMeaning({
-              id: undefined,
-              category: undefined,
-              meaning_lang1_desc: '',
-              meaning_lang1_language: 'pl',
-              meaning_lang2_desc: '',
-              meaning_lang2_language: 'en',
-              partOfSpeech: undefined,
-              words_lang1: [{
-                word: '',
-                origin: 'web-interface',
-                lang: 'pl',
-              }],
-              words_lang2: [],
-            });
+            setMeaning(newMeaning());
           }}>wyczyść formularz</button>
+          {
+            meaning?.id && <button
+              onClick={async () => {
+                await deleteMeaning({
+                  variables: {
+                    meaningId: meaning.id
+                  },
+                  refetchQueries: [GET_MEANINGS]
+                })
+              }}
+            >
+              usuń znaczenie
+            </button>
+          }
           <button onClick={async () => {
-            console.log('meaning: ', meaning);
-
             let copy = _.cloneDeep(meaning);
             recursive(copy, (obj: any, key: string) => {
               if(key === '__typename') {
                 obj['__typename'] = undefined;
               }
             });
-
             if(meaning.id) {
               await updateMeaning({
                 variables: {

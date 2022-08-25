@@ -11,7 +11,6 @@ export default function List() {
       search: searchText
     }
   })
-  console.log('data: ', data?.searchMeaning);
   const entityCtx = useContext<any>(ChosenEntityContext);
   return (
     <div className='search-list'>
@@ -22,7 +21,6 @@ export default function List() {
           data?.searchMeaning.map((el: any) => {
             return (
               <li key={el.id} onClick={() => {
-                console.log('el: ', el);
                 entityCtx.setMeaning(el);
               }}>
                 {el.meaning_lang1_desc}
