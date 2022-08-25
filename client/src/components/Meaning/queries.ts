@@ -11,14 +11,18 @@ export const GET_MEANING = gql`
 `
 
 export const CREATE_MEANING = gql`
-    mutation CreateMeaning($meaningInput: MeaningInput!) {
+    mutation CreateMeaning($meaningInput: NewMeaningInput!) {
         createMeaning( meaningInput: $meaningInput) {
-            meaning_desc
+            id
+            meaning_lang1_desc
+            meaning_lang1_language
+            meaning_lang2_desc
+            meaning_lang2_language
         }
     }
 `
-export const UPSERT_MEANING = gql`
-    mutation UpsertMeaning($meaningInput: MeaningInput!) {
+export const UPDATE_MEANING = gql`
+    mutation UpsertMeaning($meaningInput: UpdateMeaningInput!) {
         upsertMeaning(meaningInput: $meaningInput) {
             id
             meaning_lang1_desc

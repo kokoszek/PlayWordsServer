@@ -5,7 +5,7 @@ import { GraphQLID, GraphQLInt, GraphQLString } from 'graphql';
 @ObjectType()
 export class WordType implements Omit<WordEntity, 'meanings'> {
 
-    @Field(type => GraphQLID)
+    @Field(type => GraphQLInt)
     id: number;
 
     @Field(type => GraphQLString)

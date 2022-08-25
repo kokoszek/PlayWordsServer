@@ -1,7 +1,7 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { createQueryBuilder, Repository } from 'typeorm';
-import { MeaningEntity } from '../meaning/meaning.entity';
+import { LangType, MeaningEntity } from '../meaning/meaning.entity';
 import { log } from 'util';
 import { getRandomInt } from '../game/game-service';
 const axios = require("axios");
@@ -49,12 +49,14 @@ export class WordService implements OnModuleInit {
     return result.data.data.translations[0].translatedText;
   }
 
-  async findAllByMeaningId(meaningId: number): Promise<WordEntity[]> {
+  async findAllByMeaningId(meaningId: number, lang: LangType): Promise<WordEntity[]> {
     let result = await
       this.meaningRepo
         .createQueryBuilder('meaning')
         .select()
-        .innerJoinAndSelect('meaning.words', 'words')
+        .leftJoinAndSelect('meaning.words', 'words', 'words.lang = :lang', {
+          lang
+        })
         .where({
           id: meaningId
         })

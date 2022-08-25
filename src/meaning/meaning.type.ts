@@ -10,7 +10,7 @@ export class MeaningType implements Omit<MeaningEntity, 'words'> {
     @Field(type => GraphQLInt, { nullable: false })
     id: number;
 
-    @Field(type => GraphQLString, { nullable: true })
+    @Field(type => GraphQLString, { nullable: false })
     meaning_lang1_desc: string;
 
     @Field(type => GraphQLString, { nullable: false })

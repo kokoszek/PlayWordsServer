@@ -2,22 +2,10 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-input MeaningInput {
-  category: String!
-  id: Int
-  meaning_lang1_desc: String!
-  meaning_lang1_language: String!
-  meaning_lang2_desc: String!
-  meaning_lang2_language: String!
-  partOfSpeech: String!
-  words_lang1: [WordInput!]!
-  words_lang2: [WordInput!]!
-}
-
 type MeaningType {
   category: String
   id: Int!
-  meaning_lang1_desc: String
+  meaning_lang1_desc: String!
   meaning_lang1_language: String!
   meaning_lang2_desc: String
   meaning_lang2_language: String!
@@ -27,9 +15,20 @@ type MeaningType {
 }
 
 type Mutation {
-  createMeaning(meaningInput: MeaningInput!): MeaningType!
+  createMeaning(meaningInput: NewMeaningInput!): MeaningType!
   submitTask(answer: String!, taskId: Int!): Boolean!
-  upsertMeaning(meaningInput: MeaningInput!): MeaningType!
+  upsertMeaning(meaningInput: UpdateMeaningInput!): MeaningType!
+}
+
+input NewMeaningInput {
+  category: String
+  meaning_lang1_desc: String!
+  meaning_lang1_language: String!
+  meaning_lang2_desc: String
+  meaning_lang2_language: String!
+  partOfSpeech: String
+  words_lang1: [WordInputUpdate!]!
+  words_lang2: [WordInputUpdate!]!
 }
 
 type Query {
@@ -50,14 +49,32 @@ type TaskOptionsModel {
   name: String!
 }
 
-input WordInput {
+input UpdateMeaningInput {
+  category: String
+  id: Int!
+  meaning_lang1_desc: String
+  meaning_lang1_language: String
+  meaning_lang2_desc: String
+  meaning_lang2_language: String
+  partOfSpeech: String
+  words_lang1: [WordInputUpdate!]
+  words_lang2: [WordInputUpdate!]
+}
+
+input WordInputUpdate {
+  desc: String
+  freq: Int
   id: Int
+  lang: String
+  level: String
+  origin: String
+  word: String
 }
 
 type WordType {
   desc: String!
   freq: Int!
-  id: ID!
+  id: Int!
   lang: String!
   level: String!
   origin: String!

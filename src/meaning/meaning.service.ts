@@ -47,6 +47,14 @@ export default class MeaningService {
     });
     let meaningSaved = await this.meaningRepo.save(newMeaning);
     console.log('meaningSaved: ', meaningSaved);
-    return meaningSaved;
+    let reselectedMeaning = await this.meaningRepo
+      .createQueryBuilder()
+      .select()
+      .where({
+        id: meaningSaved.id
+      })
+      .getOne();
+    console.log('reselectedMeaning: ', reselectedMeaning);
+    return reselectedMeaning;
   }
 }

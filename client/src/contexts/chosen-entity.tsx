@@ -2,8 +2,8 @@ import React from 'react';
 import {createContext, useReducer, useState} from "react";
 
 // export type ChosenEntityContextType = {
-//   meaning: Partial<MeaningInput> | null,
-//   setMeaning: (obj: Partial<MeaningInput>) => void,
+//   meaning: Partial<MeaningInputNew> | null,
+//   setMeaning: (obj: Partial<MeaningInputNew>) => void,
 //   word: Partial<WordInput> | null,
 //   setWord: (obj: Partial<WordInput>) => void,
 // }
@@ -17,7 +17,7 @@ export const ChosenEntityContext = createContext<any>({
 
 export const ChosenEntityContextProvider = ({children}: any) => {
 
-  // const [meaning, setMeaning] = useState<Partial<MeaningInput> | null>({
+  // const [meaning, setMeaning] = useState<Partial<MeaningInputNew> | null>({
   //   meaning_lang1_desc: '',
   //   meaning_lang1_language: 'pl',
   //   words_lang1: [],
