@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useMutation, useQuery } from '@apollo/client';
 import { CREATE_MEANING, GET_MEANING, UPDATE_MEANING } from './queries';
 import { ChosenEntityContext } from '../../contexts/chosen-entity';
@@ -6,6 +6,7 @@ import { GET_MEANINGS } from '../List/queries';
 import './styles.scss';
 import produce from 'immer';
 import _ from 'lodash';
+import { newWord, newMeaning } from './utils';
 
 function recursive(obj: any, func: any) {
   for(let key in obj) {
@@ -23,6 +24,7 @@ function recursive(obj: any, func: any) {
   }
 }
 
+
 export default function Meaning() {
 
   // const {loading, data, error} = useQuery(GET_MEANING, {
@@ -36,9 +38,13 @@ export default function Meaning() {
   // const [lang2Words, setLang2Words] = useState<any>([]);
   const { meaning, setMeaning } = useContext<any>(ChosenEntityContext);
 
+  useEffect(() => {
+    setMeaning(newMeaning());
+  },[]);
+
+  console.log('meaning: ', meaning);
   const firstLang1Word = meaning?.words_lang1[0];
   console.log('firstLang1Word: ', firstLang1Word);
-  console.log('meaning: ', meaning);
 
   // @ts-ignore
   // @ts-ignore
@@ -64,7 +70,7 @@ export default function Meaning() {
         <ul>
           {
             meaning?.words_lang1
-              .slice(1)
+              ?.slice(1)
               .map((el: any, idx: number) => {
                 idx++; // because slice(1)
                 return (
@@ -89,72 +95,41 @@ export default function Meaning() {
         </ul>
         <button onClick={() => {
           setMeaning(produce(meaning, (draft: any) => {
-            draft.words_lang1.push({
-              id: null,
-              word: '',
-              lang: 'pl',
-              desc: '',
-              level: null,
-              freq: 1,
-              origin: 'web-interface',
-            })
+            draft.words_lang1.push(newWord('pl'))
           }));
         }}>dodaj</button>
+
         <h2>angielski odpowiednik</h2>
         <ul>
           {
             meaning?.words_lang2
-              .filter((word: any) => word.lang === 'en')
               .map((el: any, idx: number) => {
                 return (
                   <li key={idx}>
                     <input type='text' value={el.word}
                            onChange={e => {
-                             let lang2List = meaning?.words_lang2;
-                             if(lang2List) {
-                               lang2List[idx] = {...lang2List[idx]}; // copy becase its freezed
-                               lang2List[idx].word = e.target.value;
-                               setMeaning({
-                                 words_lang2: [...lang2List]
-                               })
-                             }
+                             setMeaning(produce(meaning, (draft: any) => {
+                               draft.words_lang2[idx].word = e.target.value
+                             }));
                            }}
                     />
                     <button
                       onClick={() => {
-                        if(meaning) {
-                          // @ts-ignore
-                          let lang1List = [...meaning.words_lang1];
-                          if(lang1List) {
-                            lang1List.slice(idx, 1);
-                            setMeaning({
-                              words_lang1: lang1List
-                            })
-                          }
-                        }
-                      }}
-                    >usuń</button>
+                        setMeaning(produce(meaning, (draft: any) => {
+                          draft.words_lang2.splice(idx, 1);
+                        }))
+                      }}>usuń</button>
                   </li>
                 )
               })
           }
         </ul>
         <button onClick={() => {
-          if(meaning?.words_lang2) {
-            let newWords = [...meaning?.words_lang2];
-            setMeaning({
-              words_lang2: [...meaning?.words_lang2, {
-                id: null,
-                word: '',
-                lang: 'pl',
-                desc: '',
-                level: null,
-                freq: 1,
-                origin: 'web-interface',
-              }]
-            })
-          }
+          setMeaning(produce(meaning, (draft: any) => {
+            draft.words_lang2.push(newWord('en'))
+          }));
         }}>dodaj</button>
+
         <footer>
           <button onClick={() => {
             setMeaning({
