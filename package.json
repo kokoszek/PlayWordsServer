@@ -41,6 +41,7 @@
     "graphql-ws": "^5.10.0",
     "ioredis": "^5.2.2",
     "mysql2": "^2.3.3",
+    "nestjs-request-context": "^2.0.1",
     "node-fetch": "^2.6.7",
     "node-html-parser": "^5.4.2-0",
     "pdf2json": "^2.0.1",

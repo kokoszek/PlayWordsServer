@@ -1,3 +1,4 @@
+@use '../../styles';
 
 .main-content {
   text-align: left;
@@ -6,9 +7,30 @@
     display: block;
   }
   .meaning-content {
+    & > * {
+      margin-bottom: 30px;
+    }
+    & > label {
+      margin-bottom: 0;
+      display: inline-block;
+      margin-right: 10px;
+    }
     ul {
       li {
         list-style: none;
+      }
+    }
+    .words {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border: 1px solid styles.$color1;
+      border-radius: 10px;
+      padding: 20px;
+      .lang1 {
+
+      }
+      .lang2 {
+
       }
     }
   }

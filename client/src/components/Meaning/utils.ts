@@ -12,7 +12,7 @@ export function newMeaning() {
     meaning_lang2_desc: '',
     meaning_lang2_language: 'en',
     words_lang1: [newWord()],
-    words_lang2: [],
+    words_lang2: [newWord()],
   }
 }
 

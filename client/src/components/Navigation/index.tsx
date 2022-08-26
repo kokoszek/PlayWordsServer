@@ -4,7 +4,7 @@ export default function Navigation() {
 
   return (
     <nav className='main-navigation'>
-      navigation
+      <div className='logo'>PlayWords</div>
     </nav>
   )
 }

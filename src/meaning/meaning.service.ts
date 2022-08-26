@@ -38,46 +38,30 @@ export default class MeaningService {
     return result;
   }
 
+  async findMeaningWithWords(meaningId: number): Promise<MeaningEntity> {
+    return await this.meaningRepo
+      .createQueryBuilder('meaning')
+      .select()
+      .leftJoinAndSelect('meaning.words', 'words')
+      .where({ id: meaningId })
+      .getOne();
+  }
+
   async deleteMeaning(meaningId: number): Promise<boolean> {
-    const existingWordIds: number[] = (
-      await this.meaningRepo
-        .createQueryBuilder('meaning')
-        .innerJoinAndSelect('meaning.words', 'words')
-        .where({ id: meaningId })
-        .getOne()
-    ).words.map(el => el.id);
-    await this.meaningRepo.delete({
-      id: meaningId
-    })
-    for(let wordId in existingWordIds) {
-      await this.wordService.deleteWordIfOrphan(existingWordIds[wordId]);
+    const meaningSnapshowBeforeDelete = await this.findMeaningWithWords(meaningId);
+    await this.meaningRepo.delete({ id: meaningId })
+    for(let idx in meaningSnapshowBeforeDelete?.words) {
+      await this.wordService.deleteWordIfOrphan(meaningSnapshowBeforeDelete.words[idx].id);
     }
     return true;
   }
 
-  async upsertMeaning(meaning: DeepPartial<MeaningEntity>): Promise<MeaningEntity> {
-    const newMeaning = meaning;
-    console.log('newMeaning to save: ', newMeaning);
-    const existingWordIds: number[] = (
-      await this.meaningRepo
-        .createQueryBuilder('meaning')
-        .innerJoinAndSelect('meaning.words', 'words')
-        .where({ id: meaning.id })
-        .getOne()
-    )?.words?.map(el => el.id) || [];
-    console.log('existingWordIds: ', existingWordIds);
-    let meaningSaved = await this.meaningRepo.save(newMeaning);
-    for(let wordId in existingWordIds) {
-      await this.wordService.deleteWordIfOrphan(existingWordIds[wordId]);
+  async upsertMeaning(meaning: MeaningEntity): Promise<MeaningEntity> {
+    const meaningSnapshotBeforeSave = await this.findMeaningWithWords(meaning.id);
+    await this.meaningRepo.save(meaning);
+    for(let idx in meaningSnapshotBeforeSave?.words) {
+      await this.wordService.deleteWordIfOrphan(meaningSnapshotBeforeSave.words[idx].id);
     }
-    console.log('meaningSaved: ', meaningSaved);
-    let reselectedMeaning = await this.meaningRepo
-      .createQueryBuilder()
-      .select()
-      .where({
-        id: meaningSaved.id
-      })
-      .getOne();
-    return reselectedMeaning;
+    return await this.findMeaningWithWords(meaning.id);
   }
 }

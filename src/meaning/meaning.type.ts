@@ -5,7 +5,7 @@ import { GraphQLInt, GraphQLString } from 'graphql';
 import { WordType } from '../word/word.type';
 
 @ObjectType()
-export class MeaningType implements Omit<MeaningEntity, 'words'> {
+export class MeaningType implements Omit<MeaningEntity, 'words' | 'beforeSave' | 'afterSave'> {
 
     @Field(type => GraphQLInt, { nullable: false })
     id: number;

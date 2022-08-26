@@ -27,13 +27,6 @@ export class WordService implements OnModuleInit {
   ) {}
 
   public async deleteWordIfOrphan(wordId: number): Promise<boolean> {
-
-    // let connections = getConnectionManager().connections;
-    // this.wordRepo.manager
-    //
-    // console.log('connections: ', connections);
-
-    //const entityManager = getManager();
     let result = await this.wordRepo.manager.query(
       `SELECT * FROM meaning_word_jointable WHERE wordEntityId = ?`,
       [ wordId ]
@@ -45,7 +38,7 @@ export class WordService implements OnModuleInit {
         id: wordId
       })
     } else {
-      console.log('word with id ' + wordId + ' is NOT orphan, skiping...');
+      console.log('word with id ' + wordId + ' is NOT orphan, skipping...');
     }
     return true;
   }

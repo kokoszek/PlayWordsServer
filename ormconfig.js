@@ -22,6 +22,9 @@ const config = {
   "migrations": [
     detectTSNode ? "./migrations/*.ts" : ''
   ],
+  "subscribers": [
+    path.join(__dirname, 'dist', '**', '*.subscriber.js')
+  ]
 }
 
 module.exports = config;

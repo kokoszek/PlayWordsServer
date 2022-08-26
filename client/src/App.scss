@@ -1,5 +1,30 @@
+@use './styles';
+
+body {
+  font-size: 10px;
+  background-color: styles.$cream;
+}
+
+button {
+  background-color: styles.$color1;
+  border: 1px solid white;
+  border-radius: 5px;
+  padding: 5px 10px;
+  margin: 10px;
+  color: white;
+  cursor: pointer;
+}
+
 .App {
   text-align: center;
+  font-family: 'Montserrat';
+  font-weight: 400;
+  font-size: 0.9rem;
+  height: 100vh;
+}
+
+input {
+  outline: none;
 }
 
 .App-logo {
@@ -22,6 +47,10 @@
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
+}
+
+body {
+  color: rgba(59,69,78,1.00);
 }
 
 .App-link {

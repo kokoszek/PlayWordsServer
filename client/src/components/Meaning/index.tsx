@@ -33,12 +33,19 @@ export default function Meaning() {
   // });
   const [createMeaning, mutateObjCreate] = useMutation(CREATE_MEANING);
   const [updateMeaning, mutateObjUpdate] = useMutation(UPDATE_MEANING);
-  const [deleteMeaning, _mutateObjDelete] = useMutation(DELETE_MEANING);
+  const [deleteMeaning, mutateObjDelete] = useMutation(DELETE_MEANING);
   // const [lang1Words, setLang1Words] = useState<any>([]);
   // const [lang2Words, setLang2Words] = useState<any>([]);
   const { meaning, setMeaning } = useContext<any>(ChosenEntityContext);
-
-  console.log('meaning: ', meaning);
+  console.log('mutateObjDelete: ', mutateObjDelete);
+  useEffect(() => {
+    if(mutateObjDelete.called &&
+      !mutateObjDelete.loading &&
+      mutateObjDelete.data.deleteMeaning
+    ) {
+      setMeaning(newMeaning());
+    }
+  }, [mutateObjDelete.called, mutateObjDelete.loading]);
 
   useEffect(() => {
     console.log('useEffect create: ', mutateObjCreate.data);
@@ -69,79 +76,83 @@ export default function Meaning() {
       <div className='meaning-content'>
         <label htmlFor='meaning-id'>id</label>
         <input id='meaning-id' disabled value={meaning?.id || '-'}/>
-        <label>polskie słowo</label>
-        <input type='text' value={firstLang1Word?.word} onChange={e => {
-          setMeaning(produce(meaning, (draft: any) => {
-            draft.words_lang1[0].word = e.target.value;
-          }));
-        }}/>
+        <div className='words'>
+          <div className='lang1'>
+            <h2>polskie synonimy</h2>
+            <ul>
+              {
+                meaning?.words_lang1
+                  .map((el: any, idx: number) => {
+                    return (
+                      <li key={idx}>
+                        <input type='text' value={el.word}
+                               onChange={e => {
+                                 setMeaning(produce(meaning, (draft: any) => {
+                                   draft.words_lang1[idx].word = e.target.value
+                                 }));
+                               }}
+                        />
+                        {
+                          meaning.words_lang1.length > 1 &&
+                          <button
+                            onClick={() => {
+                              setMeaning(produce(meaning, (draft: any) => {
+                                draft.words_lang1.splice(idx, 1);
+                              }))
+                            }}>usuń</button>
+                        }
+                      </li>
+                    )
+                  })
+              }
+            </ul>
+            <button onClick={() => {
+              setMeaning(produce(meaning, (draft: any) => {
+                draft.words_lang1.push(newWord())
+              }));
+            }}>dodaj</button>
+          </div>
+          <div className='lang2'>
+            <h2>angielskie synonimy</h2>
+            <ul>
+              {
+                meaning?.words_lang2
+                  .map((el: any, idx: number) => {
+                    return (
+                      <li key={idx}>
+                        <input type='text' value={el.word}
+                               onChange={e => {
+                                 setMeaning(produce(meaning, (draft: any) => {
+                                   draft.words_lang2[idx].word = e.target.value
+                                 }));
+                               }}
+                        />
+                        {
+                          meaning.words_lang2.length > 1 &&
+                          <button
+                            onClick={() => {
+                              setMeaning(produce(meaning, (draft: any) => {
+                                draft.words_lang2.splice(idx, 1);
+                              }))
+                            }}>usuń</button>
+                        }
+                      </li>
+                    )
+                  })
+              }
+            </ul>
+            <button onClick={() => {
+              setMeaning(produce(meaning, (draft: any) => {
+                draft.words_lang2.push(newWord())
+              }));
+            }}>dodaj</button>
+          </div>
+        </div>
         <label htmlFor='meaning'>opis słowa</label>
         <input id='meaning' type='text' value={meaning?.meaning_lang1_desc || ''}
                onChange={e => setMeaning(produce(meaning, (draft: any) => {
                  draft.meaning_lang1_desc = e.target.value;
                }))} />
-        <h2>polskie synonimy</h2>
-        <ul>
-          {
-            meaning?.words_lang1
-              ?.slice(1)
-              .map((el: any, idx: number) => {
-                idx++; // because slice(1)
-                return (
-                  <li key={idx}>
-                    <input type='text' value={el.word}
-                           onChange={e => {
-                             setMeaning(produce(meaning, (draft: any) => {
-                               draft.words_lang1[idx].word = e.target.value
-                             }));
-                           }}
-                    />
-                    <button
-                      onClick={() => {
-                        setMeaning(produce(meaning, (draft: any) => {
-                          draft.words_lang1.splice(idx, 1);
-                        }))
-                      }}>usuń</button>
-                  </li>
-                )
-              })
-          }
-        </ul>
-        <button onClick={() => {
-          setMeaning(produce(meaning, (draft: any) => {
-            draft.words_lang1.push(newWord())
-          }));
-        }}>dodaj</button>
-        <h2>angielskie synonimy</h2>
-        <ul>
-          {
-            meaning?.words_lang2
-              .map((el: any, idx: number) => {
-                return (
-                  <li key={idx}>
-                    <input type='text' value={el.word}
-                           onChange={e => {
-                             setMeaning(produce(meaning, (draft: any) => {
-                               draft.words_lang2[idx].word = e.target.value
-                             }));
-                           }}
-                    />
-                    <button
-                      onClick={() => {
-                        setMeaning(produce(meaning, (draft: any) => {
-                          draft.words_lang2.splice(idx, 1);
-                        }))
-                      }}>usuń</button>
-                  </li>
-                )
-              })
-          }
-        </ul>
-        <button onClick={() => {
-          setMeaning(produce(meaning, (draft: any) => {
-            draft.words_lang2.push(newWord())
-          }));
-        }}>dodaj</button>
         <footer>
           <button onClick={() => {
             setMeaning(newMeaning());
