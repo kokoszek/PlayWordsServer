@@ -6,7 +6,7 @@ import { Maybe } from 'graphql/jsutils/Maybe';
 import { WordInputUpdate } from '../word/word.input.update';
 
 @InputType()
-export class UpdateMeaningInput implements Omit<MeaningType, ''> {
+export class UpdateMeaningInput implements Omit<MeaningType, 'words_lang1' | 'words_lang2'> {
 
   @Field(type => GraphQLInt, {
     nullable: false

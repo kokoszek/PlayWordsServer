@@ -26,6 +26,28 @@ export class WordService implements OnModuleInit {
     private meaningRepo: Repository<MeaningEntity>,
   ) {}
 
+  public async searchByText(search: string): Promise<WordEntity[]> {
+    const result: WordEntity[] = await this.wordRepo
+      .createQueryBuilder()
+      .where('word LIKE :search', {
+        search: search + '%'
+      })
+      .getMany();
+    return result;
+  }
+
+  public async wordExists(word: string): Promise<WordEntity> {
+    let wordEntity = await this.wordRepo
+      .createQueryBuilder()
+      .where({
+        word
+      })
+      .getOne();
+    console.log('word text: ', word);
+    console.log('word: ', wordEntity);
+    return wordEntity;
+  }
+
   public async deleteWordIfOrphan(wordId: number): Promise<boolean> {
     let result = await this.wordRepo.manager.query(
       `SELECT * FROM meaning_word_jointable WHERE wordEntityId = ?`,

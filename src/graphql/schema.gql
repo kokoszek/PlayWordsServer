@@ -36,6 +36,8 @@ type Query {
   getMeaning(id: Int!): MeaningType!
   getTask: TaskModel!
   searchMeaning(search: String!): [MeaningType!]!
+  searchWord(search: String!): [WordType!]!
+  wordExists(word: String!): WordType
 }
 
 type TaskModel {
@@ -75,7 +77,9 @@ type WordType {
   desc: String!
   freq: Int!
   id: Int!
+  lang: String!
   level: String!
+  meanings: [MeaningType!]!
   origin: String!
   word: String!
 }

@@ -7,7 +7,9 @@ export default function Main() {
   return (
     <div className='main-container'>
       <List/>
-      <Meaning/>
+      <main className='main-content'>
+        <Meaning/>
+      </main>
     </div>
   )
 }

@@ -1,29 +1,35 @@
 import { useContext, useState } from 'react';
-import { GET_MEANINGS } from './queries';
+import { GET_MEANINGS, GET_WORDS } from './queries';
 import { useQuery } from '@apollo/client';
 import { ChosenEntityContext } from '../../contexts/chosen-entity';
 import './styles.scss';
 
 export default function List() {
   const [searchText, setSearchText] = useState<string>('');
-  const {data, loading, error } = useQuery(GET_MEANINGS, {
+  const {data, loading, error } = useQuery(GET_WORDS, {
     variables: {
       search: searchText
     }
   })
+  console.log('list data: ', data);
   const entityCtx = useContext<any>(ChosenEntityContext);
   return (
     <div className='search-list'>
       <label htmlFor='search'>Search:</label>
-      <input id='search' value={searchText} onChange={(e) => setSearchText(e.target.value)}  />
+      <input id='search' value={searchText}
+             onChange={(e) => setSearchText(e.target.value)}  />
       <ul>
         {
-          data?.searchMeaning.map((el: any) => {
+          data?.searchWord.map((el: any) => {
             return (
               <li key={el.id} onClick={() => {
-                entityCtx.setMeaning(el);
+                if(el.meanings.length > 1) {
+                  entityCtx.setWord(el);
+                } else {
+                  entityCtx.setMeaning(el.meanings[0]);
+                }
               }}>
-                {el.meaning_lang1_desc}
+                {el.word}
               </li>
             )
           })

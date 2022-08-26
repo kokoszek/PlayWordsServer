@@ -4,7 +4,7 @@ import { GraphQLInt, GraphQLString } from 'graphql';
 import { WordType } from './word.type';
 
 @InputType()
-export class WordInputUpdate implements Omit<WordType, ''> {
+export class WordInputUpdate implements Omit<WordType, 'lang' | 'meanings'> {
 
   @Field(type => GraphQLInt, {nullable: true})
   id: number | null;

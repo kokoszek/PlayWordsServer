@@ -58,3 +58,13 @@ export const DELETE_MEANING = gql`
         deleteMeaning(meaningId: $meaningId)
     }
 `;
+
+export const WORD_EXISTS = gql`
+    query WordExists($word: String!) {
+        wordExists(word: $word) {
+            id
+            word
+            origin
+        }
+    }
+`;
