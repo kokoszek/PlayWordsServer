@@ -15,18 +15,22 @@
       display: inline-block;
       margin-right: 10px;
     }
-    .word-exists-hint {
-      width: 8px;
-      height: 8px;
-      margin-right: 10px;
-      border-radius: 50%;
-      border: 1px solid black;
-      display: inline-block;
-      background-color: #96ef02;
-    }
     ul {
       li {
+        position: relative;
         list-style: none;
+        .word-exists-hint {
+          position: absolute;
+          left: -20px;
+          top: 5px;
+          z-index: 100;
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          border: 1px solid black;
+          display: inline-block;
+          background-color: #96ef02;
+        }
       }
     }
     .words {

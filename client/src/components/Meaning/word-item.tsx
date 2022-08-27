@@ -23,12 +23,20 @@ export default function WordItem(props: any) {
   } = props;
 
   const [wordExists, setWordExists] = useState(false);
+  console.log('skip: ', !!word.id)
   const {data, loading, error} = useQuery(WORD_EXISTS, {
     variables: {
       word: word.word
-    }
+    },
+    skip: !!word.id
   })
+  console.log('word-item -> data: ', data);
+  const [showWordExistsHint, setShowWordExistsHint] = useState(false);
   if(!loading && data?.wordExists) {
+    console.log('set existing word');
+    if(!showWordExistsHint) {
+      setShowWordExistsHint(true);
+    }
     setExistingWord(data.wordExists);
   }
   // useEffect(() => {
@@ -37,7 +45,7 @@ export default function WordItem(props: any) {
 
   return (
     <li key={idx}>
-      { data?.wordExists && <WordExistsHint/> }
+      { showWordExistsHint && <WordExistsHint/> }
       <input type='text' value={word.word}
              onChange={e => {
                onInputChange(e.target.value);
