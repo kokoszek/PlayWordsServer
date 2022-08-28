@@ -1,0 +1,97 @@
+@use "../colors";
+
+.subscribe-frame {
+  //align-self: flex-end;
+  grid-column: main-left / span 1;
+  //grid-row: 3 / span 1;
+  align-self: end;
+  justify-self: left;
+  width: max-content;
+  color: colors.$dimmed-white;
+  font-weight: 300;
+  header {
+    h1, h2 {
+      text-align: left;
+      margin: 0 0 10px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 200;
+      font-size: 36px;
+    }
+  }
+  p {
+    line-height: 24px;
+  }
+  .highlight-text {
+    color: colors.$main;
+    font-weight: 600;
+  }
+  ul {
+    list-style-type: none;
+    padding: 0px;
+    li {
+      img {
+        width: 60px;
+        border-radius: 50%;
+        border: 2px solid rgba(black, 0.2);
+        margin-right: -1.3rem;
+      }
+    }
+  }
+  form {
+    * {
+      display: inline-block;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    input {
+      border: 0px;
+      color: colors.$dimmed-white;
+      background-color: rgba(colors.$main, 1);
+      transition-duration: 0.2s;
+      border-radius: 20px;
+      height: 30px;
+      padding-left: 10px;
+    }
+    input:focus {
+      transition-timing-function: ease-in-out;
+      transition-duration: 0.2s;
+    }
+    input::placeholder {
+      color: rgba(white, 0.7);
+      padding-left: 10px;
+    }
+    button:hover {
+      background-color: rgba(colors.$accent-tint, 1.0);
+    }
+    .subscribe-button {
+      margin: 20px 0 0 20px;
+      //box-shadow: 0px 0px 16px 8px rgba(colors.$alt, 0.15);
+      text-shadow: 0px 0px 2px 2px black;
+      padding: 0px 10px;
+      display: block;
+      background-color: rgba(colors.$accent, 1);
+      border: 0;
+      height: 30px;
+      color: rgba(colors.$dimmed-white, 1);
+      font-weight: bold;
+      border-radius: 30px;
+      cursor: pointer;
+    }
+  }
+}
+
+@media screen and (max-width: 950px) {
+
+  .subscribe-frame {
+    grid-column: main-left / main-right;
+    //margin: 0 auto;
+    //
+    //color: colors.$main;
+    //box-shadow: 0 0 1rem 0 rgba(0, 0, 0, .2);
+    //padding: 15px;
+    //background-color: rgba(255, 255, 255, .45);
+    //backdrop-filter: blur(5px);
+  }
+}

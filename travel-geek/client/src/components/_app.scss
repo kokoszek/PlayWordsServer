@@ -1,0 +1,141 @@
+@use './colors';
+@use './common';
+
+/**
+ notes on learning CSS.
+
+ how to size <img>:
+ <img> should have a wrapping parent container.
+ we set the image width to 100%.
+ Then the parent container should be part of
+ the CSS grid 1fr. The we have a responsive img.
+*/
+input:focus,
+select:focus,
+textarea:focus,
+button:focus {
+  outline: none;
+}
+
+/**
+how to hide items.
+we can't use display:none since transitions dont work.
+
+we have to do instead:
+
+1) opacity: 0 -> 1
+
+2) pointer-events: none -> hide from keyboard tab and mouse
+
+3) visibility: hidden; -> hides from screen readers.
+ */
+
+html {
+  font-size: 8px; // 10px
+  scroll-padding-top: 4rem;
+  font-family: 'Montserrat', sans-serif;
+  scroll-behavior: smooth;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  text-decoration: none;
+  outline: none;
+}
+
+body {
+  margin: 0;
+  color: colors.$dimmed-white;
+  .root-container {
+    overflow: hidden;
+    height: min-content;
+    padding: 0 0px;
+    display: grid;
+    main.main-content {
+      background: linear-gradient(to bottom, rgba(#020202, 1) , rgba(#034970, 1));
+      background-repeat: no-repeat;
+      background-size: 100vw 100%;
+      grid-column: 1 / -1;
+      & > * {
+        @include common.container;
+      }
+      padding-bottom: 8rem;
+    }
+    grid-template-columns: 0.5rem /* +10px is column-gap */[left-margin] 1fr [main-left] 3fr [mid] 3fr [main-right] 1fr [right-margin] 0.5rem;
+    grid-template-rows: 100vh;
+    column-gap: 10px;
+  }
+}
+
+.main-content-background {
+  grid-row: 2 / 100;
+  grid-column: 1 / -1;
+}
+
+@media screen and (max-width: 885px) {
+  body {
+    .root-container {
+      //grid-template-columns: 5px [left-margin] 1fr [main-left] 1fr [mid] 1fr [main-right] 1fr [right-margin] 5px;
+    }
+  }
+
+}
+
+$start: 1;
+$end: 15;
+
+@for $i from $start through $end {
+  @for $j from ($i + 1) through $end {
+    .col-#{$i}-#{$j} {
+      grid-column: #{$i} / #{$j};
+    }
+  }
+}
+
+.col-1 { grid-column: span 1; }
+.col-2 { grid-column: span 2; }
+.col-3 { grid-column: span 3; }
+.col-4 { grid-column: span 4; }
+.col-5 { grid-column: span 5; }
+.col-6 { grid-column: span 6; }
+.col-7 { grid-column: span 7; }
+.col-8 { grid-column: span 8; }
+.col-9 { grid-column: span 9; }
+.col-10 { grid-column: span 10; }
+.col-11 { grid-column: span 11; }
+.col-12 { grid-column: span 12; }
+.col-max { grid-column: 2 / 14; }
+.col-body-max { grid-column: 1 / 15; }
+
+/*
+for main component
+ */
+//.col-1-7 { grid-column: 1 / 7; }
+//.col-1-9 { grid-column: 1 / 9; }
+//.col-1-13 { grid-column: 1 / 13; }
+//.col-2-12 { grid-column: 2 / 12; }
+//.col-9-13 { grid-column: 9 / 13; }
+//
+
+@for $i from $start through $end {
+  @for $j from ($i + 1) through $end {
+    .col-#{$i}-#{$j} {
+      grid-column: #{$i} / #{$j};
+    }
+  }
+}
+
+.row-1 { grid-row: span 1 }
+.row-start-margin { grid-row: 2 / 3}
+
+.row-1-2 { grid-row: 1 / 2 }
+.row-2-3 { grid-row: 2 / 3 }
+.row-3-4 { grid-row: 3 / 4 }
+.row-4-5 { grid-row: 4 / 5 }
+.row-5-6 { grid-row: 5 / 6 }
+.row-6-7 { grid-row: 6 / 7 }
+
+

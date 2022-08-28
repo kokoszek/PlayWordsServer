@@ -1,0 +1,99 @@
+@use '../colors';
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.main-frame {
+  grid-column: 1 / -1;
+  grid-row: 1 / 2;
+  overflow: hidden;
+  .main-bg-img {
+    background: url('../../../public/img/travel_bg.jpeg') no-repeat;
+    background-origin: border-box;
+    background-position-x: center;
+    background-size: cover;
+    width: 100vw;
+    height: 100vh;
+  }
+  .main-frame-header {
+    position: absolute;
+    left: 50vw;
+    top: 20%;
+    margin: 0 auto;
+    width: max-content;
+    font-family: inherit;
+    transform: translate(-50%, 0);
+    font-size: 3.6vw;
+    font-weight: 200;
+  }
+  .button-container {
+    bottom: 10rem;
+    cursor: pointer;
+    position: absolute;
+    transform: translate(-50%, 0);
+    left: 50%;
+    .btn {
+      display: block;
+      padding: 2rem 5rem;
+      background-color: colors.$grey;
+      color: colors.$main;
+      font-family: 'Montserrat';
+      font-size: 1.5rem;
+      border: 0;
+      border-radius: 50px;
+      cursor: pointer;
+    }
+    .btn--intro {
+      text-transform: uppercase;
+      transition: all .2s;
+      position: relative;
+    }
+    .btn--intro::after {
+      content: '';
+      display: inline-block;
+      height: 100%;
+      width: 100%;
+      border-radius: 100px;
+      background-color: colors.$grey;
+      z-index: -1;
+      position: absolute;
+      top: 0;
+      left: 0;
+      transition: all .4s;
+    }
+    .btn--intro:hover::after {
+      transform: scaleX(1.4) scaleY(1.4);
+      opacity: 0;
+    }
+    .btn--intro:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(colors.$grey, 0.3);
+    }
+    .btn--intro:active {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 10px rgba(colors.$grey, 0.3);
+    }
+  }
+}
+
+.open-navigation .hide {
+  opacity: 0.0;
+}
+
+
+//.dark-dimm {
+//  background-color: rgba(colors.$main, 0.2);
+//  width: 100%;
+//  height: 100%;
+//  grid-row: 1 / 4;
+//  grid-column: 1 / -1;
+//}

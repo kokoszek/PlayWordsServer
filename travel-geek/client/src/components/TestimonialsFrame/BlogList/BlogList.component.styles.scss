@@ -1,0 +1,29 @@
+@use '../../common';
+
+div.blog-list {
+  width: 100%;
+  display: grid;
+  @media screen and (min-width: common.$tablet-portrait){
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media screen and (min-width: common.$tablet-landscape){
+    grid-template-columns: repeat(3, 1fr);
+  }
+  @media screen and (min-width: common.$big-desktop){
+    grid-template-columns: repeat(4, 1fr);
+  }
+  gap: 1rem;
+  .my-masonry-grid {
+    //width: 80%;
+    //margin-left: 0px;
+  }
+  .my-masonry-grid_column:first-child {
+    //padding-left: 0px;
+  }
+}
+
+@media screen and(max-width: 900px){
+  div.blog-list {
+    grid-template-columns: (repeat(4, 1fr));
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "name": "client",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@apollo/client": "^3.6.0",
+    "@craco/craco": "^7.0.0-alpha.3",
+    "@emotion/react": "^11.9.3",
+    "@emotion/styled": "^11.9.3",
+    "@fortawesome/fontawesome-free": "^6.1.1",
+    "@fortawesome/fontawesome-svg-core": "^6.1.1",
+    "@fortawesome/free-regular-svg-icons": "^6.1.1",
+    "@fortawesome/free-solid-svg-icons": "^6.1.1",
+    "@fortawesome/react-fontawesome": "^0.2.0",
+    "@mui/lab": "^5.0.0-alpha.88",
+    "@mui/material": "^5.8.6",
+    "@testing-library/react": "^13.3.0",
+    "axios": "^0.16.2",
+    "craco": "^0.0.3",
+    "fontawesome-free": "^1.0.4",
+    "graphql": "0.13.0",
+    "graphql-tag": "^2.12.6",
+    "graphql-ws": "^5.9.0",
+    "http-proxy-middleware": "^2.0.6",
+    "js-cookie": "^3.0.1",
+    "materialize-css": "^1.0.0-rc.2",
+    "process": "^0.11.10",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-redux": "^8.0.2",
+    "react-router": "^6.3.0",
+    "react-router-dom": "^6.3.0",
+    "react-scripts": "^5.0.1"
+  },
+  "scripts": {
+    "sass": "sass src/components --watch",
+    "sass-help": "sass",
+    "start": "craco start",
+    "prod": "serve --ssl-cert ../cert/certificate.crt --ssl-key ../cert/private.key -p 8443 ./build/ &",
+    "build": "craco build",
+    "test": "craco test --env=jsdom --watch",
+    "eject": "react-scripts eject"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.18.9",
+    "@babel/preset-react": "^7.18.6",
+    "@babel/register": "^7.18.9",
+    "@faker-js/faker": "^7.3.0",
+    "@testing-library/jest-dom": "^5.16.4",
+    "@types/jest": "^28.1.6",
+    "@types/node": "^18.6.3",
+    "@types/react": "^18.0.15",
+    "@types/react-dom": "^18.0.6",
+    "jest": "^28.1.3",
+    "sass": "^1.53.0"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

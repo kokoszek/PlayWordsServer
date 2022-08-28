@@ -1,0 +1,42 @@
+# This file was generated based on ".graphqlconfig". Do not edit manually.
+
+schema {
+    query: query
+    mutation: Mutation
+    subscription: Subscription
+}
+
+type Blog {
+    _id: String
+    avgRate: Int
+    content: String
+    rateCount: Int
+    title: String
+    url: String
+    user: User
+}
+
+type Mutation {
+    addBlog(content: String!, title: String!, user: String!): Blog
+    deleteBlog(blogId: String!): Boolean
+    patchBlog(_id: String!, content: String, title: String, userId: String): Blog
+}
+
+type Subscription {
+    blogAdded: Blog
+    test: User
+}
+
+type User {
+    _id: String
+    blogs: [Blog]
+    displayName: String
+    googleId: String
+}
+
+type query {
+    blog(id: String): Blog
+    blogs: [Blog]
+    currentUser: User
+    user(googleId: String): User
+}

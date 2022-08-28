@@ -1,0 +1,59 @@
+@use "../colors";
+@use "../common";
+
+.testimonials-frame {
+  grid-row: 4 / span 1;
+  background-color: transparent;
+  color: colors.$grey;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-column: main-left / main-right;
+  padding: 8rem 0;
+  h1 {
+    font-family: 'League Gothic', sans-serif;
+    font-weight: normal;
+    font-size: 28px;
+    text-align: center;
+    border-bottom: 1px solid white;
+    color: black;
+    border-top-right-radius: 40px;
+    border-top-left-radius: 40px;
+    margin: 0;
+    padding-top: 15px;
+    padding-bottom: 10px;
+  }
+  .testimonials-section {
+    padding: 0rem 2rem;
+    display: grid;
+    @media screen and (min-width: common.$tablet-portrait){
+      grid-template-columns: 1fr;
+    }
+    @media screen and (min-width: common.$big-desktop){
+      grid-template-columns: 1fr 1fr;
+    }
+    gap: 4rem;
+    article {
+      margin-bottom: 4rem;
+      p {
+        font-size: 1.4rem;
+        line-height: 2.4rem;
+      }
+      header {
+        img {
+          border-radius: 100%;
+          width: 8rem;
+        }
+      }
+      footer {
+        font-size: 1.4rem;
+        color: colors.$light-grey;
+        &::before {
+          content: '- ';
+        }
+      }
+    }
+  }
+  .blog-list-section {
+  }
+}

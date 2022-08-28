@@ -1,0 +1,16 @@
+$big-desktop: 1000px;
+$tablet-landscape: 800px;
+$tablet-portrait: 600px;
+
+@mixin container {
+  margin: 0 auto;
+  @media screen and (min-width: $tablet-portrait) {
+    width: 60rem;
+  }
+  @media screen and (min-width: $tablet-landscape) {
+    width: 80rem;
+  }
+  @media screen and (min-width: $big-desktop) {
+    width: 110rem;
+  }
+}

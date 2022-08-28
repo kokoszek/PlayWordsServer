@@ -1,0 +1,181 @@
+@use '../colors';
+
+.sticky {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  z-index: 10000;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 0 20px !important;
+  transition-duration: 0.5s;
+  transition-property: background-color, color;
+  transition-timing-function: ease-in-out;
+}
+
+.sticky * {
+  color: colors.$main-light-color;
+  transition-duration: 0.5s;
+  transition-property: color;
+}
+
+.sticky a {
+  color: colors.$main-light-color !important;
+}
+
+.header-root-container {
+  grid-row: 1 / 2;
+  grid-column: 1 / -1;
+  height: 70px;
+  position: relative;
+  color: colors.$grey;
+  .menu-icon-div {
+    display: none;
+  }
+  .header-logo {
+    position: absolute;
+    left: 50vw;
+    top: 50%;
+    * {
+      margin: 0 0.2rem;
+    }
+    transform: translate(-50%, -50%);
+    font-size: 2.0rem;
+    span {
+
+    }
+  }
+  .navigation {
+    color: colors.$grey;
+    width: 100vw;
+    height: 100%;
+    li:hover {
+
+    }
+    .btn-nav  {
+      display: none;
+    }
+    ul {
+      padding-left: 0;
+      margin: 0rem 1rem;
+      height: 100%;
+      display: flex;
+      justify-content: left;
+      li {
+        font-size: 1.6rem;
+        display: flex;
+        align-items: center;
+        margin: 0 1rem;
+        cursor: pointer;
+        a {
+          color: inherit;
+        }
+        &:hover {
+          border-bottom: 2px solid colors.$grey;
+          margin-bottom: -2px;
+        }
+      }
+      li:last-child {
+        margin-left: auto;
+      }
+    }
+    div.auth-container {
+      transition: ease-in-out 0.2s;
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        span {
+
+        }
+        img {
+          width: 5rem;
+          border-radius: 50px;
+        }
+      }
+      a {
+        svg {
+          margin-left: 10px;
+        }
+      }
+    }
+    .auth-container.div:hover {
+
+    }
+  }
+}
+
+@media screen and (max-width: 768px){
+  .header-root-container {
+    /* hide by nav menu by default */
+    .navigation {
+      .btn-nav  {
+        display: block;
+      }
+      ul {
+        transform: translateX(105%);
+        transition: all 0.5s;
+        visibility: hidden;
+        opacity: 0;
+        pointer-events: none;
+      }
+      .btn-nav *[name="nav-bars"] {
+        display: block;
+      }
+      .btn-nav *[name="nav-cancel"] {
+        display: none;
+      }
+    }
+    .navigation {
+      ul {
+
+      }
+      transition: all 0.5s;
+      height: calc(100vh);
+      display: flex;
+      flex-direction: column;
+      .btn-nav {
+        height: 8rem;
+        align-self: end;
+        background-color: transparent;
+        border: 0;
+        margin-right: 1.8rem;
+        font-size: 2.0rem;
+        color: colors.$grey;
+        cursor: pointer;
+      }
+      ul {
+        flex-direction: column;
+        align-items: center;
+        justify-content: start;
+        gap: 0px;
+        background-image: linear-gradient(rgba(colors.$main, 0.5), colors.$main);
+        li {
+          height: 80px;
+          font-size: 20px;
+          a {
+          }
+        }
+        li:last-child {
+          margin-left: 0;
+        }
+      }
+    }
+  }
+  .open-navigation {
+    .navigation {
+      ul {
+        transform: translateX(0);
+        visibility: visible;
+        opacity: 1.0;
+        pointer-events: auto;
+      }
+      .btn-nav *[name="nav-bars"] {
+        display: none;
+      }
+      .btn-nav *[name="nav-cancel"] {
+        display: block;
+      }
+    }
+  }
+}

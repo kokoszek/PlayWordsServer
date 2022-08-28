@@ -1,0 +1,77 @@
+@use '../colors';
+@use '../common';
+
+.main-footer {
+  padding: 0 0px 0 0px;
+  grid-row: 8 / 9;
+  grid-column: 1 / -1;
+  background-color: #034970;
+  padding-bottom: 8rem;
+  border-top: 1px solid #176b80;
+  .rights-note:after {
+    content:" \00a9";
+  }
+  .main-footer-content {
+    @include common.container;
+    margin-top: 8rem;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+    color: colors.$dimmed-white;
+    section {
+      flex-basis: 0rem; // set all containers to width of 0 (to override default width)...
+      flex-grow: 1; // ...then flex proportionally
+      border: 0px solid red;
+      text-align: left;
+      padding: 0 10px;
+      header {
+        color: colors.$grey;
+        font-size: 18px;
+        font-family: 'Rubik', sans-serif;
+        font-weight: 300;
+      }
+      ul {
+        font-family: sans-serif;
+        font-size: 13px;
+        padding-inline-start: 0px;
+        list-style: none;
+        text-align: left;
+        li {
+          margin: 15px 0;
+          cursor: pointer;
+        }
+        li:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+    .logo {
+      img.logo-img {
+        position: relative;
+        margin-top: 18px;
+        width: 100px;
+      }
+      .rights-note {
+        color: grey;
+        font-size: 1.1rem;
+        padding-left: 5px;
+        margin-bottom: 5rem;
+        margin-top: 2rem;
+        font-family: sans-serif;
+        font-weight: 300;
+      }
+    }
+    .technology {
+
+    }
+    .social-media {
+
+    }
+    .team {
+
+    }
+    .solutions {
+
+    }
+  }
+}
