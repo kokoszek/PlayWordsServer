@@ -15,37 +15,50 @@ export default function WordItem(props: any) {
 
   const {
     word,
+    meaning,
     idx,
     showRemoveButtom,
     onInputChange,
     onRemoveClicked,
-    setExistingWord
+    setExistingWord,
+    unsetExistingWord
   } = props;
 
-  const [wordExists, setWordExists] = useState(false);
   console.log('skip: ', !!word.id)
   const {data, loading, error} = useQuery(WORD_EXISTS, {
     variables: {
       word: word.word
     },
     skip: !!word.id
-  })
-  console.log('word-item -> data: ', data);
-  const [showWordExistsHint, setShowWordExistsHint] = useState(false);
-  if(!loading && data?.wordExists) {
-    console.log('set existing word');
-    if(!showWordExistsHint) {
-      setShowWordExistsHint(true);
-    }
-    setExistingWord(data.wordExists);
+  });
+  function wordExistsInMeaning(): boolean {
+    return (
+      data?.wordExists.meanings
+        .map((el: any) => el.id)
+        .includes(meaning.id)
+    );
   }
+  useEffect(() => {
+    if(!loading && data?.wordExists) {
+      console.log('set existing word');
+      setExistingWord(data.wordExists);
+    } else {
+      if(unsetExistingWord) {
+        unsetExistingWord();
+      }
+    }
+  }, data?.wordExists);
   // useEffect(() => {
   //   console.log('data: ', data);
   // }, [word])
+  console.log('unsetExistingWord: ', unsetExistingWord)
+  console.log('word-item -> data: ', data);
+  console.log('word: ', word);
+  console.log('wordExistsInMeaning: ', wordExistsInMeaning());
 
   return (
     <li key={idx}>
-      { showWordExistsHint && <WordExistsHint/> }
+      { !wordExistsInMeaning() && data?.wordExists && <WordExistsHint/> }
       <input type='text' value={word.word}
              onChange={e => {
                onInputChange(e.target.value);

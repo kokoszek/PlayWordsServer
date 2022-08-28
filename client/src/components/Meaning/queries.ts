@@ -64,7 +64,9 @@ export const WORD_EXISTS = gql`
         wordExists(word: $word) {
             id
             word
-            origin
+            meanings {
+                id
+            }
         }
     }
 `;

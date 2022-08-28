@@ -16,6 +16,7 @@ export default function Words(props: any) {
                 return (
                   <WordItem
                     word={el}
+                    meaning={meaning}
                     idx={idx}
                     showRemoveButtom={true}
                     onInputChange={(value: any) => {
@@ -31,6 +32,14 @@ export default function Words(props: any) {
                     setExistingWord={(word: object) => {
                       setMeaning(produce(meaning, (draft: any) => {
                         draft.words_lang1[idx] = word;
+                      }))
+                    }}
+                    unsetExistingWord={() => {
+                      setMeaning(produce(meaning, (draft: any) => {
+                        if(draft.words_lang2[idx]) {
+                          draft.words_lang2[idx].id = undefined;
+                          draft.words_lang2[idx].meanings = undefined;
+                        }
                       }))
                     }}
                   />
@@ -53,6 +62,7 @@ export default function Words(props: any) {
                 return (
                   <WordItem
                     word={el}
+                    meaning={meaning}
                     idx={idx}
                     showRemoveButtom={true}
                     onInputChange={(value: any) => {
@@ -68,6 +78,14 @@ export default function Words(props: any) {
                     setExistingWord={(word: object) => {
                       setMeaning(produce(meaning, (draft: any) => {
                         draft.words_lang2[idx] = word;
+                      }))
+                    }}
+                    unsetExistingWord={() => {
+                      setMeaning(produce(meaning, (draft: any) => {
+                        if(draft.words_lang2[idx]) {
+                          draft.words_lang2[idx].id = undefined;
+                          draft.words_lang2[idx].meanings = undefined;
+                        }
                       }))
                     }}
                   />
