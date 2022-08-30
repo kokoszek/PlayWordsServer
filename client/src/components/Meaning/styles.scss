@@ -3,22 +3,31 @@
 .main-content {
   text-align: left;
   padding: 0 40px;
+
   label {
     display: block;
   }
+
   .meaning-content {
     & > * {
       margin-bottom: 30px;
     }
+
     & > label {
       margin-bottom: 0;
       display: inline-block;
       margin-right: 10px;
     }
+
+    .desc-text-area {
+      display: block;
+    }
+
     ul {
       li {
         position: relative;
         list-style: none;
+
         .word-exists-hint {
           position: absolute;
           left: -20px;
@@ -33,20 +42,24 @@
         }
       }
     }
+
     .words {
       display: grid;
       grid-template-columns: 1fr 1fr;
       border: 1px solid styles.$color1;
       border-radius: 10px;
       padding: 20px;
+
       .lang1 {
 
       }
+
       .lang2 {
 
       }
     }
   }
+
   footer {
     height: 40px;
   }

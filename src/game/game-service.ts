@@ -3,20 +3,22 @@ import { createRoomName } from './utils';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MeaningEntity } from '../meaning/meaning.entity';
 import { Repository } from 'typeorm';
+import { WordEntity } from '../word/word.entity';
 
 export type PlayerType = {
-  name: string,
-  score: number,
-  solvedWordsIds: number[],
-  gameAccepted: boolean
-}
+  name: string;
+  score: number;
+  solvedWordsIds: number[];
+  gameAccepted: boolean;
+};
 
 export type TaskType = {
-  word: MeaningEntity,
+  word: string;
+  word_desc: string;
   options: {
-    text: string
-  }[]
-}
+    text: string;
+  }[];
+};
 
 export function getRandomInt(min, max) {
   min = Math.ceil(min);
@@ -25,12 +27,12 @@ export function getRandomInt(min, max) {
 }
 
 export function getRandomIntExcept(min: number, max: number, except: number[]) {
-  while(true) {
+  while (true) {
     min = Math.ceil(min);
     max = Math.floor(max);
-    let result = Math.floor(Math.random() * (max - min + 1)) + min;
+    const result = Math.floor(Math.random() * (max - min + 1)) + min;
     console.log('randomized: ', result);
-    if(!except.includes(result)) {
+    if (!except.includes(result)) {
       return result;
     }
   }
@@ -38,72 +40,73 @@ export function getRandomIntExcept(min: number, max: number, except: number[]) {
 
 @Injectable()
 export default class GameService {
-
   constructor(
-    @InjectRepository(MeaningEntity)
-    private wordRepo: Repository<MeaningEntity>,
+    @InjectRepository(WordEntity)
+    private wordRepo: Repository<WordEntity>,
   ) {}
 
   private games: Record<
     string,
     {
-      player1?: PlayerType,
-      player2?: PlayerType,
-    }> = {};
+      player1?: PlayerType;
+      player2?: PlayerType;
+    }
+  > = {};
 
   gameId = 1;
 
   public createGame(player1: string, player2: string) {
-
     console.log('createGame');
     console.log('inmemory games: ', this.games);
-    let gameId = this.gameId++;
-    let roomName = createRoomName(gameId);
-    let newGame = {
+    const gameId = this.gameId++;
+    const roomName = createRoomName(gameId);
+    const newGame = {
       gameId: gameId,
       player1: {
         name: player1,
         score: 0,
         solvedWordsIds: [],
-        gameAccepted: false
+        gameAccepted: false,
       },
       player2: {
         name: player2,
         score: 0,
         solvedWordsIds: [],
-        gameAccepted: false
-      }
-    }
+        gameAccepted: false,
+      },
+    };
     this.games[roomName] = newGame;
     return newGame;
   }
 
   public acceptGame(playerName: string, gameId: number) {
-    if(this.isGameReady(gameId)) {
+    if (this.isGameReady(gameId)) {
       return;
     }
     const roomName = createRoomName(gameId);
-    if(this.games[roomName].player1.name === playerName) {
+    if (this.games[roomName].player1.name === playerName) {
       this.games[roomName].player1.gameAccepted = true;
     }
-    if(this.games[roomName].player2.name === playerName) {
+    if (this.games[roomName].player2.name === playerName) {
       this.games[roomName].player2.gameAccepted = true;
     }
   }
 
   public isGameReady(gameId: number): boolean {
     const roomName = createRoomName(gameId);
-    return !!this.games[roomName]?.player1.gameAccepted &&
-      !!this.games[roomName]?.player2.gameAccepted;
+    return (
+      !!this.games[roomName]?.player1.gameAccepted &&
+      !!this.games[roomName]?.player2.gameAccepted
+    );
   }
 
   public getPlayer(gameId: number, playerName: string) {
     const roomName = createRoomName(gameId);
     const game = this.games[roomName];
-    if(game.player1.name === playerName) {
+    if (game.player1.name === playerName) {
       return game.player1;
     }
-    if(game.player2.name === playerName) {
+    if (game.player2.name === playerName) {
       return game.player2;
     }
     return null;
@@ -113,11 +116,11 @@ export default class GameService {
 
   public isGameFinished(gameId: number) {
     const roomName = createRoomName(gameId);
-    if(this.games[roomName].player1.score === this.taskLimit) {
+    if (this.games[roomName].player1.score === this.taskLimit) {
       console.log('game-finished');
       return true;
     }
-    if(this.games[roomName].player2.score === this.taskLimit) {
+    if (this.games[roomName].player2.score === this.taskLimit) {
       console.log('game-finished');
       return true;
     }
@@ -126,29 +129,33 @@ export default class GameService {
 
   public async generateTask(forGameId: number): Promise<TaskType> {
     const roomName = createRoomName(forGameId);
-    const alreadyPlayedWordIds = this.games[roomName].player1.solvedWordsIds.concat(
-      this.games[roomName].player2.solvedWordsIds
+    const alreadyPlayedWordIds = this.games[
+      roomName
+    ].player1.solvedWordsIds.concat(
+      this.games[roomName].player2.solvedWordsIds,
     );
-    let result = await this.wordRepo
+    const result = await this.wordRepo
       .createQueryBuilder()
       .select('COUNT(*) as count')
       .getRawOne();
-    let count = Number.parseInt(result.count);
+    const count = Number.parseInt(result.count);
     let numberOfWordsToRandomize = 8;
-    let randomizedWords: MeaningEntity[] = [];
-    while(numberOfWordsToRandomize--) {
+    const randomizedWords: MeaningEntity[] = [];
+    while (numberOfWordsToRandomize--) {
       let randomizedWord: MeaningEntity;
-      while(true) {
-        let randomInt = getRandomInt(0, count - 1);
+      while (true) {
+        const randomInt = getRandomInt(0, count - 1);
         randomizedWord = await this.wordRepo
           .createQueryBuilder()
           .orderBy('lang_english', 'ASC')
           .limit(1)
           .offset(randomInt)
           .getOne();
-        if(!alreadyPlayedWordIds
-          .concat(randomizedWords.map(el => el.id))
-          .includes(randomizedWord.id)) {
+        if (
+          !alreadyPlayedWordIds
+            .concat(randomizedWords.map((el) => el.id))
+            .includes(randomizedWord.id)
+        ) {
           break;
         }
       }
@@ -156,9 +163,9 @@ export default class GameService {
     }
     return {
       word: randomizedWords[getRandomInt(0, 7)],
-      options: randomizedWords.map(word => ({
-        text: ''
-      }))
+      options: randomizedWords.map((word) => ({
+        text: '',
+      })),
     };
   }
 
@@ -166,5 +173,4 @@ export default class GameService {
     //return this.tasks.find(task => task.id === taskId)?.solution === solution;
     return true;
   }
-
 }

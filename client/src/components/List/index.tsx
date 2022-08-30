@@ -6,34 +6,37 @@ import './styles.scss';
 
 export default function List() {
   const [searchText, setSearchText] = useState<string>('');
-  const {data, loading, error } = useQuery(GET_WORDS, {
+  const { data, loading, error } = useQuery(GET_WORDS, {
     variables: {
-      search: searchText
-    }
-  })
-  console.log('list data: ', data);
+      search: searchText,
+    },
+  });
   const entityCtx = useContext<any>(ChosenEntityContext);
   return (
-    <div className='search-list'>
-      <label htmlFor='search'>Search:</label>
-      <input id='search' value={searchText}
-             onChange={(e) => setSearchText(e.target.value)}  />
+    <div className="search-list">
+      <label htmlFor="search">Search:</label>
+      <input
+        id="search"
+        value={searchText}
+        onChange={(e) => setSearchText(e.target.value)}
+      />
       <ul>
-        {
-          data?.searchWord.map((el: any) => {
-            return (
-              <li key={el.id} onClick={() => {
-                if(el.meanings.length > 1) {
+        {data?.searchWord.map((el: any) => {
+          return (
+            <li
+              key={el.id}
+              onClick={() => {
+                if (el.meanings.length > 1) {
                   entityCtx.setWord(el);
                 } else {
                   entityCtx.setMeaning(el.meanings[0]);
                 }
-              }}>
-                {el.word}
-              </li>
-            )
-          })
-        }
+              }}
+            >
+              {el.word}
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

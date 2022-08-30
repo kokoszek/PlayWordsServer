@@ -10,7 +10,7 @@ const config = {
   "type": "mysql",
   "host": "localhost",
   "port": 3306,
-  "username": "app",
+  "username": "root",
   "password": "password",
   "database": "playwords",
   "entities": [

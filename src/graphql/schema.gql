@@ -5,7 +5,7 @@
 type MeaningType {
   category: String
   id: Int!
-  meaning_lang1_desc: String!
+  meaning_lang1_desc: String
   meaning_lang1_language: String!
   meaning_lang2_desc: String
   meaning_lang2_language: String!
@@ -23,7 +23,7 @@ type Mutation {
 
 input NewMeaningInput {
   category: String
-  meaning_lang1_desc: String!
+  meaning_lang1_desc: String
   meaning_lang1_language: String!
   meaning_lang2_desc: String
   meaning_lang2_language: String!
