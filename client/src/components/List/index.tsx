@@ -27,6 +27,7 @@ export default function List() {
               key={el.id}
               onClick={() => {
                 if (el.meanings.length > 1) {
+                  console.log('THIS');
                   entityCtx.setWord(el);
                 } else {
                   entityCtx.setMeaning(el.meanings[0]);

@@ -8,13 +8,14 @@ import { WordEntity } from '../word/word.entity';
 export type PlayerType = {
   name: string;
   score: number;
-  solvedWordsIds: number[];
+  solvedMeaningIds: number[];
   gameAccepted: boolean;
 };
 
 export type TaskType = {
   word: string;
   word_desc: string;
+  meaningId: number;
   options: {
     text: string;
   }[];
@@ -43,6 +44,8 @@ export default class GameService {
   constructor(
     @InjectRepository(WordEntity)
     private wordRepo: Repository<WordEntity>,
+    @InjectRepository(MeaningEntity)
+    private meaningRepo: Repository<MeaningEntity>,
   ) {}
 
   private games: Record<
@@ -65,13 +68,13 @@ export default class GameService {
       player1: {
         name: player1,
         score: 0,
-        solvedWordsIds: [],
+        solvedMeaningIds: [],
         gameAccepted: false,
       },
       player2: {
         name: player2,
         score: 0,
-        solvedWordsIds: [],
+        solvedMeaningIds: [],
         gameAccepted: false,
       },
     };
@@ -129,44 +132,76 @@ export default class GameService {
 
   public async generateTask(forGameId: number): Promise<TaskType> {
     const roomName = createRoomName(forGameId);
-    const alreadyPlayedWordIds = this.games[
+    const alreadyPlayedMeaningIds = this.games[
       roomName
-    ].player1.solvedWordsIds.concat(
-      this.games[roomName].player2.solvedWordsIds,
+    ].player1.solvedMeaningIds.concat(
+      this.games[roomName].player2.solvedMeaningIds,
     );
-    const result = await this.wordRepo
+    console.log();
+    const result = await this.meaningRepo
       .createQueryBuilder()
       .select('COUNT(*) as count')
       .getRawOne();
     const count = Number.parseInt(result.count);
-    let numberOfWordsToRandomize = 8;
-    const randomizedWords: MeaningEntity[] = [];
-    while (numberOfWordsToRandomize--) {
-      let randomizedWord: MeaningEntity;
+    console.log('total meaning count : ', count);
+    const numberOfWordsToRandomize = 2;
+    let counter = numberOfWordsToRandomize;
+    const randomizedMeanings: MeaningEntity[] = [];
+    while (counter--) {
+      let randomizedMeaning: MeaningEntity;
       while (true) {
         const randomInt = getRandomInt(0, count - 1);
-        randomizedWord = await this.wordRepo
-          .createQueryBuilder()
-          .orderBy('lang_english', 'ASC')
-          .limit(1)
-          .offset(randomInt)
-          .getOne();
+        console.log('randomInt: ', randomInt);
+        randomizedMeaning = (
+          await this.meaningRepo
+            .createQueryBuilder('meaning')
+            .orderBy('meaning.id', 'ASC')
+            .leftJoinAndSelect('meaning.words', 'words')
+            .skip(randomInt)
+            .take(1)
+            .getMany()
+        )[0];
+        console.log('rand meaning: ', JSON.stringify(randomizedMeaning));
         if (
-          !alreadyPlayedWordIds
-            .concat(randomizedWords.map((el) => el.id))
-            .includes(randomizedWord.id)
+          !alreadyPlayedMeaningIds
+            .concat(randomizedMeanings.map((el) => el.id))
+            .includes(randomizedMeaning.id)
         ) {
           break;
         }
       }
-      randomizedWords.push(randomizedWord);
+      randomizedMeanings.push(randomizedMeaning);
     }
-    return {
-      word: randomizedWords[getRandomInt(0, 7)],
-      options: randomizedWords.map((word) => ({
-        text: '',
+    const randomizedMeaningToPlay =
+      randomizedMeanings[getRandomInt(0, numberOfWordsToRandomize - 1)];
+    const randomizedPolishWord: WordEntity = randomizeElement(
+      randomizedMeaningToPlay.words.filter((el) => el.lang === 'pl'),
+    );
+
+    function randomizeElement<T>(arr: T[]): T | null {
+      if (arr.length === 0) {
+        return null;
+      }
+      return arr[getRandomInt(0, arr.length - 1)];
+    }
+
+    // const phraseToShow =
+    //   randomizedPolishWord?.word || randomizedMeaningToPlay.meaning_lang1_desc;
+    console.log('randomizedMeanings: ', randomizedMeanings);
+
+    const ret = {
+      word:
+        randomizedPolishWord?.word ||
+        randomizedMeaningToPlay.meaning_lang1_desc,
+      word_desc: randomizedMeaningToPlay.meaning_lang1_desc,
+      meaningId: randomizedMeaningToPlay.id,
+      options: randomizedMeanings.map((meaning) => ({
+        text: randomizeElement(meaning.words.filter((el) => el.lang === 'en'))
+          .word,
       })),
     };
+    console.log('ret: ', ret);
+    return ret;
   }
 
   public checkTaskSolution(taskId: number, solution: string): boolean {

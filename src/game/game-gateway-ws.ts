@@ -13,6 +13,7 @@ import { createRoomName } from './utils';
 import { MeaningEntity } from '../meaning/meaning.entity';
 import { Args, Mutation } from '@nestjs/graphql';
 import { GraphQLString } from 'graphql';
+import { WordEntity } from '../word/word.entity';
 
 const MultiSemaphore = require('redis-semaphore').MultiSemaphore;
 const Redis = require('ioredis');
@@ -63,7 +64,7 @@ export default class GameGatewayWs implements OnGatewayInit {
             gameId: game.gameId,
           });
         }
-      }, 5000);
+      }, 2000);
     }, 0);
   }
 
@@ -155,21 +156,24 @@ export default class GameGatewayWs implements OnGatewayInit {
     client: Socket,
     data: {
       gameId: number;
-      word: MeaningEntity;
+      meaningId: number;
+      wordId: number;
       solution: string;
       playerName: string;
       opponentName: string;
     },
   ) {
     console.log('data: ', data);
-    const { playerName, opponentName, word, solution, gameId } = data;
+    const { playerName, opponentName, solution, gameId } = data;
     const solved = true;
     const opponent = this.gameService.getPlayer(data.gameId, data.opponentName);
     const me = this.gameService.getPlayer(data.gameId, data.playerName);
     const roomName = createRoomName(data.gameId);
 
     function hasOpponentAlreadySolvedThisTask() {
-      return !!opponent.solvedWordsIds.find((wordId) => wordId == word.id);
+      return !!opponent.solvedMeaningIds.find(
+        (meaningId) => meaningId === data.meaningId,
+      );
     }
 
     if (hasOpponentAlreadySolvedThisTask()) {
@@ -182,7 +186,7 @@ export default class GameGatewayWs implements OnGatewayInit {
       );
     } else {
       if (solved) {
-        me.solvedWordsIds.push(word.id);
+        me.solvedMeaningIds.push(data.meaningId);
         me.score += 1;
         if (this.gameService.isGameFinished(gameId)) {
           console.log('game is finished');
