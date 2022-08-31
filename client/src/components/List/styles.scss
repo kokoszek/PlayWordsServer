@@ -1,17 +1,31 @@
 
 .search-list {
+  display: flex;
+  flex-direction: column;
 
-  overflow: scroll;
+  label {
+    flex-basis: 1rem;
+  }
+
+  input {
+    flex-basis: 1rem;
+  }
+
   ul {
+    overflow: scroll;
+    flex-basis: calc(100vh - 50px - 7rem);
+
     li {
       height: 30px;
       border-bottom: 1px solid gainsboro;
       list-style: none;
       cursor: pointer;
     }
+
     li:first-child {
       border-top: 1px solid gainsboro;
     }
+
     li:hover {
       background-color: #f6f6f6;
     }

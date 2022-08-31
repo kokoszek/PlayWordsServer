@@ -60,7 +60,7 @@ export default function WordItem(props: any) {
 
   return (
     <li key={idx}>
-      {!wordExistsInMeaning() && <WordExistsHint />}
+      {!wordExistsInMeaning() && !!word.word && <WordExistsHint />}
       <input
         type="text"
         value={word.word}

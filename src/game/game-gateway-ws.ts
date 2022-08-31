@@ -157,7 +157,6 @@ export default class GameGatewayWs implements OnGatewayInit {
     data: {
       gameId: number;
       meaningId: number;
-      wordId: number;
       solution: string;
       playerName: string;
       opponentName: string;
@@ -165,7 +164,7 @@ export default class GameGatewayWs implements OnGatewayInit {
   ) {
     console.log('data: ', data);
     const { playerName, opponentName, solution, gameId } = data;
-    const solved = true;
+    const solved = solution;
     const opponent = this.gameService.getPlayer(data.gameId, data.opponentName);
     const me = this.gameService.getPlayer(data.gameId, data.playerName);
     const roomName = createRoomName(data.gameId);
