@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { createRoomName } from './utils';
-import { InjectRepository } from '@nestjs/typeorm';
-import { MeaningEntity } from '../meaning/meaning.entity';
-import { Repository } from 'typeorm';
-import { WordEntity } from '../word/word.entity';
+import { Injectable } from "@nestjs/common";
+import { createRoomName } from "./utils";
+import { InjectRepository } from "@nestjs/typeorm";
+import { MeaningEntity } from "../meaning/meaning.entity";
+import { Repository } from "typeorm";
+import { WordEntity } from "../word/word.entity";
 
 export type PlayerType = {
   name: string;
@@ -16,8 +16,9 @@ export type TaskType = {
   word: string;
   word_desc: string;
   meaningId: number;
-  options: {
-    text: string;
+  wordOptions: {
+    wordId: number;
+    word: string;
   }[];
 };
 
@@ -32,7 +33,6 @@ export function getRandomIntExcept(min: number, max: number, except: number[]) {
     min = Math.ceil(min);
     max = Math.floor(max);
     const result = Math.floor(Math.random() * (max - min + 1)) + min;
-    console.log('randomized: ', result);
     if (!except.includes(result)) {
       return result;
     }
@@ -45,38 +45,37 @@ export default class GameService {
     @InjectRepository(WordEntity)
     private wordRepo: Repository<WordEntity>,
     @InjectRepository(MeaningEntity)
-    private meaningRepo: Repository<MeaningEntity>,
-  ) {}
+    private meaningRepo: Repository<MeaningEntity>
+  ) {
+  }
 
-  private games: Record<
-    string,
+  private games: Record<string,
     {
       player1?: PlayerType;
       player2?: PlayerType;
-    }
-  > = {};
+    }> = {};
 
   gameId = 1;
 
   public createGame(player1: string, player2: string) {
-    console.log('createGame');
-    console.log('inmemory games: ', this.games);
     const gameId = this.gameId++;
     const roomName = createRoomName(gameId);
+    console.log("createGame with roomName: ", roomName);
+    console.log("inmemory games: ", this.games);
     const newGame = {
       gameId: gameId,
       player1: {
         name: player1,
         score: 0,
         solvedMeaningIds: [],
-        gameAccepted: false,
+        gameAccepted: false
       },
       player2: {
         name: player2,
         score: 0,
         solvedMeaningIds: [],
-        gameAccepted: false,
-      },
+        gameAccepted: false
+      }
     };
     this.games[roomName] = newGame;
     return newGame;
@@ -120,11 +119,11 @@ export default class GameService {
   public isGameFinished(gameId: number) {
     const roomName = createRoomName(gameId);
     if (this.games[roomName].player1.score === this.taskLimit) {
-      console.log('game-finished');
+      console.log("game-finished");
       return true;
     }
     if (this.games[roomName].player2.score === this.taskLimit) {
-      console.log('game-finished');
+      console.log("game-finished");
       return true;
     }
     return false;
@@ -134,34 +133,37 @@ export default class GameService {
     const roomName = createRoomName(forGameId);
     const alreadyPlayedMeaningIds = this.games[
       roomName
-    ].player1.solvedMeaningIds.concat(
-      this.games[roomName].player2.solvedMeaningIds,
+      ].player1.solvedMeaningIds.concat(
+      this.games[roomName].player2.solvedMeaningIds
     );
     console.log();
     const result = await this.meaningRepo
       .createQueryBuilder()
-      .select('COUNT(*) as count')
+      .select("COUNT(*) as count")
       .getRawOne();
     const count = Number.parseInt(result.count);
-    console.log('total meaning count : ', count);
-    const numberOfWordsToRandomize = 2;
+    console.log("total meaning count : ", count);
+    const numberOfWordsToRandomize = 8;
     let counter = numberOfWordsToRandomize;
     const randomizedMeanings: MeaningEntity[] = [];
     while (counter--) {
       let randomizedMeaning: MeaningEntity;
       while (true) {
         const randomInt = getRandomInt(0, count - 1);
-        console.log('randomInt: ', randomInt);
+        console.log("randomInt: ", randomInt);
         randomizedMeaning = (
           await this.meaningRepo
-            .createQueryBuilder('meaning')
-            .orderBy('meaning.id', 'ASC')
-            .leftJoinAndSelect('meaning.words', 'words')
-            .skip(randomInt)
-            .take(1)
+            .createQueryBuilder("meaning")
+            .orderBy("meaning.id", "ASC")
+            .offset(randomInt)
+            .limit(1)
             .getMany()
         )[0];
-        console.log('rand meaning: ', JSON.stringify(randomizedMeaning));
+        console.log("rand meaning: ", JSON.stringify(randomizedMeaning));
+        console.log(
+          "list of meaning ids: ",
+          alreadyPlayedMeaningIds.concat(randomizedMeanings.map((el) => el.id))
+        );
         if (
           !alreadyPlayedMeaningIds
             .concat(randomizedMeanings.map((el) => el.id))
@@ -170,12 +172,17 @@ export default class GameService {
           break;
         }
       }
+      randomizedMeaning = await this.meaningRepo
+        .createQueryBuilder("meaning")
+        .leftJoinAndSelect("meaning.words", "words")
+        .where({ id: randomizedMeaning.id })
+        .getOne();
       randomizedMeanings.push(randomizedMeaning);
     }
     const randomizedMeaningToPlay =
       randomizedMeanings[getRandomInt(0, numberOfWordsToRandomize - 1)];
     const randomizedPolishWord: WordEntity = randomizeElement(
-      randomizedMeaningToPlay.words.filter((el) => el.lang === 'pl'),
+      randomizedMeaningToPlay.words.filter((el) => el.lang === "pl")
     );
 
     function randomizeElement<T>(arr: T[]): T | null {
@@ -187,25 +194,38 @@ export default class GameService {
 
     // const phraseToShow =
     //   randomizedPolishWord?.word || randomizedMeaningToPlay.meaning_lang1_desc;
-    console.log('randomizedMeanings: ', randomizedMeanings);
 
     const ret = {
       word:
-        randomizedPolishWord?.word ||
-        randomizedMeaningToPlay.meaning_lang1_desc,
+        randomizedPolishWord?.word || // if no word in native language found...
+        randomizedMeaningToPlay.meaning_lang1_desc, // ...apply meaning description
       word_desc: randomizedMeaningToPlay.meaning_lang1_desc,
       meaningId: randomizedMeaningToPlay.id,
-      options: randomizedMeanings.map((meaning) => ({
-        text: randomizeElement(meaning.words.filter((el) => el.lang === 'en'))
-          .word,
-      })),
+      wordOptions: randomizedMeanings.map((meaning) => {
+        const randomizedWord: WordEntity = randomizeElement(
+          meaning.words.filter((el) => el.lang === "en")
+        );
+        return {
+          wordId: randomizedWord.id,
+          word: randomizedWord.word
+        };
+      })
     };
-    console.log('ret: ', ret);
     return ret;
   }
 
-  public checkTaskSolution(taskId: number, solution: string): boolean {
-    //return this.tasks.find(task => task.id === taskId)?.solution === solution;
-    return true;
+  public async checkTaskSolution(
+    meaningId: number,
+    wordIdSolution: number,
+    nativeLang: "pl" | "en" = "pl"
+  ): Promise<boolean> {
+    const meaning = await this.meaningRepo
+      .createQueryBuilder("meaning")
+      .innerJoinAndSelect("meaning.words", "words")
+      .where({ id: meaningId })
+      .getOne();
+    return meaning.words
+      .filter((word) => word.lang !== nativeLang)
+      .some((word) => word.id === wordIdSolution);
   }
 }
