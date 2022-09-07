@@ -1,18 +1,18 @@
-import { useContext, useEffect, useState } from 'react';
-import { useMutation, useQuery } from '@apollo/client';
+import { useContext, useEffect, useState } from "react";
+import { useMutation, useQuery } from "@apollo/client";
 import {
   CREATE_MEANING,
   GET_MEANING,
   UPDATE_MEANING,
-  DELETE_MEANING,
-} from './queries';
-import { ChosenEntityContext } from '../../contexts/chosen-entity';
-import { GET_MEANINGS, GET_WORDS } from '../List/queries';
-import './styles.scss';
-import produce from 'immer';
-import _ from 'lodash';
-import { newWord, newMeaning } from './utils';
-import Words from './words';
+  DELETE_MEANING
+} from "./queries";
+import { ChosenEntityContext } from "../../contexts/chosen-entity";
+import { GET_MEANINGS, GET_WORDS } from "../List/queries";
+import "./styles.scss";
+import produce from "immer";
+import _ from "lodash";
+import { newWord, newMeaning } from "./utils";
+import Words from "./words";
 
 function recursive(obj: any, func: any) {
   for (let key in obj) {
@@ -21,7 +21,7 @@ function recursive(obj: any, func: any) {
         recursive(el, func);
       });
     } else {
-      if (typeof obj[key] === 'object') {
+      if (typeof obj[key] === "object") {
         recursive(obj[key], func);
       } else {
         func(obj, key);
@@ -41,30 +41,33 @@ export default function Meaning() {
       !mutateObjDelete.loading &&
       mutateObjDelete.data.deleteMeaning
     ) {
+      console.log("set new meaning");
       setMeaning(newMeaning());
     }
   }, [mutateObjDelete.called, mutateObjDelete.loading]);
 
   useEffect(() => {
     if (mutateObjCreate.data) {
+      console.log("mutate obj create");
       setMeaning(mutateObjCreate.data.createMeaning);
     }
   }, [mutateObjCreate.loading]);
 
   useEffect(() => {
     if (mutateObjUpdate.data) {
+      console.log("mutate obj update");
       setMeaning(mutateObjUpdate.data.upsertMeaning);
     }
   }, [mutateObjUpdate.loading]);
 
-  useEffect(() => {
-    setMeaning(newMeaning());
-  }, []);
+  // useEffect(() => {
+  //   setMeaning(newMeaning());
+  // }, []);
 
   return (
     <div className="meaning-content">
       <label htmlFor="meaning-id">id</label>
-      <input id="meaning-id" disabled value={meaning?.id || '-'} />
+      <input id="meaning-id" disabled value={meaning?.id || "-"} />
       <Words setMeaning={setMeaning} meaning={meaning} />
       <label htmlFor="meaning">
         Opis znaczenia, wyjaśnienie, doprecyzowanie
@@ -72,12 +75,12 @@ export default function Meaning() {
       <textarea
         id="meaning"
         className="desc-text-area"
-        value={meaning?.meaning_lang1_desc || ''}
+        value={meaning?.meaning_lang1_desc || ""}
         onChange={(e) =>
           setMeaning(
             produce(meaning, (draft: any) => {
               draft.meaning_lang1_desc = e.target.value;
-            }),
+            })
           )
         }
       />
@@ -94,9 +97,9 @@ export default function Meaning() {
             onClick={async () => {
               await deleteMeaning({
                 variables: {
-                  meaningId: meaning.id,
+                  meaningId: meaning.id
                 },
-                refetchQueries: [GET_WORDS],
+                refetchQueries: [GET_WORDS]
               });
             }}
           >
@@ -107,28 +110,28 @@ export default function Meaning() {
           onClick={async () => {
             let copy = _.cloneDeep(meaning);
             recursive(copy, (obj: any, key: string) => {
-              if (key === '__typename') {
-                obj['__typename'] = undefined;
+              if (key === "__typename") {
+                obj["__typename"] = undefined;
               }
-              if (key === 'meaning_lang1_desc') {
-                if (!obj['meaning_lang1_desc']) {
-                  obj['meaning_lang1_desc'] = null;
+              if (key === "meaning_lang1_desc") {
+                if (!obj["meaning_lang1_desc"]) {
+                  obj["meaning_lang1_desc"] = null;
                 }
               }
             });
             if (meaning.id) {
               await updateMeaning({
                 variables: {
-                  meaningInput: copy,
+                  meaningInput: copy
                 },
-                refetchQueries: [GET_WORDS],
+                refetchQueries: [GET_WORDS]
               });
             } else {
               await createMeaning({
                 variables: {
-                  meaningInput: copy,
+                  meaningInput: copy
                 },
-                refetchQueries: [GET_WORDS],
+                refetchQueries: [GET_WORDS]
               });
             }
           }}

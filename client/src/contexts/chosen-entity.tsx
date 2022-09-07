@@ -1,5 +1,5 @@
-import React from 'react';
-import {createContext, useReducer, useState} from "react";
+import React from "react";
+import { createContext, useReducer, useState } from "react";
 
 // export type ChosenEntityContextType = {
 //   meaning: Partial<MeaningInputNew> | null,
@@ -10,12 +10,14 @@ import {createContext, useReducer, useState} from "react";
 
 export const ChosenEntityContext = createContext<any>({
   meaning: null,
-  setMeaning: () => {},
+  setMeaning: () => {
+  },
   word: null,
-  setWord: () => {},
+  setWord: () => {
+  }
 });
 
-export const ChosenEntityContextProvider = ({children}: any) => {
+export const ChosenEntityContextProvider = ({ children }: any) => {
 
   // const [meaning, setMeaning] = useState<Partial<MeaningInputNew> | null>({
   //   meaning_lang1_desc: '',
@@ -29,14 +31,16 @@ export const ChosenEntityContextProvider = ({children}: any) => {
     <ChosenEntityContext.Provider value={{
       meaning,
       setMeaning: (newMeaning: any) => {
-        setMeaning(newMeaning)
+        setWord(null);
+        setMeaning(newMeaning);
       },
       word,
       setWord: (newWord: any) => {
-        setWord(newWord)
-      },
+        setMeaning(null);
+        setWord(newWord);
+      }
     }}>
-      { children }
+      {children}
     </ChosenEntityContext.Provider>
   );
-}
+};

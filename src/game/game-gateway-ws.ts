@@ -88,7 +88,7 @@ export default class GameGatewayWs implements OnGatewayInit {
       playerName: string;
     }
   ) {
-    console.log(data.playerName + " started finding a game");
+    console.log(data.playerName + " started to find a game");
     let allList: string[] = await redis.lrange("findMatchQueue", 0, -1);
     console.log("allList: ", allList);
     if (allList.some(el => el === data.playerName)) {
