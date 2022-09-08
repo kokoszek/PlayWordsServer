@@ -6,22 +6,25 @@ import {
   ManyToMany,
   JoinTable,
   BeforeInsert,
-  AfterInsert, BeforeUpdate, AfterUpdate,
-} from 'typeorm';
-import { WordEntity } from '../word/word.entity';
-import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
-import { GraphQLInt, GraphQLString } from 'graphql';
-import { RequestContext } from 'nestjs-request-context';
-import { Request } from 'express';
+  AfterInsert, BeforeUpdate, AfterUpdate
+} from "typeorm";
+import { WordEntity } from "../word/word.entity";
+import { Field, InputType, Int, ObjectType } from "@nestjs/graphql";
+import { GraphQLInt, GraphQLString } from "graphql";
+import { RequestContext } from "nestjs-request-context";
+import { Request } from "express";
 
-export type LangType = 'pl' | 'en'
-export type PartOfSpeechType = 'verb' | 'noun' | 'adj';
-export type CategoryType = 'common' | 'colors';
+export type LangType = "pl" | "en"
+export const PartOfSpeechArray = ["verb", "phrasal verb", "noun", "adj"] as const;
+export const CategoryArray = ["general", "colors", "food", "law", "office"];
+
+export type PartOfSpeechType = typeof PartOfSpeechArray[number];
+export type CategoryType = typeof CategoryArray[number];
 
 declare global {
   namespace Express {
     interface Request {
-      wordIdsBeforeSave: number[]
+      wordIdsBeforeSave: number[];
     }
   }
 }
@@ -36,16 +39,16 @@ export class MeaningEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: true, })
+  @Column({ nullable: true })
   meaning_lang1_desc: string;
 
   @Column({ nullable: true })
   meaning_lang1_language: LangType;
 
-  @Column({ nullable: true, })
+  @Column({ nullable: true })
   meaning_lang2_desc: string;
 
-  @Column({ nullable: true, })
+  @Column({ nullable: true })
   meaning_lang2_language: LangType;
 
   @Column({
@@ -55,7 +58,7 @@ export class MeaningEntity {
 
   @Column({
     nullable: false,
-    default: 'common'
+    default: "common"
   })
   @Field(type => GraphQLString)
   category: CategoryType;
@@ -68,7 +71,7 @@ export class MeaningEntity {
     }
   )
   @JoinTable({
-    name: 'meaning_word_jointable'
+    name: "meaning_word_jointable"
   })
   words: WordEntity[];
 }

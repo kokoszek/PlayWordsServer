@@ -4,7 +4,7 @@ import {
   CREATE_MEANING,
   GET_MEANING,
   UPDATE_MEANING,
-  DELETE_MEANING
+  DELETE_MEANING, GET_PARTS_OF_SPEECH, GET_CATEGORIES
 } from "./queries";
 import { ChosenEntityContext } from "../../contexts/chosen-entity";
 import { GET_MEANINGS, GET_WORDS } from "../List/queries";
@@ -13,6 +13,7 @@ import produce from "immer";
 import _ from "lodash";
 import { newWord, newMeaning } from "./utils";
 import Words from "./words";
+import Select from "react-select";
 
 function recursive(obj: any, func: any) {
   for (let key in obj) {
@@ -35,6 +36,15 @@ export default function Meaning() {
   const [updateMeaning, mutateObjUpdate] = useMutation(UPDATE_MEANING);
   const [deleteMeaning, mutateObjDelete] = useMutation(DELETE_MEANING);
   const { meaning, setMeaning } = useContext<any>(ChosenEntityContext);
+
+  const { data, loading, error } = useQuery(GET_PARTS_OF_SPEECH);
+
+  const {
+    data: categoryData,
+    loading: categoryLoading,
+    error: categoryError
+  } = useQuery(GET_CATEGORIES);
+
   useEffect(() => {
     if (
       mutateObjDelete.called &&
@@ -64,10 +74,48 @@ export default function Meaning() {
   //   setMeaning(newMeaning());
   // }, []);
 
+  console.log("category data: ", categoryData);
   return (
     <div className="meaning-content">
-      <label htmlFor="meaning-id">id</label>
-      <input id="meaning-id" disabled value={meaning?.id || "-"} />
+      <div className="group">
+        <label htmlFor="meaning-id">id</label>
+        <input id="meaning-id" disabled value={meaning?.id || "-"} />
+      </div>
+      <div className="group">
+        <label htmlFor="select-part-of-speech">część mowy</label>
+        <Select id="select-part-of-speech"
+                options={data?.getPartsOfSpeech.map((el: string) => ({
+                  value: el, label: el
+                }))}
+                value={{ value: meaning.partOfSpeech, label: meaning.partOfSpeech }}
+                onChange={(event: any) => {
+                  console.log("onChange->value: ", event.value);
+                  setMeaning(
+                    produce(meaning, (draft: any) => {
+                      draft.partOfSpeech = event.value;
+                    })
+                  );
+                }}
+        />
+      </div>
+      <div className="group">
+        <label htmlFor="select-category">kategoria</label>
+        <Select id="select-category"
+                options={categoryData?.getCategories?.map((el: string) => ({
+                  value: el, label: el
+                }))}
+                value={{ value: meaning.category, label: meaning.category }}
+                onChange={(event: any) => {
+                  console.log("onChange->value: ", event.value);
+                  setMeaning(
+                    produce(meaning, (draft: any) => {
+                      draft.category = event.value;
+                    })
+                  );
+                }}
+        />
+      </div>
+
       <Words setMeaning={setMeaning} meaning={meaning} />
       <label htmlFor="meaning">
         Opis znaczenia, wyjaśnienie, doprecyzowanie

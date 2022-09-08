@@ -9,7 +9,7 @@ type MeaningType {
   meaning_lang1_language: String!
   meaning_lang2_desc: String
   meaning_lang2_language: String!
-  partOfSpeech: String!
+  partOfSpeech: String
   words_lang1: [WordType!]!
   words_lang2: [WordType!]!
 }
@@ -33,7 +33,9 @@ input NewMeaningInput {
 }
 
 type Query {
+  getCategories: [String!]!
   getMeaning(id: Int!): MeaningType!
+  getPartsOfSpeech: [String!]!
   getTask: TaskModel!
   searchMeaning(search: String!): [MeaningType!]!
   searchWord(search: String!): [WordType!]!

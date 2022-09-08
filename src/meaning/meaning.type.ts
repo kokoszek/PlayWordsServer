@@ -1,18 +1,17 @@
-import { WordEntity } from 'src/word/word.entity';
+import { WordEntity } from "src/word/word.entity";
 import {
   CategoryType,
   LangType,
   MeaningEntity,
-  PartOfSpeechType,
-} from './meaning.entity';
-import { Field, ObjectType } from '@nestjs/graphql';
-import { GraphQLInt, GraphQLString } from 'graphql';
-import { WordType } from '../word/word.type';
+  PartOfSpeechType
+} from "./meaning.entity";
+import { Field, ObjectType } from "@nestjs/graphql";
+import { GraphQLInt, GraphQLString } from "graphql";
+import { WordType } from "../word/word.type";
 
 @ObjectType()
 export class MeaningType
-  implements Omit<MeaningEntity, 'words' | 'beforeSave' | 'afterSave'>
-{
+  implements Omit<MeaningEntity, "words" | "beforeSave" | "afterSave"> {
   @Field((type) => GraphQLInt, { nullable: false })
   id: number;
 
@@ -28,7 +27,7 @@ export class MeaningType
   @Field((type) => GraphQLString, { nullable: false })
   meaning_lang2_language: LangType;
 
-  @Field((type) => GraphQLString)
+  @Field((type) => GraphQLString, { nullable: true })
   partOfSpeech: PartOfSpeechType;
 
   @Field((type) => GraphQLString, { nullable: true })

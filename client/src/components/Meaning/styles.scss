@@ -9,13 +9,12 @@
   }
 
   .meaning-content {
-    & > * {
+    .group {
       margin-bottom: 30px;
     }
 
-    & > label {
-      margin-bottom: 0;
-      display: inline-block;
+    .group > label {
+      margin-bottom: 5px;
       margin-right: 10px;
     }
 

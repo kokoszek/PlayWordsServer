@@ -1,6 +1,7 @@
-import { gql } from '@apollo/client';
+import { gql } from "@apollo/client";
 
-export default function(){}
+export default function() {
+}
 
 export const GET_MEANINGS = gql`
     query SearchMeaning($search: String!) {
@@ -10,6 +11,8 @@ export const GET_MEANINGS = gql`
             meaning_lang1_language
             meaning_lang2_desc
             meaning_lang2_language
+            partOfSpeech
+            category
             words_lang1 {
                 id
                 word
@@ -36,6 +39,8 @@ export const GET_WORDS = gql`
                 meaning_lang1_language
                 meaning_lang2_desc
                 meaning_lang2_language
+                partOfSpeech
+                category
                 words_lang1 {
                     id
                     word

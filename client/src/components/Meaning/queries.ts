@@ -1,6 +1,7 @@
-import {gql, } from '@apollo/client';
+import { gql } from "@apollo/client";
 
-export default function(){}
+export default function() {
+}
 
 export const GET_MEANING = gql`
     query GetMeaning($id: Int!) {
@@ -8,7 +9,19 @@ export const GET_MEANING = gql`
             id
         }
     }
-`
+`;
+
+export const GET_PARTS_OF_SPEECH = gql`
+    query GetPartsOfSpeech {
+        getPartsOfSpeech
+    }
+`;
+
+export const GET_CATEGORIES = gql`
+    query GetCategories {
+        getCategories
+    }
+`;
 
 export const CREATE_MEANING = gql`
     mutation CreateMeaning($meaningInput: NewMeaningInput!) {
@@ -18,6 +31,8 @@ export const CREATE_MEANING = gql`
             meaning_lang1_language
             meaning_lang2_desc
             meaning_lang2_language
+            partOfSpeech
+            category
             words_lang1 {
                 id
                 word
@@ -30,7 +45,7 @@ export const CREATE_MEANING = gql`
             }
         }
     }
-`
+`;
 export const UPDATE_MEANING = gql`
     mutation UpsertMeaning($meaningInput: UpdateMeaningInput!) {
         upsertMeaning(meaningInput: $meaningInput) {
@@ -39,6 +54,8 @@ export const UPDATE_MEANING = gql`
             meaning_lang1_language
             meaning_lang2_desc
             meaning_lang2_language
+            partOfSpeech
+            category
             words_lang1 {
                 id
                 word
