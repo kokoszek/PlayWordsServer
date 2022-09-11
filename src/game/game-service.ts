@@ -6,7 +6,7 @@ import { Repository } from "typeorm";
 import { WordEntity } from "../word/word.entity";
 
 export type PlayerType = {
-  name: string;
+  id: number;
   score: number;
   solvedMeaningIds: number[];
   gameAccepted: boolean;
@@ -57,7 +57,7 @@ export default class GameService {
 
   gameId = 1;
 
-  public createGame(player1: string, player2: string) {
+  public createGame(player1: number, player2: number) {
     const gameId = this.gameId++;
     const roomName = createRoomName(gameId);
     console.log("createGame with roomName: ", roomName);
@@ -65,13 +65,13 @@ export default class GameService {
     const newGame = {
       gameId: gameId,
       player1: {
-        name: player1,
+        id: player1,
         score: 0,
         solvedMeaningIds: [],
         gameAccepted: false
       },
       player2: {
-        name: player2,
+        id: player2,
         score: 0,
         solvedMeaningIds: [],
         gameAccepted: false
@@ -81,15 +81,16 @@ export default class GameService {
     return newGame;
   }
 
-  public acceptGame(playerName: string, gameId: number) {
+  public acceptGame(playerId: number, gameId: number) {
+    console.log("acceptGame -> games: ", this.games);
     if (this.isGameReady(gameId)) {
       return;
     }
     const roomName = createRoomName(gameId);
-    if (this.games[roomName].player1.name === playerName) {
+    if (this.games[roomName].player1.id === playerId) {
       this.games[roomName].player1.gameAccepted = true;
     }
-    if (this.games[roomName].player2.name === playerName) {
+    if (this.games[roomName].player2.id === playerId) {
       this.games[roomName].player2.gameAccepted = true;
     }
   }
@@ -102,13 +103,13 @@ export default class GameService {
     );
   }
 
-  public getPlayer(gameId: number, playerName: string) {
+  public getPlayer(gameId: number, playerId: number) {
     const roomName = createRoomName(gameId);
     const game = this.games[roomName];
-    if (game.player1.name === playerName) {
+    if (game.player1.id === playerId) {
       return game.player1;
     }
-    if (game.player2.name === playerName) {
+    if (game.player2.id === playerId) {
       return game.player2;
     }
     return null;
