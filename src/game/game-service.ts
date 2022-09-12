@@ -165,19 +165,25 @@ export default class GameService {
           "list of meaning ids: ",
           alreadyPlayedMeaningIds.concat(randomizedMeanings.map((el) => el.id))
         );
+        randomizedMeaning = await this.meaningRepo
+          .createQueryBuilder("meaning")
+          .leftJoinAndSelect("meaning.words", "words")
+          .where({ id: randomizedMeaning.id })
+          .getOne();
         if (
           !alreadyPlayedMeaningIds
             .concat(randomizedMeanings.map((el) => el.id))
             .includes(randomizedMeaning.id)
+          &&
+          //not in words of randomizedMeanings
+          randomizedMeanings
+            .flatMap(meaning => meaning.words)
+            .map(word => word.id)
+            .every(wordId => !randomizedMeaning.words.map(word => word.id).includes(wordId))
         ) {
           break;
         }
       }
-      randomizedMeaning = await this.meaningRepo
-        .createQueryBuilder("meaning")
-        .leftJoinAndSelect("meaning.words", "words")
-        .where({ id: randomizedMeaning.id })
-        .getOne();
       randomizedMeanings.push(randomizedMeaning);
     }
     const randomizedMeaningToPlay =
