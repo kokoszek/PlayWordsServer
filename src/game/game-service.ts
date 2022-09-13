@@ -137,7 +137,6 @@ export default class GameService {
       ].player1.solvedMeaningIds.concat(
       this.games[roomName].player2.solvedMeaningIds
     );
-    console.log();
     const result = await this.meaningRepo
       .createQueryBuilder()
       .select("COUNT(*) as count")
@@ -171,10 +170,10 @@ export default class GameService {
           .where({ id: randomizedMeaning.id })
           .getOne();
         if (
-          !alreadyPlayedMeaningIds
-            .concat(randomizedMeanings.map((el) => el.id))
-            .includes(randomizedMeaning.id)
-          &&
+          // !alreadyPlayedMeaningIds
+          //   .concat(randomizedMeanings.map((el) => el.id))
+          //   .includes(randomizedMeaning.id)
+          // &&
           //not in words of randomizedMeanings
           randomizedMeanings
             .flatMap(meaning => meaning.words)

@@ -15,6 +15,9 @@ import { Args, Mutation } from "@nestjs/graphql";
 import { GraphQLString } from "graphql";
 import { WordEntity } from "../word/word.entity";
 import PlayerService from "../player/player.service";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { PlayerEntity } from "../player/player.entity";
 
 const MultiSemaphore = require("redis-semaphore").MultiSemaphore;
 const Redis = require("ioredis");
@@ -33,7 +36,9 @@ export default class GameGatewayWs implements OnGatewayInit {
 
   constructor(
     private gameService: GameService,
-    private playerService: PlayerService
+    private playerService: PlayerService,
+    @InjectRepository(PlayerEntity)
+    private playerRepo: Repository<PlayerEntity>
   ) {
   }
 
@@ -61,18 +66,27 @@ export default class GameGatewayWs implements OnGatewayInit {
           const player1 = Number.parseInt(player1Str);
           const player2 = Number.parseInt(player2Str);
 
+          const player1Entity = await this.playerRepo.findOne({ where: { id: player1 } });
+          const player2Entity = await this.playerRepo.findOne({ where: { id: player2 } });
+
+          console.log("player1Entity: ", player1Entity);
+          console.log("player2Entity: ", player2Entity);
+
           console.log("players poped from queue: ", player1, " and ", player2);
           const game = this.gameService.createGame(player1, player2);
           console.log("emiting event: ", "game-found-for-" + player1);
+
           this.server.emit("game-found-for-" + player1, {
             matchFound: true,
             opponentId: player2,
+            opponentName: player2Entity.playerName,
             gameId: game.gameId
           });
           console.log("emiting event: ", "game-found-for-" + player2);
           this.server.emit("game-found-for-" + player2, {
             matchFound: true,
             opponentId: player1,
+            opponentName: player1Entity.playerName,
             gameId: game.gameId
           });
         }
@@ -102,14 +116,15 @@ export default class GameGatewayWs implements OnGatewayInit {
   ) {
     const { playerId } = data;
     console.log(playerId + " started to find a game");
-    let allList: number[] = await redis.lrange("findMatchQueue", 0, -1);
-    console.log("allList: ", allList);
-    if (allList.some(el => el === playerId)) {
+    let allList: string[] = await redis.lrange("findMatchQueue", 0, -1);
+    if (allList.some(el => Number.parseInt(el) === playerId)) {
       console.log("player " + playerId + " already in queue, skipping....");
       return;
     }
     console.log("startFindGame push type: ", typeof playerId);
     await redis.rpush("findMatchQueue", playerId);
+    allList = await redis.lrange("findMatchQueue", 0, -1);
+    console.log("allList after pushing: ", allList);
     sem.leave();
     return true;
   }
@@ -231,8 +246,13 @@ export default class GameGatewayWs implements OnGatewayInit {
       } else {
         // wrong answer
         opponent.score += 1;
-        this.sendTaskResultMsg(playerId, "task-lost!", "wrong-solution", me, opponent);
-        this.sendTaskResultMsg(opponentId, "task-won!", "opponents-wrong-solution", opponent, me);
+        if (this.gameService.isGameFinished(gameId)) {
+          this.sendTaskResultMsg(playerId, "game-lost!", "limit-achieved", me, opponent);
+          this.sendTaskResultMsg(opponentId, "game-won!", "limit-achieved", opponent, me);
+        } else {
+          this.sendTaskResultMsg(playerId, "task-lost!", "wrong-solution", me, opponent);
+          this.sendTaskResultMsg(opponentId, "task-won!", "opponents-wrong-solution", opponent, me);
+        }
       }
     }
     this.emitNewTask(3000, data.gameId);

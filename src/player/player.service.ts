@@ -16,7 +16,11 @@ export default class PlayerService {
     const player = this.playerRepo.create({
       playerName: null
     });
-    return await this.playerRepo.save(player);
+    const savedPlayer = await this.playerRepo.save(player);
+    return await this.playerRepo.save({
+      ...savedPlayer,
+      playerName: "Gość-" + savedPlayer.id
+    });
   }
 }
 
