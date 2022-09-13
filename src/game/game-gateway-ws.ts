@@ -141,6 +141,11 @@ export default class GameGatewayWs implements OnGatewayInit {
     return true;
   }
 
+  private emitBothReady(gameId: number) {
+    const roomName = createRoomName(gameId);
+    this.server.to(roomName).emit("bothReady");
+  }
+
   @SubscribeMessage("acceptGame")
   acceptGame(
     client: Socket,
@@ -159,6 +164,7 @@ export default class GameGatewayWs implements OnGatewayInit {
     if (this.gameService.isGameReady(gameId)) {
       console.log("emit gameReady");
       this.server.to(roomName).emit("gameReady");
+      this.emitBothReady(gameId);
       this.emitNewTask(3000, gameId);
     }
     return {
