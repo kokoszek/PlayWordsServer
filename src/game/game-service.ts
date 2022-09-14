@@ -117,7 +117,7 @@ export default class GameService {
     return null;
   }
 
-  private taskLimit = 5;
+  private taskLimit = 3;
 
   public shouldSendNextTask(gameId: number) {
     const roomName = createRoomName(gameId);
@@ -126,32 +126,48 @@ export default class GameService {
       game.tasks.length === game.player2.numberOfPlayedTasks;
   }
 
-  public isGameFinished(gameId: number) {
+  public getGameResolution(gameId: number): {
+    winner: PlayerType,
+    loser: PlayerType
+  } {
+    if (!this.isGameFinished(gameId)) {
+      return null;
+    }
     const roomName = createRoomName(gameId);
     if (this.games[roomName].player1.score === this.taskLimit) {
+      return {
+        winner: this.games[roomName].player1,
+        loser: this.games[roomName].player2
+      };
+    } else {
+      return {
+        winner: this.games[roomName].player2,
+        loser: this.games[roomName].player1
+      };
+    }
+  }
+
+  public isGameFinished(gameId: number): boolean {
+    const roomName = createRoomName(gameId);
+    if (
+      this.games[roomName].player1.numberOfPlayedTasks === this.taskLimit
+      &&
+      this.games[roomName].player2.numberOfPlayedTasks === this.taskLimit
+    ) {
       console.log("game-finished");
       return true;
+    } else {
+      return false;
     }
-    if (this.games[roomName].player2.score === this.taskLimit) {
-      console.log("game-finished");
-      return true;
-    }
-    return false;
   }
 
   public async generateTask(forGameId: number): Promise<TaskType> {
     const roomName = createRoomName(forGameId);
-    // const alreadyPlayedMeaningIds = this.games[
-    //   roomName
-    //   ].player1.solvedMeaningIds.concat(
-    //   this.games[roomName].player2.solvedMeaningIds
-    // );
     const result = await this.meaningRepo
       .createQueryBuilder()
       .select("COUNT(*) as count")
       .getRawOne();
     const count = Number.parseInt(result.count);
-    console.log("total meaning count : ", count);
     const numberOfWordsToRandomize = 8;
     let counter = numberOfWordsToRandomize;
     const randomizedMeanings: MeaningEntity[] = [];
@@ -159,37 +175,35 @@ export default class GameService {
       let randomizedMeaning: MeaningEntity;
       while (true) {
         const randomInt = getRandomInt(0, count - 1);
-        console.log("randomInt: ", randomInt);
+        //console.log("randomInt: ", randomInt);
         randomizedMeaning = (
           await this.meaningRepo
             .createQueryBuilder("meaning")
+            .leftJoinAndSelect("meaning.words", "words")
             .orderBy("meaning.id", "ASC")
-            .offset(randomInt)
-            .limit(1)
-            .getMany()
-        )[0];
-        console.log("rand meaning: ", JSON.stringify(randomizedMeaning));
-        // console.log(
-        //   "list of meaning ids: ",
-        //   alreadyPlayedMeaningIds.concat(randomizedMeanings.map((el) => el.id))
-        // );
-        randomizedMeaning = await this.meaningRepo
-          .createQueryBuilder("meaning")
-          .leftJoinAndSelect("meaning.words", "words")
-          .where({ id: randomizedMeaning.id })
-          .getOne();
+            .skip(randomInt)
+            .take(1)
+            .getOne()
+        );
+        // randomizedMeaning = await this.meaningRepo
+        //   .createQueryBuilder("meaning")
+        //   .leftJoinAndSelect("meaning.words", "words")
+        //   .where({ id: randomizedMeaning.id })
+        //   .getOne();
         if (
-          // !alreadyPlayedMeaningIds
-          //   .concat(randomizedMeanings.map((el) => el.id))
-          //   .includes(randomizedMeaning.id)
-          // &&
-          //not in words of randomizedMeanings
+          // haven't been already played
+          !this.games[roomName]
+            .tasks
+            .map(task => task.meaningId)
+            .includes(randomizedMeaning.id)
+          &&
+          // and not in words of randomizedMeanings (not already randomized), so that the randomized word list is unique
           randomizedMeanings
             .flatMap(meaning => meaning.words)
             .map(word => word.id)
             .every(wordId => !randomizedMeaning.words.map(word => word.id).includes(wordId))
         ) {
-          break;
+          break; // break if successfuly picked 'randomizedMeaning' ( conditions present is above 'if' )
         }
       }
       randomizedMeanings.push(randomizedMeaning);
@@ -212,9 +226,7 @@ export default class GameService {
 
     let correctWord: WordEntity;
     const ret = {
-      word:
-        randomizedPolishWord?.word || // if no word in native language found...
-        randomizedMeaningToPlay.meaning_lang1_desc, // ...apply meaning description
+      word: randomizedPolishWord?.word,
       word_desc: randomizedMeaningToPlay.meaning_lang1_desc,
       meaningId: randomizedMeaningToPlay.id,
       wordOptions: randomizedMeanings.map((meaning) => {

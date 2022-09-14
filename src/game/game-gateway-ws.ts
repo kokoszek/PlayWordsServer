@@ -268,6 +268,22 @@ export default class GameGatewayWs implements OnGatewayInit {
       });
       this.sendTaskResultMsg(opponentId, "opponent-failed-task!", opponent, me);
     }
+    if (this.gameService.isGameFinished(gameId)) {
+      const gameResolution = this.gameService.getGameResolution(gameId);
+      this.sendTaskResultMsg(
+        gameResolution.winner.id,
+        "game-won!",
+        gameResolution.winner,
+        gameResolution.loser
+      );
+      this.sendTaskResultMsg(
+        gameResolution.loser.id,
+        "game-lost!",
+        gameResolution.loser,
+        gameResolution.winner
+      );
+    }
+
     if (this.gameService.shouldSendNextTask(gameId)) {
       // send new task in 3 seconds
       this.emitNewTask(3000, data.gameId);
