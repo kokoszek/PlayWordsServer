@@ -150,9 +150,14 @@ export default class GameService {
   public isGameFinished(gameId: number): boolean {
     const roomName = createRoomName(gameId);
     if (
-      this.games[roomName].player1.numberOfPlayedTasks === this.taskLimit
+      (
+        this.games[roomName].player1.score === this.taskLimit
+        ||
+        this.games[roomName].player2.score === this.taskLimit
+      )
       &&
-      this.games[roomName].player2.numberOfPlayedTasks === this.taskLimit
+      this.games[roomName].player1.numberOfPlayedTasks ===
+      this.games[roomName].player2.numberOfPlayedTasks
     ) {
       console.log("game-finished");
       return true;
