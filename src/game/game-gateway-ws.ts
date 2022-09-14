@@ -38,7 +38,9 @@ export default class GameGatewayWs implements OnGatewayInit {
     private gameService: GameService,
     private playerService: PlayerService,
     @InjectRepository(PlayerEntity)
-    private playerRepo: Repository<PlayerEntity>
+    private playerRepo: Repository<PlayerEntity>,
+    @InjectRepository(WordEntity)
+    private wordRepo: Repository<WordEntity>
   ) {
   }
 
@@ -188,22 +190,27 @@ export default class GameGatewayWs implements OnGatewayInit {
 
   private sendTaskResultMsg(
     toPlayerId: number,
-    winOrLost: "task-lost!" | "task-won!" | "game-won!" | "game-lost!",
-    reason:
-      | "task-solved-by-opponent"
-      | "task-solved-by-myself"
-      | "wrong-solution"
-      | "opponents-wrong-solution"
-      | "limit-achieved",
+    eventType:
+      "task-solved!" |
+      "task-not-solved!" |
+      "game-won!" |
+      "game-lost!" |
+      "opponent-solved-task!" |
+      "opponent-failed-task!"
+    ,
     me: PlayerType,
-    opponent: PlayerType
+    opponent: PlayerType,
+    correctWord?: {
+      word: string,
+      wordId: number
+    }
   ) {
-    this.server.to(toPlayerId.toString()).emit(winOrLost, {
-      reason: reason,
+    this.server.to(toPlayerId.toString()).emit(eventType, {
       gameScore: {
         me: me,
         opponent: opponent
-      }
+      },
+      correctWord
     });
   }
 
@@ -229,38 +236,41 @@ export default class GameGatewayWs implements OnGatewayInit {
     const me = this.gameService.getPlayer(data.gameId, playerId);
     const roomName = createRoomName(data.gameId);
 
-    function hasOpponentAlreadySolvedThisTask() {
-      return !!opponent.solvedMeaningIds.find(
-        (meaningId) => meaningId === data.meaningId
-      );
-    }
+    // function hasOpponentAlreadySolvedThisTask() {
+    //   return !!opponent.solvedMeaningIds.find(
+    //     (meaningId) => meaningId === data.meaningId
+    //   );
+    // }
+    me.numberOfPlayedTasks += 1;
 
-    if (hasOpponentAlreadySolvedThisTask()) {
-      this.sendTaskResultMsg(playerId, "task-lost!", "task-solved-by-opponent", me, opponent);
+    if (solved) {
+      //me.solvedMeaningIds.push(data.meaningId);
+      me.score += 1;
+      // console.log("game is finished");
+      // this.sendTaskResultMsg(playerId, "game-won!", "limit-achieved", me, opponent);
+      // this.sendTaskResultMsg(opponentId, "game-lost!", "limit-achieved", opponent, me);
+      // return;
+      //const correctWord = await this.wordRepo.findOne({ where: { id: wordIdSolution } });
+      const correctWord = await this.gameService.getCorrectWordInLatestTask(data.gameId);
+      this.sendTaskResultMsg(playerId, "task-solved!", me, opponent, {
+        word: correctWord.word,
+        wordId: wordIdSolution
+      });
+      this.sendTaskResultMsg(opponentId, "opponent-solved-task!", opponent, me);
     } else {
-      if (solved) {
-        me.solvedMeaningIds.push(data.meaningId);
-        me.score += 1;
-        if (this.gameService.isGameFinished(gameId)) {
-          console.log("game is finished");
-          this.sendTaskResultMsg(playerId, "game-won!", "limit-achieved", me, opponent);
-          this.sendTaskResultMsg(opponentId, "game-lost!", "limit-achieved", opponent, me);
-          return;
-        } // else ?? probably yes
-        this.sendTaskResultMsg(playerId, "task-won!", "task-solved-by-myself", me, opponent);
-        this.sendTaskResultMsg(opponentId, "task-lost!", "task-solved-by-opponent", opponent, me);
-      } else {
-        // wrong answer
-        opponent.score += 1;
-        if (this.gameService.isGameFinished(gameId)) {
-          this.sendTaskResultMsg(playerId, "game-lost!", "limit-achieved", me, opponent);
-          this.sendTaskResultMsg(opponentId, "game-won!", "limit-achieved", opponent, me);
-        } else {
-          this.sendTaskResultMsg(playerId, "task-lost!", "wrong-solution", me, opponent);
-          this.sendTaskResultMsg(opponentId, "task-won!", "opponents-wrong-solution", opponent, me);
-        }
-      }
+      // wrong answer
+      //opponent.score += 1;
+      const correctWord = await this.gameService.getCorrectWordInLatestTask(data.gameId);
+      console.log("correct word: ", correctWord);
+      this.sendTaskResultMsg(playerId, "task-not-solved!", me, opponent, {
+        word: correctWord.word,
+        wordId: correctWord.wordId
+      });
+      this.sendTaskResultMsg(opponentId, "opponent-failed-task!", opponent, me);
     }
-    this.emitNewTask(3000, data.gameId);
+    if (this.gameService.shouldSendNextTask(gameId)) {
+      // send new task in 3 seconds
+      this.emitNewTask(3000, data.gameId);
+    }
   }
 }

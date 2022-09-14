@@ -8,7 +8,7 @@ import { WordEntity } from "../word/word.entity";
 export type PlayerType = {
   id: number;
   score: number;
-  solvedMeaningIds: number[];
+  numberOfPlayedTasks: number;
   gameAccepted: boolean;
 };
 
@@ -53,6 +53,7 @@ export default class GameService {
     {
       player1?: PlayerType;
       player2?: PlayerType;
+      tasks: Array<TaskType & { correctWord: WordEntity }>;
     }> = {};
 
   gameId = 1;
@@ -67,15 +68,16 @@ export default class GameService {
       player1: {
         id: player1,
         score: 0,
-        solvedMeaningIds: [],
+        numberOfPlayedTasks: 0,
         gameAccepted: false
       },
       player2: {
         id: player2,
         score: 0,
-        solvedMeaningIds: [],
+        numberOfPlayedTasks: 0,
         gameAccepted: false
-      }
+      },
+      tasks: []
     };
     this.games[roomName] = newGame;
     return newGame;
@@ -117,6 +119,13 @@ export default class GameService {
 
   private taskLimit = 5;
 
+  public shouldSendNextTask(gameId: number) {
+    const roomName = createRoomName(gameId);
+    const game = this.games[roomName];
+    return game.tasks.length === game.player1.numberOfPlayedTasks &&
+      game.tasks.length === game.player2.numberOfPlayedTasks;
+  }
+
   public isGameFinished(gameId: number) {
     const roomName = createRoomName(gameId);
     if (this.games[roomName].player1.score === this.taskLimit) {
@@ -132,11 +141,11 @@ export default class GameService {
 
   public async generateTask(forGameId: number): Promise<TaskType> {
     const roomName = createRoomName(forGameId);
-    const alreadyPlayedMeaningIds = this.games[
-      roomName
-      ].player1.solvedMeaningIds.concat(
-      this.games[roomName].player2.solvedMeaningIds
-    );
+    // const alreadyPlayedMeaningIds = this.games[
+    //   roomName
+    //   ].player1.solvedMeaningIds.concat(
+    //   this.games[roomName].player2.solvedMeaningIds
+    // );
     const result = await this.meaningRepo
       .createQueryBuilder()
       .select("COUNT(*) as count")
@@ -160,10 +169,10 @@ export default class GameService {
             .getMany()
         )[0];
         console.log("rand meaning: ", JSON.stringify(randomizedMeaning));
-        console.log(
-          "list of meaning ids: ",
-          alreadyPlayedMeaningIds.concat(randomizedMeanings.map((el) => el.id))
-        );
+        // console.log(
+        //   "list of meaning ids: ",
+        //   alreadyPlayedMeaningIds.concat(randomizedMeanings.map((el) => el.id))
+        // );
         randomizedMeaning = await this.meaningRepo
           .createQueryBuilder("meaning")
           .leftJoinAndSelect("meaning.words", "words")
@@ -201,6 +210,7 @@ export default class GameService {
     // const phraseToShow =
     //   randomizedPolishWord?.word || randomizedMeaningToPlay.meaning_lang1_desc;
 
+    let correctWord: WordEntity;
     const ret = {
       word:
         randomizedPolishWord?.word || // if no word in native language found...
@@ -211,13 +221,45 @@ export default class GameService {
         const randomizedWord: WordEntity = randomizeElement(
           meaning.words.filter((el) => el.lang === "en")
         );
+        if (meaning.id === randomizedMeaningToPlay.id) {
+          correctWord = randomizedWord;
+        }
         return {
           wordId: randomizedWord.id,
           word: randomizedWord.word
         };
       })
     };
+    this.games[roomName].tasks.push({
+      ...ret,
+      correctWord
+    });
     return ret;
+  }
+
+  public async getCorrectWordInLatestTask(gameId: number): Promise<{ word: string, wordId: number }> {
+    const roomName = createRoomName(gameId);
+    const task: TaskType & { correctWord: WordEntity } =
+      this.games[roomName].tasks[this.games[roomName].tasks.length - 1];
+    return {
+      word: task.correctWord.word,
+      wordId: task.correctWord.id
+    };
+    // const meaning = await this.meaningRepo.findOne({
+    //   where: {
+    //     id: task.meaningId
+    //   }
+    // });
+    // let ret = null;
+    // task.wordOptions.forEach(wordOption => {
+    //   if (meaning.words.map(word => word.id).includes(wordOption.wordId)) {
+    //     ret = {
+    //       word: wordOption.word,
+    //       wordId: wordOption.wordId
+    //     };
+    //   }
+    // });
+    // return ret;
   }
 
   public async checkTaskSolution(
