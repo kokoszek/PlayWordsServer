@@ -1,19 +1,21 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { createQueryBuilder, Repository } from 'typeorm';
-import { LangType, MeaningEntity } from '../meaning/meaning.entity';
-import { log } from 'util';
-import { getRandomInt } from '../game/game-service';
+import { Injectable, OnModuleInit } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { createQueryBuilder, Repository } from "typeorm";
+import { LangType, MeaningEntity } from "../meaning/meaning.entity";
+import { log } from "util";
+import { getRandomInt } from "../game/game-service";
+
 const axios = require("axios");
 
-import { parse } from 'node-html-parser';
-import { WordEntity } from './word.entity';
+import { parse } from "node-html-parser";
+import { WordEntity } from "./word.entity";
 
-const fetch = require('node-fetch');
+const fetch = require("node-fetch");
 
-import { getManager, getConnectionManager } from 'typeorm';
+import { getManager, getConnectionManager } from "typeorm";
+import WordParticle from "./word-particle.entity";
 
-const fs = require('fs');
+const fs = require("fs");
 const PDFParser = require("pdf2json");
 
 
@@ -22,15 +24,18 @@ export class WordService implements OnModuleInit {
   constructor(
     @InjectRepository(WordEntity)
     private wordRepo: Repository<WordEntity>,
+    @InjectRepository(WordParticle)
+    private wordParticleRepo: Repository<WordParticle>,
     @InjectRepository(MeaningEntity)
-    private meaningRepo: Repository<MeaningEntity>,
-  ) {}
+    private meaningRepo: Repository<MeaningEntity>
+  ) {
+  }
 
   public async searchByText(search: string): Promise<WordEntity[]> {
     const result: WordEntity[] = await this.wordRepo
       .createQueryBuilder()
-      .where('word LIKE :search', {
-        search: search + '%'
+      .where("word LIKE :search", {
+        search: search + "%"
       })
       .getMany();
     return result;
@@ -43,24 +48,24 @@ export class WordService implements OnModuleInit {
         word
       })
       .getOne();
-    console.log('word text: ', word);
-    console.log('word: ', wordEntity);
+    console.log("word text: ", word);
+    console.log("word: ", wordEntity);
     return wordEntity;
   }
 
   public async deleteWordIfOrphan(wordId: number): Promise<boolean> {
     let result = await this.wordRepo.manager.query(
       `SELECT * FROM meaning_word_jointable WHERE wordEntityId = ?`,
-      [ wordId ]
+      [wordId]
     );
-    console.log('result: ', result);
-    if(result.length === 0) {
-      console.log('word with id ' + wordId + ' is orphan, deleting...');
+    console.log("result: ", result);
+    if (result.length === 0) {
+      console.log("word with id " + wordId + " is orphan, deleting...");
       await this.wordRepo.delete({
         id: wordId
-      })
+      });
     } else {
-      console.log('word with id ' + wordId + ' is NOT orphan, skipping...');
+      console.log("word with id " + wordId + " is NOT orphan, skipping...");
     }
     return true;
   }
@@ -73,19 +78,19 @@ export class WordService implements OnModuleInit {
     encodedParams.append("source", "en");
 
     const options = {
-      method: 'POST',
-      url: 'https://google-translate1.p.rapidapi.com/language/translate/v2',
+      method: "POST",
+      url: "https://google-translate1.p.rapidapi.com/language/translate/v2",
       headers: {
-        'content-type': 'application/x-www-form-urlencoded',
-        'Accept-Encoding': 'application/gzip',
-        'X-RapidAPI-Key': '9955f8dc65mshea2d9990a9ad31fp10acebjsn8052d4e2a1a6',
-        'X-RapidAPI-Host': 'google-translate1.p.rapidapi.com'
+        "content-type": "application/x-www-form-urlencoded",
+        "Accept-Encoding": "application/gzip",
+        "X-RapidAPI-Key": "9955f8dc65mshea2d9990a9ad31fp10acebjsn8052d4e2a1a6",
+        "X-RapidAPI-Host": "google-translate1.p.rapidapi.com"
       },
       data: encodedParams
     };
 
     let result = await axios.request(options);
-    console.log('word.data: ', result.data);
+    console.log("word.data: ", result.data);
 
     return result.data.data.translations[0].translatedText;
   }
@@ -93,9 +98,9 @@ export class WordService implements OnModuleInit {
   async findAllByMeaningId(meaningId: number, lang: LangType): Promise<WordEntity[]> {
     let result = await
       this.meaningRepo
-        .createQueryBuilder('meaning')
+        .createQueryBuilder("meaning")
         .select()
-        .leftJoinAndSelect('meaning.words', 'words', 'words.lang = :lang', {
+        .leftJoinAndSelect("meaning.words", "words", "words.lang = :lang", {
           lang
         })
         .where({
@@ -109,25 +114,25 @@ export class WordService implements OnModuleInit {
     let words = [];
     line.forEach(word => {
       //filters
-      if(!(
+      if (!(
         !word ||
         /[\(\)\%]/.test(word) || // if contains '(' , ')' or '%'
         word.length === 1 ||
         /^\d+$/.test(word) || // exclude digits
-        word === 'B1'
+        word === "B1"
       )) {
-        word = word.replace('.','').toLowerCase();
-        if(![
-          'as',
-          'by',
-          'ucles',
-          'of',
-          'page',
-          'b1',
-          'preliminary',
-          'and',
-          'for',
-          'schools',
+        word = word.replace(".", "").toLowerCase();
+        if (![
+          "as",
+          "by",
+          "ucles",
+          "of",
+          "page",
+          "b1",
+          "preliminary",
+          "and",
+          "for",
+          "schools"
         ].includes(word)) {
           words.push(word);
         }
@@ -138,17 +143,17 @@ export class WordService implements OnModuleInit {
 
   processSamplePdfLine(line: string[], prevLine: string[]) {
     let words = [];
-    let lastWordInPrevLine = prevLine && prevLine[prevLine.length-1];
-    if(lastWordInPrevLine?.slice(-1) === '-') {
-      line[0] = lastWordInPrevLine.slice(0, -1) + line[0]
+    let lastWordInPrevLine = prevLine && prevLine[prevLine.length - 1];
+    if (lastWordInPrevLine?.slice(-1) === "-") {
+      line[0] = lastWordInPrevLine.slice(0, -1) + line[0];
     }
     let finalLine = [];
     line.forEach((word: any, idx) => {
-      word = word.replaceAll(/\%../ig, '');
-      word = word.replaceAll('.', '');
+      word = word.replaceAll(/\%../ig, "");
+      word = word.replaceAll(".", "");
       word = word.toLowerCase();
-      if(!(idx === line.length - 1 || word.slice(-1) === '-')) { //if last word
-        if(!word || word === '.' || word === ',' || /^\d+$/.test(word) || word.length === 1) {
+      if (!(idx === line.length - 1 || word.slice(-1) === "-")) { //if last word
+        if (!word || word === "." || word === "," || /^\d+$/.test(word) || word.length === 1) {
 
         } else {
           finalLine.push(word);
@@ -163,7 +168,7 @@ export class WordService implements OnModuleInit {
     let words = [];
     let prevLine;
     page.Texts.forEach(rawLine => {
-      let line = rawLine.R[0].T.split('%20');
+      let line = rawLine.R[0].T.split("%20");
       let cleanedUpWords = processLine(line, prevLine);
       words.push(...cleanedUpWords);
       // console.log('--------');
@@ -183,17 +188,17 @@ export class WordService implements OnModuleInit {
 
   async processPdfFile() {
     const pdfParser = new PDFParser();
-    pdfParser.on("readable", meta => console.log("PDF Metadata", meta) );
+    pdfParser.on("readable", meta => console.log("PDF Metadata", meta));
     pdfParser.on("data", page => {
       //console.log(page ? "One page paged" : "All pages parsed", page)
       this.counter++;
       // if(this.counter > 20) {
       //   return;
       // }
-      console.log('====================== ', this.counter);
+      console.log("====================== ", this.counter);
       //let words = this.extractWords(page, this.processSamplePdfLine);
       let words = this.extractWords(page, this.processB1CambridgeVocabularyLine);
-      console.log('words: ', words);
+      console.log("words: ", words);
       words.forEach(async word => {
         const wordEntity = this.wordRepo.create({
           word
@@ -206,9 +211,11 @@ export class WordService implements OnModuleInit {
       });
     });
     pdfParser.on("error", err => console.error("Parser Error", err));
-    pdfParser.on("pdfParser_dataError", errData => console.error(errData.parserError) );
+    pdfParser.on("pdfParser_dataError", errData => console.error(errData.parserError));
     pdfParser.on("pdfParser_dataReady", pdfData => {
-      fs.writeFile("./pdf2json/test/F1040EZ.fields.json", JSON.stringify(pdfParser.getAllFieldsTypes()), ()=>{console.log("Done.");});
+      fs.writeFile("./pdf2json/test/F1040EZ.fields.json", JSON.stringify(pdfParser.getAllFieldsTypes()), () => {
+        console.log("Done.");
+      });
     });
 
     //pdfParser.loadPDF("./pdfs/sample.pdf");
@@ -254,45 +261,62 @@ export class WordService implements OnModuleInit {
 
   async testDiki() {
 
-    fetch('https://www.diki.pl/slownik-angielskiego?q=ograniczony')
+    fetch("https://www.diki.pl/slownik-angielskiego?q=ograniczony")
       .then(async result => {
         let html = await result.text();
         const root = parse(html);
-        let dictionaryEntity = root.querySelector('.dictionaryEntity')
-        let titleNode = root.querySelector('.dictionaryEntity .hws .hw')
+        let dictionaryEntity = root.querySelector(".dictionaryEntity");
+        let titleNode = root.querySelector(".dictionaryEntity .hws .hw");
         const title = titleNode.childNodes[0].rawText;
-        console.log('title: ', title);
+        console.log("title: ", title);
 
-        let partOfSpeechNode = root.querySelector('.dictionaryEntity');
+        let partOfSpeechNode = root.querySelector(".dictionaryEntity");
         //console.log('node: ', partOfSpeechNode);
         partOfSpeechNode.childNodes.map(el => {
-          let parsed = parse(el.toString())
-          if(parsed) {
-            let el = parsed.querySelector('.partOfSpeechSectionHeader .partOfSpeech')?.rawText
-            if(el) {
-              console.log('el: ', el);
+          let parsed = parse(el.toString());
+          if (parsed) {
+            let el = parsed.querySelector(".partOfSpeechSectionHeader .partOfSpeech")?.rawText;
+            if (el) {
+              console.log("el: ", el);
             }
-            let list = parsed.querySelector('.nativeToForeignEntrySlices');
-            if(list) {
+            let list = parsed.querySelector(".nativeToForeignEntrySlices");
+            if (list) {
               let filteredList = list?.childNodes.map(el => el.rawText);
-              filteredList = filteredList.map(el => el.replaceAll(/\n +/ig, ''));
+              filteredList = filteredList.map(el => el.replaceAll(/\n +/ig, ""));
               filteredList = filteredList.filter(el => !!el);
               filteredList = filteredList.map(el => {
                 let regexpMatch = /^(\w+) .*/;
                 let match = el.match(regexpMatch);
-                return match ? match[1]: '';
+                return match ? match[1] : "";
               });
-              console.log('list: ', filteredList);
+              console.log("list: ", filteredList);
             }
           }
         });
         //console.log('partOfSpeech: ', partOfSpeech);
         //console.log('.dictionaryEntity', dictionaryEntity.toString());
-      })
+      });
   }
 
   async onModuleInit(): Promise<any> {
-    console.log('on module init');
+    console.log("on module init");
+    // const allWords = await this.wordRepo
+    //   .createQueryBuilder("word")
+    //   .select()
+    //   .leftJoinAndSelect("word.wordParticles", "particles")
+    //   .getMany();
+    // console.log("allWords: ", allWords);
+
+    //console.log("allWords: ", allWords);
+    // allWords.forEach(async word => {
+    //   let particles: string[] = word.word.split(/ +/);
+    //   //console.log("particles: ", particles);
+    //   word.wordParticles =
+    //     particles.map(particle =>
+    //       this.wordParticleRepo.create({ wordParticle: particle })
+    //     );
+    //   await this.wordRepo.save(word);
+    // });
     //await this.deleteOrphanWords(5);
     // await this.testDiki();
     // await this.processPdfFile();
