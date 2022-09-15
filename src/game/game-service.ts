@@ -62,7 +62,6 @@ export default class GameService {
     const gameId = this.gameId++;
     const roomName = createRoomName(gameId);
     console.log("createGame with roomName: ", roomName);
-    console.log("inmemory games: ", this.games);
     const newGame = {
       gameId: gameId,
       player1: {
@@ -105,6 +104,18 @@ export default class GameService {
     );
   }
 
+  public getOpponentOfPlayer(gameId: number, playerId: number): PlayerType {
+    const roomName = createRoomName(gameId);
+    const game = this.games[roomName];
+    if (game.player1.id == playerId) {
+      return game.player2;
+    }
+    if (game.player2.id == playerId) {
+      return game.player1;
+    }
+    return null;
+  }
+
   public getPlayer(gameId: number, playerId: number) {
     const roomName = createRoomName(gameId);
     const game = this.games[roomName];
@@ -128,21 +139,32 @@ export default class GameService {
 
   public getGameResolution(gameId: number): {
     winner: PlayerType,
-    loser: PlayerType
+    loser: PlayerType,
+    tie: boolean
   } {
     if (!this.isGameFinished(gameId)) {
       return null;
     }
     const roomName = createRoomName(gameId);
+    if (this.games[roomName].player1.score === this.taskLimit &&
+      this.games[roomName].player2.score === this.taskLimit) {
+      return {
+        winner: null,
+        loser: null,
+        tie: true
+      };
+    }
     if (this.games[roomName].player1.score === this.taskLimit) {
       return {
         winner: this.games[roomName].player1,
-        loser: this.games[roomName].player2
+        loser: this.games[roomName].player2,
+        tie: false
       };
     } else {
       return {
         winner: this.games[roomName].player2,
-        loser: this.games[roomName].player1
+        loser: this.games[roomName].player1,
+        tie: false
       };
     }
   }
@@ -225,9 +247,6 @@ export default class GameService {
       }
       return arr[getRandomInt(0, arr.length - 1)];
     }
-
-    // const phraseToShow =
-    //   randomizedPolishWord?.word || randomizedMeaningToPlay.meaning_lang1_desc;
 
     let correctWord: WordEntity;
     const ret = {
