@@ -20,7 +20,13 @@ export class WordEntity {
 
   @Column()
   word: string;
-
+  /**
+   * if (category === 'color')
+   *  then category === 'color' and level === any
+   * if (category === 'phrasal verb')
+   *  then category === 'phrasal verb' and same word particles
+   *
+   */
   @Column({
     nullable: true
   })

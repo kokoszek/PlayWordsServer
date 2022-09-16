@@ -4,6 +4,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { MeaningEntity } from "../meaning/meaning.entity";
 import { Repository } from "typeorm";
 import { WordEntity } from "../word/word.entity";
+import WordParticle from "../word/word-particle.entity";
 
 export type PlayerType = {
   id: number;
@@ -188,6 +189,56 @@ export default class GameService {
     }
   }
 
+  public async generateTask2(forGameId: number, level: string): Promise<TaskType> {
+
+    let word: WordEntity = this.randomizeWord(level, "en");
+    let meaning: MeaningEntity = this.randomizeElement(word.meanings);
+    let wordsToPlay: WordEntity[] = [];
+    if (meaning.partOfSpeech === "phrasal verb") {
+      let wordsWithParticle: WordEntity[] = [];
+      if (this.hasSbdParticle(word)) {
+        wordsWithParticle =
+          this.randomizePhrasalVerbsWithSbdParticle(7);
+      } else {
+        wordsWithParticle =
+          this.randomizePhrasalVerbWithParticle(word.particles[0], 7);
+      }
+      let rest = this.randomizeRestOfPhrasalVerbs(7 - wordsWithParticle.length);
+      wordsToPlay = [word, ...wordsWithParticle, ...rest];
+    } else {
+      let words =
+        this.randomizeWords(7, word.meaning.category, meaning.partOfSpeech);
+      let restOfWords =
+        this.randomizeRestOfWords(7 - words.length);
+      wordsToPlay = [word, ...words, ...restOfWords];
+    }
+    let plWord = this.getPolishWordFromMeaning(meaning);
+    const ret = {
+      word: plWord?.word,
+      word_desc: meaning.meaning_lang1_desc,
+      meaningId: meaning.id,
+      wordOptions: wordsToPlay.map((word: WordEntity) => {
+        return {
+          wordId: word.id,
+          word: word.word
+        };
+      })
+    };
+    const roomName = createRoomName(forGameId);
+    this.games[roomName].tasks.push({
+      ...ret,
+      correctWord: word
+    });
+    return ret;
+  }
+
+  private randomizeElement<T>(arr: T[]): T | null {
+    if (arr.length === 0) {
+      return null;
+    }
+    return arr[getRandomInt(0, arr.length - 1)];
+  }
+
   public async generateTask(forGameId: number): Promise<TaskType> {
     const roomName = createRoomName(forGameId);
     const result = await this.meaningRepo
@@ -202,7 +253,6 @@ export default class GameService {
       let randomizedMeaning: MeaningEntity;
       while (true) {
         const randomInt = getRandomInt(0, count - 1);
-        //console.log("randomInt: ", randomInt);
         randomizedMeaning = (
           await this.meaningRepo
             .createQueryBuilder("meaning")
@@ -212,11 +262,6 @@ export default class GameService {
             .take(1)
             .getOne()
         );
-        // randomizedMeaning = await this.meaningRepo
-        //   .createQueryBuilder("meaning")
-        //   .leftJoinAndSelect("meaning.words", "words")
-        //   .where({ id: randomizedMeaning.id })
-        //   .getOne();
         if (
           // haven't been already played
           !this.games[roomName]
@@ -237,16 +282,10 @@ export default class GameService {
     }
     const randomizedMeaningToPlay =
       randomizedMeanings[getRandomInt(0, numberOfWordsToRandomize - 1)];
-    const randomizedPolishWord: WordEntity = randomizeElement(
+    const randomizedPolishWord: WordEntity = this.randomizeElement(
       randomizedMeaningToPlay.words.filter((el) => el.lang === "pl")
     );
 
-    function randomizeElement<T>(arr: T[]): T | null {
-      if (arr.length === 0) {
-        return null;
-      }
-      return arr[getRandomInt(0, arr.length - 1)];
-    }
 
     let correctWord: WordEntity;
     const ret = {
@@ -254,7 +293,7 @@ export default class GameService {
       word_desc: randomizedMeaningToPlay.meaning_lang1_desc,
       meaningId: randomizedMeaningToPlay.id,
       wordOptions: randomizedMeanings.map((meaning) => {
-        const randomizedWord: WordEntity = randomizeElement(
+        const randomizedWord: WordEntity = this.randomizeElement(
           meaning.words.filter((el) => el.lang === "en")
         );
         if (meaning.id === randomizedMeaningToPlay.id) {
