@@ -1,10 +1,10 @@
-const path = require('path');
-require('reflect-metadata');
+const path = require("path");
+require("reflect-metadata");
 
 const detectTSNode = require("detect-ts-node");
 
-console.log('detectTSNode: ', detectTSNode);
-console.log('__dirname: ', __dirname);
+console.log("detectTSNode: ", detectTSNode);
+console.log("__dirname: ", __dirname);
 
 const config = {
   "type": "mysql",
@@ -12,19 +12,20 @@ const config = {
   "port": 3306,
   "username": "root",
   "password": "password",
-  "database": "playwords",
+  "database": "playwords2",
   "entities": [
     detectTSNode ?
-      path.join(__dirname, 'src', '**', '*.entity.ts') :
-      path.join(__dirname, 'dist', '**', '*.entity.js')
+      path.join(__dirname, "src", "**", "*.entity.ts") :
+      path.join(__dirname, "dist", "**", "*.entity.js")
   ],
   "migrationsTableName": "typeorm_migrations",
   "migrations": [
-    detectTSNode ? "./migrations/*.ts" : ''
+    detectTSNode ? "./migrations/*.ts" : ""
   ],
   "subscribers": [
-    path.join(__dirname, 'dist', '**', '*.subscriber.js')
-  ]
-}
+    path.join(__dirname, "dist", "**", "*.subscriber.js")
+  ],
+  logging: false
+};
 
 module.exports = config;

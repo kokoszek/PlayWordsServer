@@ -55,7 +55,7 @@ export class WordService implements OnModuleInit {
 
   public async deleteWordIfOrphan(wordId: number): Promise<boolean> {
     let result = await this.wordRepo.manager.query(
-      `SELECT * FROM meaning_word_jointable WHERE wordEntityId = ?`,
+      `SELECT * FROM meaning_word_jointable WHERE wordId = ?`,
       [wordId]
     );
     console.log("result: ", result);
@@ -100,14 +100,18 @@ export class WordService implements OnModuleInit {
       this.meaningRepo
         .createQueryBuilder("meaning")
         .select()
-        .leftJoinAndSelect("meaning.words", "words", "words.lang = :lang", {
+        .innerJoinAndSelect("meaning.words", "links")
+        .innerJoinAndSelect("links.word", "word", "word.lang = :lang", {
           lang
         })
         .where({
           id: meaningId
         })
         .getOne();
-    return result.words;
+    if (!result) {
+      return [];
+    }
+    return result.words.map(link => link.word);
   }
 
   processB1CambridgeVocabularyLine(line: string[], prevLine: string[]) {

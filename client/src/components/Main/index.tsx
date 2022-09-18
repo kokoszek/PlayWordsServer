@@ -12,7 +12,7 @@ export default function Main() {
       <List />
       <main className="main-content">
         {
-          entityCtx.meaning ? <Meaning /> : <Word />
+          entityCtx.meaning ? <Meaning /> : entityCtx.word ? <Word /> : <Meaning />
         }
       </main>
     </div>

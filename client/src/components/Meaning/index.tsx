@@ -87,7 +87,7 @@ export default function Meaning() {
                 options={data?.getPartsOfSpeech.map((el: string) => ({
                   value: el, label: el
                 }))}
-                value={{ value: meaning.partOfSpeech, label: meaning.partOfSpeech }}
+                value={{ value: meaning?.partOfSpeech, label: meaning?.partOfSpeech }}
                 onChange={(event: any) => {
                   console.log("onChange->value: ", event.value);
                   setMeaning(
@@ -104,7 +104,7 @@ export default function Meaning() {
                 options={categoryData?.getCategories?.map((el: string) => ({
                   value: el, label: el
                 }))}
-                value={{ value: meaning.category, label: meaning.category }}
+                value={{ value: meaning?.category, label: meaning?.category }}
                 onChange={(event: any) => {
                   console.log("onChange->value: ", event.value);
                   setMeaning(
@@ -156,6 +156,7 @@ export default function Meaning() {
         )}
         <button
           onClick={async () => {
+            console.log("MEANING: ", meaning);
             let copy = _.cloneDeep(meaning);
             recursive(copy, (obj: any, key: string) => {
               if (key === "__typename") {

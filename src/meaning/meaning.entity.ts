@@ -13,6 +13,7 @@ import { Field, InputType, Int, ObjectType } from "@nestjs/graphql";
 import { GraphQLInt, GraphQLString } from "graphql";
 import { RequestContext } from "nestjs-request-context";
 import { Request } from "express";
+import { LinkEntity } from "./link.entity";
 
 export type LangType = "pl" | "en"
 export const PartOfSpeechArray = ["verb", "phrasal verb", "noun", "adj"] as const;
@@ -63,15 +64,12 @@ export class MeaningEntity {
   @Field(type => GraphQLString)
   category: CategoryType;
 
-  @ManyToMany(
-    () => WordEntity,
-    word => word.meanings,
+  @OneToMany(
+    () => LinkEntity,
+    link => link.meaning,
     {
-      cascade: true
+      cascade: false
     }
   )
-  @JoinTable({
-    name: "meaning_word_jointable"
-  })
-  words: WordEntity[];
+  words: LinkEntity[];
 }

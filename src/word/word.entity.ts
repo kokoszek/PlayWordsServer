@@ -10,6 +10,7 @@ import { Field, InputType, ObjectType } from "@nestjs/graphql";
 import { GraphQLInt, GraphQLString } from "graphql";
 import { InputTypeFromEntity } from "../common/input-type";
 import WordParticle from "./word-particle.entity";
+import { LinkEntity } from "../meaning/link.entity";
 
 type WordInputType = InputTypeFromEntity<WordEntity>;
 
@@ -32,12 +33,6 @@ export class WordEntity {
   })
   desc: string;
 
-  @Column({
-    nullable: true
-  })
-  @Field((type) => GraphQLString)
-  level: "A1" | "A2" | "B1" | "B2" | "C1" | "C1+" | null;
-
   @Column()
   @Field((type) => GraphQLString)
   lang: string;
@@ -55,11 +50,11 @@ export class WordEntity {
   @Field((type) => GraphQLString)
   origin: string;
 
-  @ManyToMany(() => MeaningEntity, (meaning) => meaning.words, {
+  @OneToMany(() => LinkEntity, (link) => link.word, {
     onDelete: "CASCADE"
   })
-  @Field((type) => [MeaningEntity])
-  meanings: MeaningEntity[];
+  @Field((type) => [LinkEntity])
+  meanings: LinkEntity[];
 
   @OneToMany(
     () => WordParticle,

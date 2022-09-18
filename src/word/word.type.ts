@@ -21,7 +21,7 @@ export class WordType implements Omit<WordEntity, "meanings" | "wordParticles"> 
   desc: string;
 
   @Field(type => GraphQLString)
-  level: Maybe<"A1" | "A2" | "B1" | "B2" | "C1" | "C1+">;
+  level: string;
 
   @Field(type => GraphQLInt)
   freq: number;

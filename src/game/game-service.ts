@@ -205,9 +205,10 @@ export default class GameService implements OnModuleInit {
     let result = await this.wordRepo
       .createQueryBuilder("word")
       .select("COUNT(*) as count")
-      .innerJoin("word.meanings", "meanings")
+      .innerJoin("word.meanings", "links")
+      .innerJoin("links.meaning", "meaning")
       .innerJoin("word.wordParticles", "wordParticles")
-      .where(`meanings.partOfSpeech = 'phrasal verb'`)
+      .where(`meaning.partOfSpeech = 'phrasal verb'`)
       .andWhere(`wordParticles.wordParticle = '${wordParticle}'`)
       .getRawOne();
 
@@ -223,9 +224,10 @@ export default class GameService implements OnModuleInit {
         let result: WordEntity = await this.wordRepo
           .createQueryBuilder("word")
           .select()
-          .innerJoin("word.meanings", "meanings")
+          .innerJoin("word.meanings", "links")
+          .innerJoin("links.meaning", "meaning")
           .innerJoin("word.wordParticles", "wordParticles")
-          .where("meanings.partOfSpeech = 'phrasal verb'")
+          .where("meaning.partOfSpeech = 'phrasal verb'")
           .andWhere("wordParticles.wordParticle = 'somebody'")
           .orderBy("word.id", "ASC")
           .take(1)
@@ -251,8 +253,9 @@ export default class GameService implements OnModuleInit {
     let result = await this.wordRepo
       .createQueryBuilder("word")
       .select("COUNT(*) as count")
-      .innerJoin("word.meanings", "meanings")
-      .where(`meanings.partOfSpeech = 'phrasal verb'`)
+      .innerJoin("word.meanings", "links")
+      .innerJoin("links.meaning", "meaning")
+      .where(`meaning.partOfSpeech = 'phrasal verb'`)
       .andWhere("word.lang = 'en'")
       .getRawOne();
     //console.log("RESULT: ", result);
@@ -269,8 +272,9 @@ export default class GameService implements OnModuleInit {
         let result: WordEntity = await this.wordRepo
           .createQueryBuilder("word")
           .select()
-          .innerJoin("word.meanings", "meanings")
-          .where("meanings.partOfSpeech = 'phrasal verb'")
+          .innerJoin("word.meanings", "links")
+          .innerJoin("links.meaning", "meaning")
+          .where("meaning.partOfSpeech = 'phrasal verb'")
           .andWhere("word.lang = 'en'")
           .orderBy("word.id", "ASC")
           .limit(1)
@@ -280,8 +284,9 @@ export default class GameService implements OnModuleInit {
         // console.log("result: ", result);
         // console.log("words: ", words);
         if (
-          !words.map(word => word.id).includes(result.id) &&
-          !excludeWordIds.includes(result.id)
+          !words.map(word => word?.id).includes(result?.id) &&
+          !excludeWordIds.includes(result?.id) ||
+          result == null
         ) {
           words.push(result);
           break;
@@ -357,78 +362,78 @@ export default class GameService implements OnModuleInit {
     return arr[getRandomInt(0, arr.length - 1)];
   }
 
-  public async generateTask(forGameId: number): Promise<TaskType> {
-    const roomName = createRoomName(forGameId);
-    const result = await this.meaningRepo
-      .createQueryBuilder()
-      .select("COUNT(*) as count")
-      .getRawOne();
-    const count = Number.parseInt(result.count);
-    const numberOfWordsToRandomize = 8;
-    let counter = numberOfWordsToRandomize;
-    const randomizedMeanings: MeaningEntity[] = [];
-    while (counter--) {
-      let randomizedMeaning: MeaningEntity;
-      while (true) {
-        const randomInt = getRandomInt(0, count - 1);
-        randomizedMeaning = (
-          await this.meaningRepo
-            .createQueryBuilder("meaning")
-            .leftJoinAndSelect("meaning.words", "words")
-            .orderBy("meaning.id", "ASC")
-            .skip(randomInt)
-            .take(1)
-            .getOne()
-        );
-        if (
-          // haven't been already played
-          !this.games[roomName]
-            .tasks
-            .map(task => task.meaningId)
-            .includes(randomizedMeaning.id)
-          &&
-          // and not in words of randomizedMeanings (not already randomized), so that the randomized word list is unique
-          randomizedMeanings
-            .flatMap(meaning => meaning.words)
-            .map(word => word.id)
-            .every(wordId => !randomizedMeaning.words.map(word => word.id).includes(wordId))
-        ) {
-          break; // break if successfuly picked 'randomizedMeaning' ( conditions present is above 'if' )
-        }
-      }
-      randomizedMeanings.push(randomizedMeaning);
-    }
-    const randomizedMeaningToPlay =
-      randomizedMeanings[getRandomInt(0, numberOfWordsToRandomize - 1)];
-    const randomizedPolishWord: WordEntity = this.randomizeElement(
-      randomizedMeaningToPlay.words.filter((el) => el.lang === "pl")
-    );
-
-
-    let correctWord: WordEntity;
-    const ret = {
-      word: randomizedPolishWord?.word,
-      word_desc: randomizedMeaningToPlay.meaning_lang1_desc,
-      meaningId: randomizedMeaningToPlay.id,
-      wordOptions: randomizedMeanings.map((meaning) => {
-        const randomizedWord: WordEntity = this.randomizeElement(
-          meaning.words.filter((el) => el.lang === "en")
-        );
-        if (meaning.id === randomizedMeaningToPlay.id) {
-          correctWord = randomizedWord;
-        }
-        return {
-          wordId: randomizedWord.id,
-          word: randomizedWord.word
-        };
-      })
-    };
-    this.games[roomName].tasks.push({
-      ...ret,
-      correctWord
-    });
-    return ret;
-  }
+  // public async generateTask(forGameId: number): Promise<TaskType> {
+  //   const roomName = createRoomName(forGameId);
+  //   const result = await this.meaningRepo
+  //     .createQueryBuilder()
+  //     .select("COUNT(*) as count")
+  //     .getRawOne();
+  //   const count = Number.parseInt(result.count);
+  //   const numberOfWordsToRandomize = 8;
+  //   let counter = numberOfWordsToRandomize;
+  //   const randomizedMeanings: MeaningEntity[] = [];
+  //   while (counter--) {
+  //     let randomizedMeaning: MeaningEntity;
+  //     while (true) {
+  //       const randomInt = getRandomInt(0, count - 1);
+  //       randomizedMeaning = (
+  //         await this.meaningRepo
+  //           .createQueryBuilder("meaning")
+  //           .leftJoinAndSelect("meaning.words", "words")
+  //           .orderBy("meaning.id", "ASC")
+  //           .skip(randomInt)
+  //           .take(1)
+  //           .getOne()
+  //       );
+  //       if (
+  //         // haven't been already played
+  //         !this.games[roomName]
+  //           .tasks
+  //           .map(task => task.meaningId)
+  //           .includes(randomizedMeaning.id)
+  //         &&
+  //         // and not in words of randomizedMeanings (not already randomized), so that the randomized word list is unique
+  //         randomizedMeanings
+  //           .flatMap(meaning => meaning.words)
+  //           .map(word => word.id)
+  //           .every(wordId => !randomizedMeaning.words.map(word => word.id).includes(wordId))
+  //       ) {
+  //         break; // break if successfuly picked 'randomizedMeaning' ( conditions present is above 'if' )
+  //       }
+  //     }
+  //     randomizedMeanings.push(randomizedMeaning);
+  //   }
+  //   const randomizedMeaningToPlay =
+  //     randomizedMeanings[getRandomInt(0, numberOfWordsToRandomize - 1)];
+  //   const randomizedPolishWord: WordEntity = this.randomizeElement(
+  //     randomizedMeaningToPlay.words.filter((el) => el.lang === "pl")
+  //   );
+  //
+  //
+  //   let correctWord: WordEntity;
+  //   const ret = {
+  //     word: randomizedPolishWord?.word,
+  //     word_desc: randomizedMeaningToPlay.meaning_lang1_desc,
+  //     meaningId: randomizedMeaningToPlay.id,
+  //     wordOptions: randomizedMeanings.map((meaning) => {
+  //       const randomizedWord: WordEntity = this.randomizeElement(
+  //         meaning.words.filter((el) => el.lang === "en")
+  //       );
+  //       if (meaning.id === randomizedMeaningToPlay.id) {
+  //         correctWord = randomizedWord;
+  //       }
+  //       return {
+  //         wordId: randomizedWord.id,
+  //         word: randomizedWord.word
+  //       };
+  //     })
+  //   };
+  //   this.games[roomName].tasks.push({
+  //     ...ret,
+  //     correctWord
+  //   });
+  //   return ret;
+  // }
 
   public async getCorrectWordInLatestTask(gameId: number): Promise<{ word: string, wordId: number }> {
     const roomName = createRoomName(gameId);
@@ -462,11 +467,12 @@ export default class GameService implements OnModuleInit {
   ): Promise<boolean> {
     const meaning = await this.meaningRepo
       .createQueryBuilder("meaning")
-      .innerJoinAndSelect("meaning.words", "words")
+      .innerJoinAndSelect("meaning.words", "links")
+      .innerJoinAndSelect("links.word", "word")
       .where({ id: meaningId })
       .getOne();
     return meaning.words
-      .filter((word) => word.lang !== nativeLang)
-      .some((word) => word.id === wordIdSolution);
+      .filter((link) => link.word.lang !== nativeLang)
+      .some((link) => link.word.id === wordIdSolution);
   }
 }

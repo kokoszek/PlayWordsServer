@@ -8,7 +8,8 @@ import { MeaningType } from "./meaning.type";
 import { UpdateMeaningInput } from "./meaning.input.update";
 import { DeepPartial, Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
-
+import { LinkEntity } from "./link.entity";
+import { WordEntity } from "../word/word.entity";
 
 @Resolver(of => MeaningType)
 export class MeaningResolver {
@@ -17,33 +18,70 @@ export class MeaningResolver {
     private meaningService: MeaningService,
     private wordService: WordService,
     @InjectRepository(MeaningEntity)
-    private meaningRepo: Repository<MeaningEntity>
+    private meaningRepo: Repository<MeaningEntity>,
+    @InjectRepository(LinkEntity)
+    private linkRepo: Repository<LinkEntity>,
+    @InjectRepository(WordEntity)
+    private wordRepo: Repository<WordEntity>
   ) {
   }
 
-  GraphQLInput2Entity(input: NewMeaningInput | UpdateMeaningInput): MeaningEntity {
+  GraphQL2Entity(input: NewMeaningInput | UpdateMeaningInput): MeaningEntity {
     return this.meaningRepo.create({
       ...input,
       id: "id" in input ? input.id : null,
+      words: input.words_lang1.map(word => {
+        return this.linkRepo.create({
+          level: "A1",
+          meaningId: "id" in input ? input.id : undefined,
+          // meaning: this.meaningRepo.create({
+          //   id: "id" in input ? input.id : undefined
+          // }),
+          wordId: word.id,
+          word: this.wordRepo.create({
+            id: word.id,
+            word: word.word,
+            lang: input.meaning_lang1_language,
+            origin: "web-interface"
+          })
+        });
+      }).concat(
+        input.words_lang2.map(word => {
+          return this.linkRepo.create({
+            level: "A1",
+            // meaningId: "id" in input ? input.id : undefined,
+            // meaning: this.meaningRepo.create({
+            //   id: "id" in input ? input.id : undefined
+            // }),
+            wordId: word.id,
+            word: this.wordRepo.create({
+              id: word.id,
+              word: word.word,
+              lang: input.meaning_lang2_language,
+              origin: "web-interface"
+            })
+          });
+        })
+      )
       // meaning_lang1_language: input.meaning_lang1_language,
       // meaning_lang1_desc: input.meaning_lang1_desc,
       // meaning_lang2_language: input.meaning_lang2_language,
       // meaning_lang2_desc: input.meaning_lang2_desc,
       // category: input.category,
       // partOfSpeech: input.partOfSpeech,
-      words: input.words_lang1.map(word => ({
-        ...word,
-        lang: input.meaning_lang1_language
-      }))
-        .concat(input.words_lang2.map(word => ({
-          ...word,
-          lang: input.meaning_lang2_language
-        })))
+      // words: input.words_lang1.map(word => ({
+      //   ...word,
+      //   lang: input.meaning_lang1_language
+      // }))
+      //   .concat(input.words_lang2.map(word => ({
+      //     ...word,
+      //     lang: input.meaning_lang2_language
+      //   })))
     });
     //return this.meaningRepo.create()
   }
 
-  Entity2GraphQLType(typormEntity: MeaningEntity): MeaningType {
+  Entity2GraphQL(typormEntity: MeaningEntity): MeaningType {
     return {
       ...typormEntity,
       words_lang1: null, // resolved in resolver
@@ -55,10 +93,9 @@ export class MeaningResolver {
   async createMeaning(
     @Args("meaningInput") meaningInput: NewMeaningInput
   ) {
-
     console.log("meaningInput: ", meaningInput);
-    let meaning: MeaningEntity = this.GraphQLInput2Entity(meaningInput);
-    const saved = await this.meaningService.upsertMeaning(meaning);
+    let meaning: MeaningEntity = this.GraphQL2Entity(meaningInput);
+    const saved = await this.meaningService.insertMeaning(meaning);
     return saved;
   }
 
@@ -67,8 +104,8 @@ export class MeaningResolver {
     @Args("meaningInput") meaningInput: UpdateMeaningInput
   ) {
     console.log("upsertMeaning -> input: ", meaningInput);
-    let meaning: MeaningEntity = this.GraphQLInput2Entity(meaningInput);
-    const meaningEntity = await this.meaningService.upsertMeaning(meaning);
+    let meaning: MeaningEntity = this.GraphQL2Entity(meaningInput);
+    const meaningEntity = await this.meaningService.updateMeaning(meaning);
     return meaningEntity;
   }
 
@@ -99,7 +136,8 @@ export class MeaningResolver {
     @Args("search", { type: () => String }) search: string
   ): Promise<MeaningType[]> {
     let result = await this.meaningService.searchByText(search);
-    return result.map(this.Entity2GraphQLType);
+    console.log("result: ", result);
+    return result.map(this.Entity2GraphQL);
   }
 
   @Query(returns => MeaningType)
@@ -107,13 +145,14 @@ export class MeaningResolver {
     @Args("id", { type: () => GraphQLInt }) id: number
   ): Promise<MeaningType> {
     let result = await this.meaningService.getById(id);
-    return this.Entity2GraphQLType(result);
+    return this.Entity2GraphQL(result);
   }
 
   @ResolveField()
   async words_lang1(@Parent() meaning: MeaningType) {
     const { id } = meaning;
     const words = await this.wordService.findAllByMeaningId(id, meaning.meaning_lang1_language);
+    //console.log("words1: ", words);
     return words;
   }
 
@@ -121,6 +160,7 @@ export class MeaningResolver {
   async words_lang2(@Parent() meaning: MeaningType) {
     const { id } = meaning;
     const words = await this.wordService.findAllByMeaningId(id, meaning.meaning_lang2_language);
+    //console.log("words2: ", words);
     return words;
   }
 }

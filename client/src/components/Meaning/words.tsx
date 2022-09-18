@@ -1,10 +1,10 @@
-import produce from 'immer';
-import { newWord } from './utils';
-import WordItem from './word-item';
+import produce from "immer";
+import { newWord } from "./utils";
+import WordItem from "./word-item";
 
 export default function Words(props: any) {
   const { setMeaning, meaning } = props;
-  console.log('meaning: ', meaning);
+  console.log("meaning: ", meaning);
   return (
     <div className="words">
       <div className="lang1">
@@ -18,35 +18,39 @@ export default function Words(props: any) {
                 idx={idx}
                 showRemoveButtom={true}
                 onInputChange={(value: any) => {
+                  console.log("BEFORE: ", meaning);
+                  let newMeaning = produce(meaning, (draft: any) => {
+                    draft.words_lang1[idx].word = value;
+                  });
+                  console.log("newMeaning: ", newMeaning);
                   setMeaning(
-                    produce(meaning, (draft: any) => {
-                      draft.words_lang1[idx].word = value;
-                    }),
+                    newMeaning
                   );
                 }}
                 onRemoveClicked={() => {
                   setMeaning(
                     produce(meaning, (draft: any) => {
                       draft.words_lang1.splice(idx, 1);
-                    }),
+                    })
                   );
                 }}
-                setExistingWord={(word: object) => {
-                  setMeaning(
-                    produce(meaning, (draft: any) => {
-                      draft.words_lang1[idx] = word;
-                    }),
-                  );
+                setExistingWord={(wordId: number) => {
+                  // setMeaning(
+                  //   produce(meaning, (draft: any) => {
+                  //     draft.words_lang1[idx] = word;
+                  //   })
+                  // );
                 }}
                 unsetExistingWord={() => {
-                  setMeaning(
-                    produce(meaning, (draft: any) => {
-                      if (draft.words_lang1[idx]) {
-                        delete draft.words_lang1[idx].id;
-                        delete draft.words_lang1[idx].meanings;
-                      }
-                    }),
-                  );
+                  // console.log("UNSET EXISTING MEANING");
+                  // setMeaning(
+                  //   produce(meaning, (draft: any) => {
+                  //     if (draft.words_lang1[idx]) {
+                  //       //delete draft.words_lang1[idx].id;
+                  //       delete draft.words_lang1[idx].meanings;
+                  //     }
+                  //   })
+                  // );
                 }}
               />
             );
@@ -57,7 +61,7 @@ export default function Words(props: any) {
             setMeaning(
               produce(meaning, (draft: any) => {
                 draft.words_lang1.push(newWord());
-              }),
+              })
             );
           }}
         >
@@ -78,21 +82,21 @@ export default function Words(props: any) {
                   setMeaning(
                     produce(meaning, (draft: any) => {
                       draft.words_lang2[idx].word = value;
-                    }),
+                    })
                   );
                 }}
                 onRemoveClicked={() => {
                   setMeaning(
                     produce(meaning, (draft: any) => {
                       draft.words_lang2.splice(idx, 1);
-                    }),
+                    })
                   );
                 }}
                 setExistingWord={(word: object) => {
                   setMeaning(
                     produce(meaning, (draft: any) => {
                       draft.words_lang2[idx] = word;
-                    }),
+                    })
                   );
                 }}
                 unsetExistingWord={() => {
@@ -102,7 +106,7 @@ export default function Words(props: any) {
                         delete draft.words_lang2[idx].id;
                         delete draft.words_lang2[idx].meanings;
                       }
-                    }),
+                    })
                   );
                 }}
               />
@@ -114,7 +118,7 @@ export default function Words(props: any) {
             setMeaning(
               produce(meaning, (draft: any) => {
                 draft.words_lang2.push(newWord());
-              }),
+              })
             );
           }}
         >
