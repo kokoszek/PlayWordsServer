@@ -14,14 +14,20 @@ export const GET_MEANINGS = gql`
             partOfSpeech
             category
             words_lang1 {
-                id
-                word
-                origin
+                level
+                word {
+                    id
+                    origin
+                    word
+                }
             }
             words_lang2 {
-                id
-                word
-                origin
+                level
+                word {
+                    id
+                    origin
+                    word
+                }
             }
         }
     }
@@ -34,22 +40,31 @@ export const GET_WORDS = gql`
             word
             lang
             meanings {
-                id
-                meaning_lang1_desc
-                meaning_lang1_language
-                meaning_lang2_desc
-                meaning_lang2_language
-                partOfSpeech
-                category
-                words_lang1 {
+                level
+                meaning {
                     id
-                    word
-                    origin
-                }
-                words_lang2 {
-                    id
-                    word
-                    origin
+                    meaning_lang1_desc
+                    meaning_lang1_language
+                    meaning_lang2_desc
+                    meaning_lang2_language
+                    partOfSpeech
+                    category
+                    words_lang1 {
+                        level
+                        word {
+                            id
+                            origin
+                            word
+                        }
+                    }
+                    words_lang2 {
+                        level
+                        word {
+                            id
+                            origin
+                            word
+                        }
+                    }
                 }
             }
         }

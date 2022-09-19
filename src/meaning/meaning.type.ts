@@ -8,6 +8,7 @@ import {
 import { Field, ObjectType } from "@nestjs/graphql";
 import { GraphQLInt, GraphQLString } from "graphql";
 import { WordType } from "../word/word.type";
+import { LinkType } from "./link.type";
 
 @ObjectType()
 export class MeaningType
@@ -33,9 +34,9 @@ export class MeaningType
   @Field((type) => GraphQLString, { nullable: true })
   category: CategoryType;
 
-  @Field((type) => [WordType])
-  words_lang1: WordType[];
+  @Field((type) => [LinkType])
+  words_lang1: LinkType[];
 
-  @Field((type) => [WordType])
-  words_lang2: WordType[];
+  @Field((type) => [LinkType])
+  words_lang2: LinkType[];
 }

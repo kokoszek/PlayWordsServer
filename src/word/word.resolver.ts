@@ -7,6 +7,7 @@ import { WordType } from "./word.type";
 import { WordService } from "./word-service";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
+import WordConverter from "./word.converter";
 
 @Resolver(of => WordType)
 export class WordResolver {
@@ -16,14 +17,6 @@ export class WordResolver {
     @InjectRepository(WordEntity)
     private wordRepo: Repository<WordEntity>
   ) {
-  }
-
-  private Entity2GraphQLType(entity: WordEntity): WordType {
-    return {
-      ...entity,
-      level: null,
-      meanings: null
-    };
   }
 
   @ResolveField()
@@ -52,7 +45,7 @@ export class WordResolver {
     @Args("word", { type: () => String }) word: string
   ): Promise<WordType> {
     let result = await this.wordService.wordExists(word);
-    return this.Entity2GraphQLType(result);
+    return WordConverter.entityToGQL(result);
   }
 
   @Query(returns => [WordType])
@@ -60,6 +53,7 @@ export class WordResolver {
     @Args("search", { type: () => String }) search: string
   ): Promise<WordType[]> {
     let result = await this.wordService.searchByText(search);
-    return result.map(this.Entity2GraphQLType);
+    console.log("searchWord: ", result);
+    return result.map(WordConverter.entityToGQL);
   }
 }

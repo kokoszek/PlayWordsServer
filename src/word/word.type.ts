@@ -4,6 +4,7 @@ import { GraphQLID, GraphQLInt, GraphQLString } from "graphql";
 import { Maybe } from "graphql/jsutils/Maybe";
 import { WordInputUpdate } from "./word.input.update";
 import { MeaningType } from "../meaning/meaning.type";
+import { LinkType } from "../meaning/link.type";
 
 @ObjectType()
 export class WordType implements Omit<WordEntity, "meanings" | "wordParticles"> {
@@ -29,8 +30,8 @@ export class WordType implements Omit<WordEntity, "meanings" | "wordParticles"> 
   @Field(type => GraphQLString)
   origin: string;
 
-  @Field(type => [MeaningType], {
+  @Field(type => [LinkType], {
     nullable: false
   })
-  meanings: MeaningType[];
+  meanings: LinkType[];
 }

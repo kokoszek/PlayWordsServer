@@ -8,6 +8,7 @@ import MeaningService from "./meaning.service";
 import { WordModule } from "../word/word.module";
 import { RequestContextModule } from "nestjs-request-context";
 import { LinkEntity } from "./link.entity";
+import { LinkResolver } from "./link.resolver";
 
 @Module({
   imports: [
@@ -19,7 +20,7 @@ import { LinkEntity } from "./link.entity";
     ]),
     WordModule
   ],
-  providers: [MeaningResolver, MeaningService]
+  providers: [MeaningResolver, LinkResolver, MeaningService]
 })
 export class MeaningModule {
 }

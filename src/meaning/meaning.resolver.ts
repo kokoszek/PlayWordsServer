@@ -10,6 +10,9 @@ import { DeepPartial, Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { LinkEntity } from "./link.entity";
 import { WordEntity } from "../word/word.entity";
+import { LinkType } from "./link.type";
+import MeaningConverter from "./meaning.converter";
+import LinkConverter from "./link.converter";
 
 @Resolver(of => MeaningType)
 export class MeaningResolver {
@@ -81,14 +84,6 @@ export class MeaningResolver {
     //return this.meaningRepo.create()
   }
 
-  Entity2GraphQL(typormEntity: MeaningEntity): MeaningType {
-    return {
-      ...typormEntity,
-      words_lang1: null, // resolved in resolver
-      words_lang2: null // resolved in resolver
-    };
-  }
-
   @Mutation(returns => MeaningType)
   async createMeaning(
     @Args("meaningInput") meaningInput: NewMeaningInput
@@ -137,7 +132,7 @@ export class MeaningResolver {
   ): Promise<MeaningType[]> {
     let result = await this.meaningService.searchByText(search);
     console.log("result: ", result);
-    return result.map(this.Entity2GraphQL);
+    return result.map(MeaningConverter.entityToGQL);
   }
 
   @Query(returns => MeaningType)
@@ -145,22 +140,22 @@ export class MeaningResolver {
     @Args("id", { type: () => GraphQLInt }) id: number
   ): Promise<MeaningType> {
     let result = await this.meaningService.getById(id);
-    return this.Entity2GraphQL(result);
+    return MeaningConverter.entityToGQL(result);
   }
 
   @ResolveField()
-  async words_lang1(@Parent() meaning: MeaningType) {
+  async words_lang1(@Parent() meaning: MeaningType): Promise<LinkType[]> {
     const { id } = meaning;
-    const words = await this.wordService.findAllByMeaningId(id, meaning.meaning_lang1_language);
+    const links = await this.wordService.findAllByMeaningId(id, meaning.meaning_lang1_language);
     //console.log("words1: ", words);
-    return words;
+    return links.map(LinkConverter.entityToGQL);
   }
 
   @ResolveField()
-  async words_lang2(@Parent() meaning: MeaningType) {
+  async words_lang2(@Parent() meaning: MeaningType): Promise<LinkType[]> {
     const { id } = meaning;
-    const words = await this.wordService.findAllByMeaningId(id, meaning.meaning_lang2_language);
+    const links = await this.wordService.findAllByMeaningId(id, meaning.meaning_lang2_language);
     //console.log("words2: ", words);
-    return words;
+    return links.map(LinkConverter.entityToGQL);
   }
 }

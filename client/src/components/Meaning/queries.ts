@@ -34,14 +34,20 @@ export const CREATE_MEANING = gql`
             partOfSpeech
             category
             words_lang1 {
-                id
-                word
-                origin
+                level
+                word {
+                    id
+                    origin
+                    word
+                }
             }
             words_lang2 {
-                id
-                word
-                origin
+                level
+                word {
+                    id
+                    origin
+                    word
+                }
             }
         }
     }
@@ -57,14 +63,20 @@ export const UPDATE_MEANING = gql`
             partOfSpeech
             category
             words_lang1 {
-                id
-                word
-                origin
+                level
+                word {
+                    id
+                    origin
+                    word
+                }
             }
             words_lang2 {
-                id
-                word
-                origin
+                level
+                word {
+                    id
+                    origin
+                    word
+                }
             }
         }
     }
@@ -82,7 +94,9 @@ export const WORD_EXISTS = gql`
             id
             word
             meanings {
-                id
+                meaning {
+                    id
+                }
             }
         }
     }

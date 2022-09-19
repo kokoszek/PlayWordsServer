@@ -2,6 +2,14 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type LinkType {
+  level: String
+  meaning: MeaningType!
+  meaningId: Int!
+  word: WordType!
+  wordId: Int!
+}
+
 type MeaningType {
   category: String
   id: Int!
@@ -10,8 +18,8 @@ type MeaningType {
   meaning_lang2_desc: String
   meaning_lang2_language: String!
   partOfSpeech: String
-  words_lang1: [WordType!]!
-  words_lang2: [WordType!]!
+  words_lang1: [LinkType!]!
+  words_lang2: [LinkType!]!
 }
 
 type Mutation {
@@ -81,7 +89,7 @@ type WordType {
   id: Int!
   lang: String!
   level: String!
-  meanings: [MeaningType!]!
+  meanings: [LinkType!]!
   origin: String!
   word: String!
 }

@@ -14,6 +14,7 @@ const fetch = require("node-fetch");
 
 import { getManager, getConnectionManager } from "typeorm";
 import WordParticle from "./word-particle.entity";
+import { LinkEntity } from "../meaning/link.entity";
 
 const fs = require("fs");
 const PDFParser = require("pdf2json");
@@ -95,13 +96,13 @@ export class WordService implements OnModuleInit {
     return result.data.data.translations[0].translatedText;
   }
 
-  async findAllByMeaningId(meaningId: number, lang: LangType): Promise<WordEntity[]> {
+  async findAllByMeaningId(meaningId: number, lang: LangType): Promise<LinkEntity[]> {
     let result = await
       this.meaningRepo
         .createQueryBuilder("meaning")
         .select()
         .innerJoinAndSelect("meaning.words", "links")
-        .innerJoinAndSelect("links.word", "word", "word.lang = :lang", {
+        .innerJoin("links.word", "word", "word.lang = :lang", {
           lang
         })
         .where({
@@ -111,7 +112,7 @@ export class WordService implements OnModuleInit {
     if (!result) {
       return [];
     }
-    return result.words.map(link => link.word);
+    return result.words;
   }
 
   processB1CambridgeVocabularyLine(line: string[], prevLine: string[]) {
