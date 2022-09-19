@@ -74,7 +74,6 @@ export default function Meaning() {
   //   setMeaning(newMeaning());
   // }, []);
 
-  console.log("category data: ", categoryData);
   return (
     <div className="meaning-content">
       <div className="group">

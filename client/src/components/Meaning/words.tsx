@@ -34,7 +34,14 @@ export default function Words(props: any) {
                     })
                   );
                 }}
-                setExistingWord={(wordId: number) => {
+                setWordId={(wordId: number) => {
+                  setMeaning(
+                    produce(meaning, (draft: any) => {
+                      draft.words_lang1[idx].id = wordId;
+                    })
+                  );
+                }}
+                setExistingWord={(word: object) => {
                   // setMeaning(
                   //   produce(meaning, (draft: any) => {
                   //     draft.words_lang1[idx] = word;
@@ -75,6 +82,7 @@ export default function Words(props: any) {
             return (
               <WordItem
                 word={el}
+                lang="en"
                 meaning={meaning}
                 idx={idx}
                 showRemoveButtom={true}
@@ -92,20 +100,10 @@ export default function Words(props: any) {
                     })
                   );
                 }}
-                setExistingWord={(word: object) => {
+                setWordId={(wordId: number) => {
                   setMeaning(
                     produce(meaning, (draft: any) => {
-                      draft.words_lang2[idx] = word;
-                    })
-                  );
-                }}
-                unsetExistingWord={() => {
-                  setMeaning(
-                    produce(meaning, (draft: any) => {
-                      if (draft.words_lang2[idx]) {
-                        delete draft.words_lang2[idx].id;
-                        delete draft.words_lang2[idx].meanings;
-                      }
+                      draft.words_lang2[idx].id = wordId;
                     })
                   );
                 }}

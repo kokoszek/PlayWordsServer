@@ -1,8 +1,8 @@
-import produce from 'immer';
-import { useEffect, useState } from 'react';
-import { GET_WORDS } from '../List/queries';
-import { useQuery } from '@apollo/client';
-import { WORD_EXISTS } from './queries';
+import produce from "immer";
+import { useEffect, useRef, useState } from "react";
+import { GET_WORDS } from "../List/queries";
+import { useQuery } from "@apollo/client";
+import { WORD_EXISTS } from "./queries";
 
 function WordExistsHint(props: any) {
   //const { exists } = props;
@@ -17,17 +17,21 @@ export default function WordItem(props: any) {
     showRemoveButtom,
     onInputChange,
     onRemoveClicked,
-    setExistingWord,
-    unsetExistingWord,
+    setWordId,
+    lang
   } = props;
 
   const { data, loading, error } = useQuery(WORD_EXISTS, {
     variables: {
-      word: word.word,
+      word: word.word
     },
     //skip: !!word.id,
-    skip: false,
+    skip: false
   });
+
+  if (idx === 0 && lang === "en") {
+    console.log("word(get): ", word);
+  }
 
   function wordExistsInMeaning(): boolean {
     if (!data) {
@@ -39,15 +43,27 @@ export default function WordItem(props: any) {
     return a;
   }
 
+  const origWordIdRef = useRef(null);
   useEffect(() => {
-    if (data?.wordExists) {
-      const wordToSet = {
-        ...data.wordExists,
-      };
-      delete wordToSet['meanings'];
-      setExistingWord(wordToSet);
+    if (origWordIdRef.current === null) {
+      if (idx === 0 && lang === "en") {
+        console.log("setting ref: ", word.id);
+      }
+      origWordIdRef.current = word.id;
+    }
+  }, [word.id]);
+
+  useEffect(() => {
+    if (data?.wordExists && !wordExistsInMeaning()) {
+      if (idx === 0 && lang === "en") {
+        console.log("setWordId: ", data.wordExists.id);
+      }
+      setWordId(data.wordExists.id);
     } else {
-      unsetExistingWord();
+      if (idx === 0 && lang === "en") {
+        console.log("setWordId to orig: ", origWordIdRef.current);
+      }
+      setWordId(origWordIdRef.current);
     }
   }, [word.word, data?.wordExists]);
   // useEffect(() => {
