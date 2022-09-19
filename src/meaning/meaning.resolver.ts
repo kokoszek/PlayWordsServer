@@ -131,7 +131,6 @@ export class MeaningResolver {
     @Args("search", { type: () => String }) search: string
   ): Promise<MeaningType[]> {
     let result = await this.meaningService.searchByText(search);
-    console.log("result: ", result);
     return result.map(MeaningConverter.entityToGQL);
   }
 

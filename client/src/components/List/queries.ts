@@ -41,6 +41,8 @@ export const GET_WORDS = gql`
             lang
             meanings {
                 level
+                meaningId
+                wordId
                 meaning {
                     id
                     meaning_lang1_desc

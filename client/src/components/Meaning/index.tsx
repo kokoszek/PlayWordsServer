@@ -11,7 +11,7 @@ import { GET_MEANINGS, GET_WORDS } from "../List/queries";
 import "./styles.scss";
 import produce from "immer";
 import _ from "lodash";
-import { newWord, newMeaning } from "./utils";
+import { newLinkWithEmptyWord, newMeaning } from "./utils";
 import Words from "./words";
 import Select from "react-select";
 
@@ -156,7 +156,7 @@ export default function Meaning() {
         <button
           onClick={async () => {
             console.log("MEANING: ", meaning);
-            let copy = _.cloneDeep(meaning);
+            let copy = _.cloneDeep(meaning); // because some fields were freezed, need to work on unlocked
             recursive(copy, (obj: any, key: string) => {
               if (key === "__typename") {
                 obj["__typename"] = undefined;
@@ -167,17 +167,33 @@ export default function Meaning() {
                 }
               }
             });
+            const input = {
+              ...copy,
+              words_lang1: copy.words_lang1.map((link: any) => {
+                return {
+                  level: link.level,
+                  ...link.word
+                };
+              }),
+              words_lang2: copy.words_lang2.map((link: any) => {
+                return {
+                  level: link.level,
+                  ...link.word
+                };
+              })
+            };
+            console.log("INPUT: ", input);
             if (meaning.id) {
               await updateMeaning({
                 variables: {
-                  meaningInput: copy
+                  meaningInput: input
                 },
                 refetchQueries: [GET_WORDS]
               });
             } else {
               await createMeaning({
                 variables: {
-                  meaningInput: copy
+                  meaningInput: input
                 },
                 refetchQueries: [GET_WORDS]
               });

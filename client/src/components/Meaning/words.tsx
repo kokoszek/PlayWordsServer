@@ -1,6 +1,6 @@
 import produce from "immer";
-import { newWord } from "./utils";
-import WordItem from "./word-item";
+import { newLinkWithEmptyWord } from "./utils";
+import LinkItem from "./word-item";
 
 export default function Words(props: any) {
   const { setMeaning, meaning } = props;
@@ -10,19 +10,18 @@ export default function Words(props: any) {
       <div className="lang1">
         <h2>polskie synonimy</h2>
         <ul>
-          {meaning?.words_lang1.map((el: any, idx: number) => {
+          {meaning?.words_lang1.map((link: any, idx: number) => {
             return (
-              <WordItem
-                word={el}
+              <LinkItem
+                link={link}
+                key={link.word.id}
                 meaning={meaning}
                 idx={idx}
                 showRemoveButtom={true}
                 onInputChange={(value: any) => {
-                  console.log("BEFORE: ", meaning);
                   let newMeaning = produce(meaning, (draft: any) => {
-                    draft.words_lang1[idx].word = value;
+                    draft.words_lang1[idx].word.word = value;
                   });
-                  console.log("newMeaning: ", newMeaning);
                   setMeaning(
                     newMeaning
                   );
@@ -37,7 +36,7 @@ export default function Words(props: any) {
                 setWordId={(wordId: number) => {
                   setMeaning(
                     produce(meaning, (draft: any) => {
-                      draft.words_lang1[idx].id = wordId;
+                      draft.words_lang1[idx].word.id = wordId;
                     })
                   );
                 }}
@@ -67,7 +66,7 @@ export default function Words(props: any) {
           onClick={() => {
             setMeaning(
               produce(meaning, (draft: any) => {
-                draft.words_lang1.push(newWord());
+                draft.words_lang1.push(newLinkWithEmptyWord());
               })
             );
           }}
@@ -78,10 +77,11 @@ export default function Words(props: any) {
       <div className="lang2">
         <h2>angielskie synonimy</h2>
         <ul>
-          {meaning?.words_lang2.map((el: any, idx: number) => {
+          {meaning?.words_lang2.map((link: any, idx: number) => {
             return (
-              <WordItem
-                word={el}
+              <LinkItem
+                link={link}
+                key={link.word.id}
                 lang="en"
                 meaning={meaning}
                 idx={idx}
@@ -89,7 +89,7 @@ export default function Words(props: any) {
                 onInputChange={(value: any) => {
                   setMeaning(
                     produce(meaning, (draft: any) => {
-                      draft.words_lang2[idx].word = value;
+                      draft.words_lang2[idx].word.word = value;
                     })
                   );
                 }}
@@ -103,7 +103,7 @@ export default function Words(props: any) {
                 setWordId={(wordId: number) => {
                   setMeaning(
                     produce(meaning, (draft: any) => {
-                      draft.words_lang2[idx].id = wordId;
+                      draft.words_lang2[idx].word.id = wordId;
                     })
                   );
                 }}
@@ -115,7 +115,7 @@ export default function Words(props: any) {
           onClick={() => {
             setMeaning(
               produce(meaning, (draft: any) => {
-                draft.words_lang2.push(newWord());
+                draft.words_lang2.push(newLinkWithEmptyWord());
               })
             );
           }}

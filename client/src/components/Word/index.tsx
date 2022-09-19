@@ -13,12 +13,12 @@ export default function Word() {
       <h2>Znaczenia słowa: </h2>
       <ul>
         {
-          entityCtx?.word?.meanings && entityCtx.word.meanings.map((el: any) => (
-            <li onClick={() => {
-              entityCtx.setMeaning(el);
+          entityCtx?.word?.meanings && entityCtx.word.meanings.map((link: any) => (
+            <li key={link.meaning.id} onClick={() => {
+              entityCtx.setMeaning(link.meaning);
             }}>
               {
-                el.meaning_lang1_desc
+                link.meaning.meaning_lang1_desc
               }
             </li>
           ))

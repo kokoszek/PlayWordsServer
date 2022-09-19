@@ -11,7 +11,7 @@ function WordExistsHint(props: any) {
 
 export default function WordItem(props: any) {
   const {
-    word,
+    link,
     meaning,
     idx,
     showRemoveButtom,
@@ -20,17 +20,19 @@ export default function WordItem(props: any) {
     setWordId,
     lang
   } = props;
+  const word = link?.word;
+  //console.log("word: ", word);
 
   const { data, loading, error } = useQuery(WORD_EXISTS, {
     variables: {
       word: word.word
     },
     //skip: !!word.id,
-    skip: false
+    skip: !word.word
   });
 
   if (idx === 0 && lang === "en") {
-    console.log("word(get): ", word);
+    //console.log("word(get): ", word);
   }
 
   function wordExistsInMeaning(): boolean {
@@ -38,7 +40,7 @@ export default function WordItem(props: any) {
       return true;
     }
     let a = data.wordExists.meanings
-      .map((el: any) => el.id)
+      .map((link: any) => link.meaning.id)
       .includes(meaning.id);
     return a;
   }
@@ -47,7 +49,7 @@ export default function WordItem(props: any) {
   useEffect(() => {
     if (origWordIdRef.current === null) {
       if (idx === 0 && lang === "en") {
-        console.log("setting ref: ", word.id);
+        //console.log("setting ref: ", word.id);
       }
       origWordIdRef.current = word.id;
     }
@@ -56,12 +58,12 @@ export default function WordItem(props: any) {
   useEffect(() => {
     if (data?.wordExists && !wordExistsInMeaning()) {
       if (idx === 0 && lang === "en") {
-        console.log("setWordId: ", data.wordExists.id);
+        //console.log("setWordId: ", data.wordExists.id);
       }
       setWordId(data.wordExists.id);
     } else {
       if (idx === 0 && lang === "en") {
-        console.log("setWordId to orig: ", origWordIdRef.current);
+        //console.log("setWordId to orig: ", origWordIdRef.current);
       }
       setWordId(origWordIdRef.current);
     }

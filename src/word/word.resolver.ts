@@ -8,6 +8,9 @@ import { WordService } from "./word-service";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import WordConverter from "./word.converter";
+import { LinkType } from "../meaning/link.type";
+import LinkConverter from "../meaning/link.converter";
+import { LinkEntity } from "../meaning/link.entity";
 
 @Resolver(of => WordType)
 export class WordResolver {
@@ -20,7 +23,7 @@ export class WordResolver {
   }
 
   @ResolveField()
-  async meanings(@Parent() word: WordType): Promise<MeaningType[]> {
+  async meanings(@Parent() word: WordType): Promise<LinkType[]> {
     const { id } = word;
     const wordEntity = await this.wordRepo
       .createQueryBuilder("word")
@@ -28,13 +31,9 @@ export class WordResolver {
       .innerJoinAndSelect("links.meaning", "meaning")
       .where({ id })
       .getOne();
-    return wordEntity.meanings.map(link => { // TODO: use mapping function from meaning resolver
-      //link.meaning
-      return {
-        ...link.meaning,
-        words_lang1: null, // resolved in resolver
-        words_lang2: null // resolved in resolver
-      };
+    // console.log("LINKS: ", wordEntity.meanings);
+    return wordEntity.meanings.map((link: LinkEntity) => {
+      return LinkConverter.entityToGQL(link);
     });
   }
 
@@ -53,7 +52,7 @@ export class WordResolver {
     @Args("search", { type: () => String }) search: string
   ): Promise<WordType[]> {
     let result = await this.wordService.searchByText(search);
-    console.log("searchWord: ", result);
+    //console.log("searchWord: ", result);
     return result.map(WordConverter.entityToGQL);
   }
 }

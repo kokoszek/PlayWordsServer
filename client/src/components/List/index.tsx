@@ -11,6 +11,7 @@ export default function List() {
       search: searchText
     }
   });
+  //console.log("data.searchWord: ", data.searchWord);
   const entityCtx = useContext<any>(ChosenEntityContext);
   return (
     <div className="search-list">
@@ -30,6 +31,7 @@ export default function List() {
                   console.log("THIS");
                   entityCtx.setWord(el);
                 } else {
+                  console.log("el.meanings[0].meaning: ", el.meanings[0].meaning);
                   entityCtx.setMeaning(el.meanings[0].meaning);
                 }
               }}

@@ -53,33 +53,63 @@ export default class MeaningService {
   }
 
   async deleteMeaning(meaningId: number): Promise<boolean> {
-    const meaningSnapshowBeforeDelete = await this.findMeaningWithWords(meaningId);
+    const meaningSnapshowBeforeDelete: MeaningEntity = await this.findMeaningWithWords(meaningId);
+    console.log("MeaningService -> deleteMeanings(id)", meaningId);
+    let deleteResult = await this.linkRepo.delete({
+      meaningId: meaningId
+    });
+    console.log("deleteResult(linkRepo): ", deleteResult);
     await this.meaningRepo.delete({ id: meaningId });
-    // for (let idx in meaningSnapshowBeforeDelete?.words) {
-    //   await this.wordService.deleteWordIfOrphan(meaningSnapshowBeforeDelete.words[idx].word.id);
-    // }
+    for (let link of meaningSnapshowBeforeDelete?.words) {
+      await this.wordService.deleteWordIfOrphan(link.word.id);
+    }
     return true;
   }
 
   async insertMeaning(meaning: MeaningEntity): Promise<MeaningEntity> {
-    const meaningSnapshotBeforeSave = await this.findMeaningWithWords(meaning.id);
+    //const meaningSnapshotBeforeSave = await this.findMeaningWithWords(meaning.id);
     console.log("before save: ", meaning);
-    let meaningId = await this.meaningRepo.insert(meaning);
-    console.log("meaningId: ", meaningId.raw.insertId);
+    let meaningId = (await this.meaningRepo.insert(meaning)).raw.insertId;
     for (let link of meaning.words) {
-      let wordId = await this.wordRepo.insert(link.word);
-      console.log("wordId: ", wordId.raw.insertId);
-      await this.linkRepo.insert({
+      let wordId = link.word.id;
+      if (!wordId) {
+        wordId = (await this.wordRepo.insert(link.word)).raw.insertId;
+        await this.linkRepo.insert({
+          level: link.level,
+          wordId: wordId,
+          meaningId: meaningId
+        });
+      }
+      await this.linkRepo.save({
         level: link.level,
-        wordId: wordId.raw.insertId,
-        meaningId: meaningId.raw.insertId
+        wordId: wordId,
+        meaningId: meaningId
       });
     }
     console.log("after save");
     // for (let idx in meaningSnapshotBeforeSave?.words) {
     //   await this.wordService.deleteWordIfOrphan(meaningSnapshotBeforeSave.words[idx].word.id);
     // }
-    return await this.findMeaningWithWords(meaning.id);
+    return await this.findMeaningWithWords(meaningId);
+  }
+
+  private async createLinkIfDoesNotExist(meaningId: number, wordId: number, level: string): Promise<LinkEntity> {
+    let linkEntity: LinkEntity = await this.linkRepo.findOne({
+      where: {
+        meaningId: meaningId,
+        wordId: wordId
+      }
+    });
+    if (!linkEntity) {
+      console.log("link does not exists, creating...(word id): ", wordId);
+      linkEntity = this.linkRepo.create({
+        meaningId: meaningId,
+        wordId: wordId,
+        level: level
+      });
+      linkEntity = await this.linkRepo.save(linkEntity);
+    }
+    return linkEntity;
   }
 
   async updateMeaning(meaning: MeaningEntity): Promise<MeaningEntity> {
@@ -94,7 +124,8 @@ export default class MeaningService {
     for (const link of meaning.words) {
       if (link.word.id) {
         // create link if does not exist yet
-        console.log("LINK: ", link);
+        await this.createLinkIfDoesNotExist(meaning.id, link.word.id, link.level);
+
         await this.wordRepo.update({
           id: link.word.id
         }, link.word);

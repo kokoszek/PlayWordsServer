@@ -18,7 +18,6 @@ export class LinkResolver {
     @InjectRepository(WordEntity)
     private wordRepo: Repository<WordEntity>
   ) {
-    console.log("LinkResolver ctr");
   }
 
   @ResolveField()
@@ -33,13 +32,11 @@ export class LinkResolver {
 
   @ResolveField()
   async meaning(@Parent() link: LinkType): Promise<MeaningType> {
-    console.log("LinkResolver -> link: ", link);
     const meaningEntity = await this.meaningRepo.findOne({
       where: {
         id: link.meaningId
       }
     });
-    console.log("LinkResolver -> meaningEntity: ", meaningEntity);
     return MeaningConverter.entityToGQL(meaningEntity);
   }
 
