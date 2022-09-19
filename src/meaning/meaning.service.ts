@@ -93,7 +93,7 @@ export default class MeaningService {
     return await this.findMeaningWithWords(meaningId);
   }
 
-  private async createLinkIfDoesNotExist(meaningId: number, wordId: number, level: string): Promise<LinkEntity> {
+  private async handleLink(meaningId: number, wordId: number, level: string): Promise<LinkEntity> {
     let linkEntity: LinkEntity = await this.linkRepo.findOne({
       where: {
         meaningId: meaningId,
@@ -107,9 +107,11 @@ export default class MeaningService {
         wordId: wordId,
         level: level
       });
-      linkEntity = await this.linkRepo.save(linkEntity);
     }
-    return linkEntity;
+    return await this.linkRepo.save({
+      ...linkEntity,
+      level: level
+    });
   }
 
   async updateMeaning(meaning: MeaningEntity): Promise<MeaningEntity> {
@@ -123,9 +125,9 @@ export default class MeaningService {
     const addedWords: LinkEntity[] = [];
     for (const link of meaning.words) {
       if (link.word.id) {
+        console.log("link: ", link);
         // create link if does not exist yet
-        await this.createLinkIfDoesNotExist(meaning.id, link.word.id, link.level);
-
+        await this.handleLink(meaning.id, link.word.id, link.level);
         await this.wordRepo.update({
           id: link.word.id
         }, link.word);

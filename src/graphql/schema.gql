@@ -42,6 +42,7 @@ input NewMeaningInput {
 
 type Query {
   getCategories: [String!]!
+  getLevels: [String!]!
   getMeaning(id: Int!): MeaningType!
   getPartsOfSpeech: [String!]!
   getTask: TaskModel!

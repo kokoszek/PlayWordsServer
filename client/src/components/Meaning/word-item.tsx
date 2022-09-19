@@ -2,7 +2,8 @@ import produce from "immer";
 import { useEffect, useRef, useState } from "react";
 import { GET_WORDS } from "../List/queries";
 import { useQuery } from "@apollo/client";
-import { WORD_EXISTS } from "./queries";
+import { GET_LEVELS, WORD_EXISTS } from "./queries";
+import Select from "react-select";
 
 function WordExistsHint(props: any) {
   //const { exists } = props;
@@ -18,10 +19,21 @@ export default function WordItem(props: any) {
     onInputChange,
     onRemoveClicked,
     setWordId,
-    lang
+    lang,
+    onLevelChange
   } = props;
   const word = link?.word;
   //console.log("word: ", word);
+
+  const { data: levelsData } = useQuery(GET_LEVELS);
+  const [level, setLevel] = useState<any>(null);
+
+  useEffect(() => {
+    setLevel({
+      label: link.level,
+      value: link.level
+    });
+  }, [link.level]);
 
   const { data, loading, error } = useQuery(WORD_EXISTS, {
     variables: {
@@ -35,6 +47,8 @@ export default function WordItem(props: any) {
   if (idx === 0 && lang === "en") {
     //console.log("word(get): ", word);
   }
+
+  //console.log("levelsData: ", levelsData);
 
   function wordExistsInMeaning(): boolean {
     if (!data) {
@@ -81,10 +95,23 @@ export default function WordItem(props: any) {
     <li key={idx}>
       {!wordExistsInMeaning() && !!word.word && <WordExistsHint />}
       <input
+        className="word-input"
         type="text"
         value={word.word}
         onChange={(e) => {
           onInputChange(e.target.value);
+        }}
+      />
+      <Select
+        className="level-select"
+        options={levelsData?.getLevels.map((level: any) => ({
+          label: level, value: level
+        })).concat([{ label: "none", value: null }])}
+        value={level}
+        onChange={(event: any) => {
+          console.log("event: ", event);
+          setLevel(event);
+          onLevelChange(event.value);
         }}
       />
       {showRemoveButtom && (

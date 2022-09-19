@@ -14,6 +14,25 @@
   }
 
   .meaning-content {
+    .top-options {
+      display: flex;
+      flex-direction: row;
+      margin-bottom: 20px;
+
+      .group:first-child {
+        flex-basis: 0px;
+
+        label {
+          width: min-content;
+        }
+      }
+
+      .group {
+        flex-grow: 1;
+        margin: 0 20px;
+      }
+    }
+
     .group {
       margin-bottom: 30px;
     }
@@ -28,9 +47,20 @@
     }
 
     ul {
+
       li {
         position: relative;
         list-style: none;
+        display: flex;
+        margin-bottom: 10px;
+
+        .word-input {
+          margin-right: 20px;
+        }
+
+        .level-select {
+          width: max-content;
+        }
 
         .word-exists-hint {
           position: absolute;

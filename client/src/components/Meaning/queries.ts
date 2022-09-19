@@ -17,6 +17,12 @@ export const GET_PARTS_OF_SPEECH = gql`
     }
 `;
 
+export const GET_LEVELS = gql`
+    query GetLevels {
+        getLevels
+    }
+`;
+
 export const GET_CATEGORIES = gql`
     query GetCategories {
         getCategories

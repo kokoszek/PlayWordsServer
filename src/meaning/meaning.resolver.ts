@@ -35,7 +35,7 @@ export class MeaningResolver {
       id: "id" in input ? input.id : null,
       words: input.words_lang1.map(word => {
         return this.linkRepo.create({
-          level: "A1",
+          level: word.level,
           meaningId: "id" in input ? input.id : undefined,
           // meaning: this.meaningRepo.create({
           //   id: "id" in input ? input.id : undefined
@@ -51,7 +51,7 @@ export class MeaningResolver {
       }).concat(
         input.words_lang2.map(word => {
           return this.linkRepo.create({
-            level: "A1",
+            level: word.level,
             // meaningId: "id" in input ? input.id : undefined,
             // meaning: this.meaningRepo.create({
             //   id: "id" in input ? input.id : undefined

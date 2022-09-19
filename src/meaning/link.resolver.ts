@@ -1,5 +1,5 @@
 import { LinkType } from "./link.type";
-import { Parent, ResolveField, Resolver } from "@nestjs/graphql";
+import { Parent, Query, ResolveField, Resolver } from "@nestjs/graphql";
 import { WordType } from "../word/word.type";
 import { InjectRepository } from "@nestjs/typeorm";
 import { MeaningEntity } from "./meaning.entity";
@@ -8,6 +8,7 @@ import { Repository } from "typeorm";
 import WordConverter from "../word/word.converter";
 import { MeaningType } from "./meaning.type";
 import MeaningConverter from "./meaning.converter";
+import { LevelsArray } from "./link.entity";
 
 @Resolver(of => LinkType)
 export class LinkResolver {
@@ -18,6 +19,11 @@ export class LinkResolver {
     @InjectRepository(WordEntity)
     private wordRepo: Repository<WordEntity>
   ) {
+  }
+
+  @Query(returns => [String])
+  getLevels(): readonly string[] {
+    return LevelsArray;
   }
 
   @ResolveField()

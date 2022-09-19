@@ -11,8 +11,7 @@ import { WordType } from "../word/word.type";
 import { LinkType } from "./link.type";
 
 @ObjectType()
-export class MeaningType
-  implements Omit<MeaningEntity, "words" | "beforeSave" | "afterSave"> {
+export class MeaningType implements Omit<MeaningEntity, "words" | "beforeSave" | "afterSave"> {
   @Field((type) => GraphQLInt, { nullable: false })
   id: number;
 

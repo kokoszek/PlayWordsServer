@@ -22,9 +22,13 @@ export default function Words(props: any) {
                   let newMeaning = produce(meaning, (draft: any) => {
                     draft.words_lang1[idx].word.word = value;
                   });
-                  setMeaning(
-                    newMeaning
-                  );
+                  setMeaning(newMeaning);
+                }}
+                onLevelChange={(value: string) => {
+                  let newMeaning = produce(meaning, (draft: any) => {
+                    draft.words_lang1[idx].level = value;
+                  });
+                  setMeaning(newMeaning);
                 }}
                 onRemoveClicked={() => {
                   setMeaning(
@@ -92,6 +96,12 @@ export default function Words(props: any) {
                       draft.words_lang2[idx].word.word = value;
                     })
                   );
+                }}
+                onLevelChange={(value: string) => {
+                  let newMeaning = produce(meaning, (draft: any) => {
+                    draft.words_lang2[idx].level = value;
+                  });
+                  setMeaning(newMeaning);
                 }}
                 onRemoveClicked={() => {
                   setMeaning(
