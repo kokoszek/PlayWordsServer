@@ -196,8 +196,8 @@ export default class GameService implements OnModuleInit {
 
   async onModuleInit(): Promise<any> {
     //let words = await this.randomizePhrasalVerbsWithSbdParticle(7);
-    let words = await this.randomizeRestOfPhrasalVerbs(4, [12, 24, 25]);
-    console.log("words2: ", words);
+    // let words = await this.randomizeRestOfPhrasalVerbs(4, [12, 24, 25]);
+    // console.log("words2: ", words);
   }
 
   private async randomizePhrasalVerbsWithParticle(wordParticle: string, amount: number) {

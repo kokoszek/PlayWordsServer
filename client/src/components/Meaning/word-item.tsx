@@ -27,6 +27,7 @@ export default function WordItem(props: any) {
     variables: {
       word: word.word
     },
+    fetchPolicy: "no-cache",
     //skip: !!word.id,
     skip: !word.word
   });

@@ -4,7 +4,7 @@ import {
   CREATE_MEANING,
   GET_MEANING,
   UPDATE_MEANING,
-  DELETE_MEANING, GET_PARTS_OF_SPEECH, GET_CATEGORIES
+  DELETE_MEANING, GET_PARTS_OF_SPEECH, GET_CATEGORIES, WORD_EXISTS
 } from "./queries";
 import { ChosenEntityContext } from "../../contexts/chosen-entity";
 import { GET_MEANINGS, GET_WORDS } from "../List/queries";
@@ -146,7 +146,7 @@ export default function Meaning() {
                 variables: {
                   meaningId: meaning.id
                 },
-                refetchQueries: [GET_WORDS]
+                refetchQueries: [GET_WORDS, WORD_EXISTS]
               });
             }}
           >
@@ -188,14 +188,14 @@ export default function Meaning() {
                 variables: {
                   meaningInput: input
                 },
-                refetchQueries: [GET_WORDS]
+                refetchQueries: [GET_WORDS, WORD_EXISTS]
               });
             } else {
               await createMeaning({
                 variables: {
                   meaningInput: input
                 },
-                refetchQueries: [GET_WORDS]
+                refetchQueries: [GET_WORDS, WORD_EXISTS]
               });
             }
           }}
