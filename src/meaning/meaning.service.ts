@@ -5,6 +5,7 @@ import { DeepPartial, Repository } from "typeorm";
 import { WordEntity } from "../word/word.entity";
 import { WordService } from "../word/word-service";
 import { LinkEntity } from "./link.entity";
+import WordParticle from "../word/word-particle.entity";
 
 @Injectable()
 export default class MeaningService {
@@ -16,6 +17,8 @@ export default class MeaningService {
     private wordRepo: Repository<WordEntity>,
     @InjectRepository(LinkEntity)
     private linkRepo: Repository<LinkEntity>,
+    @InjectRepository(WordParticle)
+    private wordParticleRepo: Repository<WordParticle>,
     private wordService: WordService
   ) {
   }
@@ -66,6 +69,16 @@ export default class MeaningService {
     return true;
   }
 
+  async insertWordParticles(wordEntity: WordEntity) {
+    for (const particle of wordEntity.word.split(/ +/)) {
+      const wordParticle = this.wordParticleRepo.create({
+        wordEntity: wordEntity,
+        wordParticle: particle
+      });
+      await this.wordParticleRepo.save(wordParticle);
+    }
+  }
+
   async insertMeaning(meaning: MeaningEntity): Promise<MeaningEntity> {
     //const meaningSnapshotBeforeSave = await this.findMeaningWithWords(meaning.id);
     console.log("before save: ", meaning);
@@ -74,6 +87,7 @@ export default class MeaningService {
       let wordId = link.word.id;
       if (!wordId) {
         wordId = (await this.wordRepo.insert(link.word)).raw.insertId;
+        await this.insertWordParticles(link.word);
         await this.linkRepo.insert({
           level: link.level,
           wordId: wordId,
@@ -133,10 +147,12 @@ export default class MeaningService {
         }, link.word);
       } else {
         // create word and create link
-        let insertResult = await this.wordRepo.insert({
+        let wordEntity = this.wordRepo.create({
           word: link.word.word,
           lang: link.word.lang
         });
+        let insertResult = await this.wordRepo.insert(wordEntity);
+        await this.insertWordParticles(wordEntity);
         let addedLink = this.linkRepo.create({
           meaningId: meaning.id,
           wordId: insertResult.raw.insertId as number,

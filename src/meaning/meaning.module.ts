@@ -9,6 +9,7 @@ import { WordModule } from "../word/word.module";
 import { RequestContextModule } from "nestjs-request-context";
 import { LinkEntity } from "./link.entity";
 import { LinkResolver } from "./link.resolver";
+import WordParticle from "../word/word-particle.entity";
 
 @Module({
   imports: [
@@ -16,7 +17,8 @@ import { LinkResolver } from "./link.resolver";
     TypeOrmModule.forFeature([
       MeaningEntity,
       LinkEntity,
-      WordEntity
+      WordEntity,
+      WordParticle
     ]),
     WordModule
   ],

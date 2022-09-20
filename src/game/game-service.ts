@@ -5,6 +5,7 @@ import { MeaningEntity } from "../meaning/meaning.entity";
 import { Repository } from "typeorm";
 import { WordEntity } from "../word/word.entity";
 import WordParticle from "../word/word-particle.entity";
+import { LinkEntity } from "../meaning/link.entity";
 
 export type PlayerType = {
   id: number;
@@ -46,7 +47,11 @@ export default class GameService implements OnModuleInit {
     @InjectRepository(WordEntity)
     private wordRepo: Repository<WordEntity>,
     @InjectRepository(MeaningEntity)
-    private meaningRepo: Repository<MeaningEntity>
+    private meaningRepo: Repository<MeaningEntity>,
+    @InjectRepository(LinkEntity)
+    private linkRepo: Repository<LinkEntity>,
+    @InjectRepository(WordParticle)
+    private wordParticleRepo: Repository<WordParticle>
   ) {
   }
 
@@ -191,13 +196,13 @@ export default class GameService implements OnModuleInit {
 
   private hasSbdParticle(word: WordEntity): boolean {
     return word.wordParticles
-      .some(wp => wp.wordParticle === "somebody" || wp.wordParticle === "sbd");
+      .some(wp => ["someone", "somebody", "sbd"].includes(wp.wordParticle));
   }
 
   async onModuleInit(): Promise<any> {
-    //let words = await this.randomizePhrasalVerbsWithSbdParticle(7);
+    // let words = await this.randomizePhrasalVerbsWithSbdParticle(7);
     // let words = await this.randomizeRestOfPhrasalVerbs(4, [12, 24, 25]);
-    // console.log("words2: ", words);
+    await this.generateTask2(2, "B1");
   }
 
   private async randomizePhrasalVerbsWithParticle(wordParticle: string, amount: number) {
@@ -296,64 +301,82 @@ export default class GameService implements OnModuleInit {
     return words;
   }
 
-  private async randomizeWord(level: string, lang: string): Promise<WordEntity> {
-    const count = await this.wordRepo.createQueryBuilder("word")
+  private async randomizeLink(level: string, lang: string): Promise<LinkEntity> {
+    const result = await this.linkRepo.createQueryBuilder("link")
       .select("COUNT(*) as count")
-      .where("word.level = :level", { level })
+      .innerJoin("link.word", "word")
+      .where("link.level = :level", { level })
       .andWhere("word.lang = :lang", { lang })
       .getRawOne();
-
-    return null;
+    const count = Number.parseInt(result.count);
+    let randomInt = getRandomInt(0, count - 1);
+    randomInt = 1;
+    console.log("count: ", count);
+    console.log("randomInt: ", randomInt);
+    const randWord = (
+      await this.linkRepo
+        .createQueryBuilder("link")
+        .innerJoinAndSelect("link.meaning", "meaning")
+        .innerJoinAndSelect("link.word", "word")
+        .leftJoinAndSelect("word.wordParticles", "wordParticles")
+        .where("link.level = :level", { level })
+        .andWhere("word.lang = :lang", { lang })
+        .orderBy("word.id", "ASC")
+        .skip(randomInt)
+        .take(1)
+        .getOne()
+    );
+    return randWord;
   }
 
-  // public async generateTask2(forGameId: number, level: string): Promise<TaskType> {
-  //
-  //   let word: WordEntity = await this.randomizeWord(level, "en");
-  //   let meaning: MeaningEntity = this.randomizeElement(word.meanings);
-  //   let wordsToPlay: WordEntity[] = [];
-  //   const totalWordOptions = 8;
-  //   if (meaning.partOfSpeech === "phrasal verb") {
-  //     let wordsWithParticle: WordEntity[] = [];
-  //     if (this.hasSbdParticle(word)) {
-  //       wordsWithParticle =
-  //         await this.randomizePhrasalVerbsWithSbdParticle(totalWordOptions - 1);
-  //     } else {
-  //       wordsWithParticle =
-  //         await this.randomizePhrasalVerbsWithParticle(
-  //           word.wordParticles[0].wordParticle,
-  //           totalWordOptions - 1);
-  //     }
-  //     let rest = await this.randomizeRestOfPhrasalVerbs(
-  //       totalWordOptions - 1 - wordsWithParticle.length,
-  //       wordsWithParticle.map(w => w.id)
-  //     );
-  //     wordsToPlay = [word, ...wordsWithParticle, ...rest];
-  //   } else {
-  //     let words =
-  //       this.randomizeWords(7, meaning.category, meaning.partOfSpeech);
-  //     let restOfWords =
-  //       this.randomizeRestOfWords(7 - words.length);
-  //     wordsToPlay = [word, ...words, ...restOfWords];
-  //   }
-  //   let plWord = this.getPolishWordFromMeaning(meaning);
-  //   const ret = {
-  //     word: plWord?.word,
-  //     word_desc: meaning.meaning_lang1_desc,
-  //     meaningId: meaning.id,
-  //     wordOptions: wordsToPlay.map((word: WordEntity) => {
-  //       return {
-  //         wordId: word.id,
-  //         word: word.word
-  //       };
-  //     })
-  //   };
-  //   const roomName = createRoomName(forGameId);
-  //   this.games[roomName].tasks.push({
-  //     ...ret,
-  //     correctWord: word
-  //   });
-  //   return ret;
-  // }
+  public async generateTask2(forGameId: number, level: string): Promise<TaskType> {
+
+    let link: LinkEntity = await this.randomizeLink(level, "en");
+    let wordsToPlay: WordEntity[] = [];
+    const totalWordOptions = 8;
+    if (link.meaning.partOfSpeech === "phrasal verb") {
+      let wordsWithParticle: WordEntity[] = [];
+      if (this.hasSbdParticle(link.word)) {
+        wordsWithParticle =
+          await this.randomizePhrasalVerbsWithSbdParticle(totalWordOptions - 1);
+      } else {
+        wordsWithParticle =
+          await this.randomizePhrasalVerbsWithParticle(
+            link.word.wordParticles[0].wordParticle,
+            totalWordOptions - 1);
+      }
+      let rest = await this.randomizeRestOfPhrasalVerbs(
+        totalWordOptions - 1 - wordsWithParticle.length,
+        wordsWithParticle.map(w => w.id)
+      );
+      wordsToPlay = [link.word, ...wordsWithParticle, ...rest];
+    } else {
+      // let words =
+      //   this.randomizeWords(7, link.category, link.partOfSpeech);
+      // let restOfWords =
+      //   this.randomizeRestOfWords(7 - words.length);
+      // wordsToPlay = [word, ...words, ...restOfWords];
+    }
+    return null;
+    // let plWord = this.getPolishWordFromMeaning(link);
+    // const ret = {
+    //   word: plWord?.word,
+    //   word_desc: link.meaning_lang1_desc,
+    //   meaningId: link.id,
+    //   wordOptions: wordsToPlay.map((word: WordEntity) => {
+    //     return {
+    //       wordId: word.id,
+    //       word: word.word
+    //     };
+    //   })
+    // };
+    // const roomName = createRoomName(forGameId);
+    // this.games[roomName].tasks.push({
+    //   ...ret,
+    //   correctWord: word
+    // });
+    // return ret;
+  }
 
   private randomizeElement<T>(arr: T[]): T | null {
     if (arr.length === 0) {
@@ -369,6 +392,8 @@ export default class GameService implements OnModuleInit {
   //     .select("COUNT(*) as count")
   //     .getRawOne();
   //   const count = Number.parseInt(result.count);
+  //   // const randomInt = getRandomInt(0, count - 1);
+  //
   //   const numberOfWordsToRandomize = 8;
   //   let counter = numberOfWordsToRandomize;
   //   const randomizedMeanings: MeaningEntity[] = [];
