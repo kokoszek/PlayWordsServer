@@ -100,8 +100,8 @@ export default class GameGatewayWs implements OnGatewayInit {
   private emitNewTask(delayMs: number, gameId: number) {
     const roomName = createRoomName(gameId);
     setTimeout(async () => {
-      //const task = await this.gameService.generateTask(gameId);
-      const task = null;
+      const task = await this.gameService.generateTask2(gameId, "A1");
+      //const task = null;
       console.log("task: ", task);
       this.server.to(roomName).emit("newTask", task);
     }, delayMs);
@@ -311,9 +311,13 @@ export default class GameGatewayWs implements OnGatewayInit {
       }
     }
 
+    console.log("before IF");
     if (this.gameService.shouldSendNextTask(gameId)) {
       // send new task in 3 seconds
+      console.log("EMIT");
       this.emitNewTask(3000, data.gameId);
+    } else {
+      console.log("SHOULD NOT send next task");
     }
   }
 }

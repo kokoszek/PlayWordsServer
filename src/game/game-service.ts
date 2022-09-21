@@ -5,7 +5,7 @@ import { CategoryType, MeaningEntity, PartOfSpeechType } from "../meaning/meanin
 import { Repository } from "typeorm";
 import { WordEntity } from "../word/word.entity";
 import WordParticle from "../word/word-particle.entity";
-import { LinkEntity } from "../meaning/link.entity";
+import { LevelType, LinkEntity } from "../meaning/link.entity";
 
 export type PlayerType = {
   id: number;
@@ -361,7 +361,7 @@ export default class GameService implements OnModuleInit {
     return words;
   }
 
-  private async randomizeLink(level: string, lang: string): Promise<LinkEntity> {
+  private async randomizeLink(level: LevelType, lang: string): Promise<LinkEntity> {
     const result = await this.linkRepo.createQueryBuilder("link")
       .select("COUNT(*) as count")
       .innerJoin("link.word", "word")
@@ -437,7 +437,7 @@ export default class GameService implements OnModuleInit {
     return words;
   }
 
-  public async generateTask2(forGameId: number, level: string): Promise<TaskType> {
+  public async generateTask2(forGameId: number, level: LevelType): Promise<TaskType> {
 
     let link: LinkEntity = await this.randomizeLink(level, "en");
     // link = await this.linkRepo
