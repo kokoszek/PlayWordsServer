@@ -25,7 +25,7 @@ const config = {
   "subscribers": [
     path.join(__dirname, "dist", "**", "*.subscriber.js")
   ],
-  logging: true
+  logging: false
 };
 
 module.exports = config;

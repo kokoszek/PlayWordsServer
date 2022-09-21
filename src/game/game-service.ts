@@ -210,13 +210,11 @@ export default class GameService implements OnModuleInit {
     amount: number,
     exclude: WordEntity
   ) {
-
-    console.log("wordParticle: ", wordParticle);
-
-    let result = await this.wordRepo
+    //console.log("wordParticle: ", wordParticle);
+    let result: any = await this.wordRepo
       .createQueryBuilder("word")
-      .select("COUNT(*) as count")
-      .select()
+      .select("COUNT(DISTINCT word.id) as count")
+      //.select()
       .innerJoin("word.meanings", "links")
       .innerJoin("links.meaning", "meaning")
       .innerJoin("word.wordParticles", "wordParticles", `wordParticles.wordParticle = '${wordParticle}'`)
@@ -224,21 +222,18 @@ export default class GameService implements OnModuleInit {
       .andWhere("word.id != :wordId", {
         wordId: exclude.id
       })
-      .groupBy("word.id")
+      //.groupBy("word.id")
       .getRawOne();
-
-    console.log("result: ", result);
-
+    //console.log("2 result: ", result);
     const count = Number.parseInt(result.count);
-    console.log("count: ", count);
-
+    //console.log("count: ", count);
     const counterOrig = Math.min(amount, count);
     let counter = counterOrig;
     const words: WordEntity[] = [];
     while (counter--) {
       while (true) {
         const randomInt = getRandomInt(0, counterOrig - 1);
-        console.log("randomInt: ", randomInt);
+        //console.log("randomInt: ", randomInt);
         let result: any = await this.wordRepo
           .createQueryBuilder("word")
           .select()
@@ -249,7 +244,8 @@ export default class GameService implements OnModuleInit {
           .andWhere("word.id != :wordId", {
             wordId: exclude.id
           })
-          .groupBy("word.id")
+          //.groupBy("word.id")
+          .distinct(true)
           .orderBy("word.id", "ASC")
           .limit(1)
           .offset(randomInt)
@@ -257,10 +253,10 @@ export default class GameService implements OnModuleInit {
         // .take(1)
         // .skip(randomInt)
         // .getOne();
-        console.log("RESULT: ", result);
+        //console.log("RESULT: ", result);
         if (!words.concat([exclude]).map(word => word.id).includes(result.id)) {
           words.push(result);
-          console.log("break");
+          //console.log("break");
           break;
         }
       }
@@ -291,10 +287,10 @@ export default class GameService implements OnModuleInit {
       //.groupBy("word.id, meaning.partOfSpeech")
       //.distinct(true)
       .getRawOne();
-    console.log("RESULT: ", result);
+    //console.log("RESULT: ", result);
     const allCount = Number.parseInt(result.count);
     //const allCount = 1;
-    console.log("allCount: ", allCount);
+    //console.log("allCount: ", allCount);
 
     const counterOrig = amount;
     let counter = counterOrig;
@@ -302,7 +298,7 @@ export default class GameService implements OnModuleInit {
     while (counter--) {
       while (true) {
         const randomInt = getRandomInt(0, allCount - 1);
-        console.log("randomInt: ", randomInt);
+        //console.log("randomInt: ", randomInt);
         let result: WordEntity = await this.wordRepo
           .createQueryBuilder("word")
           .select()
@@ -316,9 +312,9 @@ export default class GameService implements OnModuleInit {
           .offset(randomInt)
           .getOne();
         // console.log("randomInt: ", randomInt);
-        console.log("result: ", result);
-        console.log("words: ", words);
-        console.log("excludeWordIds: ", excludeWordIds);
+        //console.log("result: ", result);
+        //console.log("words: ", words);
+        //console.log("excludeWordIds: ", excludeWordIds);
         // console.log("words: ", words);
         if (
           (!words.map(word => word?.id).includes(result?.id) &&
@@ -343,9 +339,9 @@ export default class GameService implements OnModuleInit {
       .getRawOne();
     const count = Number.parseInt(result.count);
     let randomInt = getRandomInt(0, count - 1);
-    randomInt = 1;
-    console.log("count: ", count);
-    console.log("randomInt: ", randomInt);
+    //randomInt = 1;
+    //console.log("count: ", count);
+    //console.log("randomInt: ", randomInt);
     const randWord = (
       await this.linkRepo
         .createQueryBuilder("link")
@@ -365,25 +361,25 @@ export default class GameService implements OnModuleInit {
   public async generateTask2(forGameId: number, level: string): Promise<TaskType> {
 
     let link: LinkEntity = await this.randomizeLink(level, "en");
-    console.log("link: ", link);
+    //console.log("link: ", link);
     let wordsToPlay: WordEntity[] = [];
-    const totalWordOptions = 4;
+    const totalWordOptions = 8;
     if (link.meaning.partOfSpeech === "phrasal verb") {
       let wordsWithParticle: WordEntity[] = [];
       if (this.hasSbdParticle(link.word)) {
         wordsWithParticle =
-          await this.randomizePhrasalVerbsWithSbdParticle(totalWordOptions - 1, link.word);
+          await this.randomizePhrasalVerbsWithSbdParticle(3, link.word);
       } else {
         wordsWithParticle =
           await this.randomizePhrasalVerbsWithParticle(
             link.word.wordParticles[0].wordParticle,
-            totalWordOptions - 1,
+            3,
             link.word
           );
       }
-      console.log("1.wordsWithParticle: ", wordsWithParticle);
+      //console.log("1.wordsWithParticle: ", wordsWithParticle);
       let rest = await this.randomizeRestOfPhrasalVerbs(
-        totalWordOptions - 1 - wordsWithParticle.length,
+        4,
         wordsWithParticle.concat([link.word]).map(w => w.id)
       );
       wordsToPlay = [link.word, ...wordsWithParticle, ...rest];
