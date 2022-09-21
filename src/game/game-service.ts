@@ -202,7 +202,7 @@ export default class GameService implements OnModuleInit {
   async onModuleInit(): Promise<any> {
     // let words = await this.randomizePhrasalVerbsWithSbdParticle(7);
     // let words = await this.randomizeRestOfPhrasalVerbs(4, [12, 24, 25]);
-    await this.generateTask2(2, "A1");
+    //await this.generateTask2(2, "A1");
   }
 
   private async randomizePhrasalVerbsWithParticle(
@@ -440,16 +440,16 @@ export default class GameService implements OnModuleInit {
   public async generateTask2(forGameId: number, level: string): Promise<TaskType> {
 
     let link: LinkEntity = await this.randomizeLink(level, "en");
-    link = await this.linkRepo
-      .createQueryBuilder("link")
-      .leftJoinAndSelect("link.word", "word")
-      .leftJoinAndSelect("link.meaning", "meaning")
-      .leftJoinAndSelect("word.wordParticles", "wordParticles")
-      .where({
-        meaningId: 25,
-        wordId: 60
-      })
-      .getOne();
+    // link = await this.linkRepo
+    //   .createQueryBuilder("link")
+    //   .leftJoinAndSelect("link.word", "word")
+    //   .leftJoinAndSelect("link.meaning", "meaning")
+    //   .leftJoinAndSelect("word.wordParticles", "wordParticles")
+    //   .where({
+    //     meaningId: 25,
+    //     wordId: 60
+    //   })
+    //   .getOne();
     console.log("link: ", link);
     let wordsToPlay: WordEntity[] = [];
     const totalWordOptions = 8;
@@ -498,7 +498,6 @@ export default class GameService implements OnModuleInit {
       wordsToPlay = [link.word, ...words, ...restOfWords];
     }
 
-
     console.log("wordsToPlay: ", wordsToPlay);
     //console.log("wordsToPlay: ", wordsToPlay);
     // let plWord = this.getPolishWordFromMeaning(link);
@@ -518,7 +517,7 @@ export default class GameService implements OnModuleInit {
       meaning.words.filter(link => link.word.lang === "pl")
     );
 
-    return null;
+    console.log("plWord: ", plWord);
     const ret: TaskType = {
       word: plWord?.word.word,
       word_desc: link.meaning.meaning_lang1_desc,
