@@ -12,8 +12,9 @@ import {
 } from "@apollo/client";
 import { ChosenEntityContextProvider } from "./contexts/chosen-entity";
 
+console.log("graphql endpoint: ", process.env.REACT_APP_GRAPHQL_ENDPOINT);
 const client = new ApolloClient({
-  uri: "http://18.159.222.148:3000/graphql",
+  uri: process.env.REACT_APP_GRAPHQL_ENDPOINT,
   cache: new InMemoryCache()
 });
 
