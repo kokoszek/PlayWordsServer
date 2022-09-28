@@ -15,11 +15,15 @@ button {
   cursor: pointer;
 }
 
+input {
+  font-size: 1.2rem;
+}
+
 .App {
   text-align: center;
   font-family: 'Montserrat';
   font-weight: 400;
-  font-size: 0.9rem;
+  font-size: 1.2rem;
   height: 100vh;
 }
 
@@ -50,7 +54,7 @@ input {
 }
 
 body {
-  color: rgba(59,69,78,1.00);
+  color: rgba(59, 69, 78, 1.00);
 }
 
 .App-link {

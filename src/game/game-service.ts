@@ -362,31 +362,39 @@ export default class GameService implements OnModuleInit {
   }
 
   private async randomizeLink(level: LevelType, lang: string): Promise<LinkEntity> {
-    const result = await this.linkRepo.createQueryBuilder("link")
+    const resultCount = await this.linkRepo.createQueryBuilder("link")
       .select("COUNT(*) as count")
       .innerJoin("link.word", "word")
       .where("link.level = :level", { level })
       .andWhere("word.lang = :lang", { lang })
       .getRawOne();
-    const count = Number.parseInt(result.count);
+    const count = Number.parseInt(resultCount.count);
     let randomInt = getRandomInt(0, count - 1);
     //randomInt = 1;
     //console.log("count: ", count);
     //console.log("randomInt: ", randomInt);
-    const randWord = (
+    const randomizedLink = await this.linkRepo.createQueryBuilder("link")
+      .select()
+      .innerJoin("link.word", "word")
+      .where("link.level = :level", { level })
+      .andWhere("word.lang = :lang", { lang })
+      .limit(1)
+      .offset(randomInt)
+      .getOne();
+
+    const randomizedLinkWithJoins = (
       await this.linkRepo
         .createQueryBuilder("link")
         .innerJoinAndSelect("link.meaning", "meaning")
         .innerJoinAndSelect("link.word", "word")
         .leftJoinAndSelect("word.wordParticles", "wordParticles")
-        .where("link.level = :level", { level })
-        .andWhere("word.lang = :lang", { lang })
-        .orderBy("word.id", "ASC")
-        .skip(randomInt)
-        .take(1)
+        .where("meaningId = :meaningId AND wordId = :wordId", {
+          meaningId: randomizedLink.meaningId,
+          wordId: randomizedLink.wordId
+        })
         .getOne()
     );
-    return randWord;
+    return randomizedLinkWithJoins;
   }
 
   async randomizeWords(amount: number, category: CategoryType, partOfSpeech: PartOfSpeechType, exclude: WordEntity) {
