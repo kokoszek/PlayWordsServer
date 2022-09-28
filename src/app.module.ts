@@ -31,7 +31,7 @@ const path = require("path");
       autoSchemaFile: path.join(process.cwd(), "src/graphql/schema.gql"),
       sortSchema: true,
       cors: {
-        origin: "http://localhost:3001",
+        origin: process.env.FRONTEND_ORIGIN,
         credentials: true
       },
       // subscriptions: {
