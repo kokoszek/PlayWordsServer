@@ -98,6 +98,7 @@ export default function WordItem(props: any) {
         className="word-input"
         type="text"
         value={word.word}
+        tabIndex={0}
         onChange={(e) => {
           onInputChange(e.target.value);
         }}
@@ -116,6 +117,7 @@ export default function WordItem(props: any) {
       />
       {showRemoveButtom && (
         <button
+          tabIndex={-1}
           onClick={() => {
             onRemoveClicked();
           }}

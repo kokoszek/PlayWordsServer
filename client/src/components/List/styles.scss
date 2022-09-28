@@ -18,7 +18,8 @@
     padding-right: 0;
 
     li {
-      height: 30px;
+      height: min-content;
+      padding: 10px 0;
       border-bottom: 1px solid gainsboro;
       list-style: none;
       cursor: pointer;

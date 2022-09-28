@@ -140,11 +140,13 @@ export default function Meaning() {
           onClick={() => {
             setMeaning(newMeaning());
           }}
+          tabIndex={-1}
         >
           wyczyść formularz
         </button>
         {meaning?.id && (
           <button
+            tabIndex={-1}
             onClick={async () => {
               await deleteMeaning({
                 variables: {

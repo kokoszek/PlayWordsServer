@@ -67,6 +67,7 @@ export default function Words(props: any) {
           })}
         </ul>
         <button
+          tabIndex={-1}
           onClick={() => {
             setMeaning(
               produce(meaning, (draft: any) => {
@@ -122,6 +123,7 @@ export default function Words(props: any) {
           })}
         </ul>
         <button
+          tabIndex={-1}
           onClick={() => {
             setMeaning(
               produce(meaning, (draft: any) => {
