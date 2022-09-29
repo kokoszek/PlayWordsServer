@@ -86,7 +86,7 @@ export default function Words(props: any) {
             return (
               <LinkItem
                 link={link}
-                key={link.word.id}
+                key={idx}
                 lang="en"
                 meaning={meaning}
                 idx={idx}

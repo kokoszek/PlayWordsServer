@@ -1,5 +1,5 @@
 import { Injectable, OnModuleInit } from "@nestjs/common";
-import { createRoomName } from "./utils";
+import { createRoomName, getRandomInt, randomizeElement } from "./utils";
 import { InjectRepository } from "@nestjs/typeorm";
 import { CategoryType, MeaningEntity, PartOfSpeechType } from "../meaning/meaning.entity";
 import { Repository } from "typeorm";
@@ -24,22 +24,6 @@ export type TaskType = {
   }[];
 };
 
-export function getRandomInt(min, max) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-export function getRandomIntExcept(min: number, max: number, except: number[]) {
-  while (true) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    const result = Math.floor(Math.random() * (max - min + 1)) + min;
-    if (!except.includes(result)) {
-      return result;
-    }
-  }
-}
 
 @Injectable()
 export default class GameService implements OnModuleInit {
@@ -269,7 +253,7 @@ export default class GameService implements OnModuleInit {
       .select("COUNT(DISTINCT word.id) as count")
       .innerJoin("word.meanings", "links")
       .innerJoin("links.meaning", "meaning")
-      .andWhere("word.lang = 'en'")
+      .where("word.lang = 'en'")
       .getRawOne();
     const allCount = Number.parseInt(result.count);
     const counterOrig = amount;
@@ -284,7 +268,7 @@ export default class GameService implements OnModuleInit {
           .select()
           .innerJoin("word.meanings", "links")
           .innerJoin("links.meaning", "meaning")
-          .andWhere("word.lang = 'en'")
+          .where("word.lang = 'en'")
           .orderBy("word.id", "ASC")
           .distinct(true)
           .limit(1)
@@ -382,7 +366,7 @@ export default class GameService implements OnModuleInit {
       .offset(randomInt)
       .getOne();
 
-    const randomizedLinkWithJoins = (
+    const ranomizedLinkWithJoins = (
       await this.linkRepo
         .createQueryBuilder("link")
         .innerJoinAndSelect("link.meaning", "meaning")
@@ -394,7 +378,7 @@ export default class GameService implements OnModuleInit {
         })
         .getOne()
     );
-    return randomizedLinkWithJoins;
+    return ranomizedLinkWithJoins;
   }
 
   async randomizeWords(amount: number, category: CategoryType, partOfSpeech: PartOfSpeechType, exclude: WordEntity) {
@@ -407,7 +391,7 @@ export default class GameService implements OnModuleInit {
         category,
         partOfSpeech
       })
-      .andWhere("word.id != :wordId", {
+      .where("word.id != :wordId", {
         wordId: exclude.id
       })
       .andWhere("word.lang = 'en'")
@@ -427,7 +411,7 @@ export default class GameService implements OnModuleInit {
             category,
             partOfSpeech
           })
-          .andWhere("word.id != :wordId", {
+          .where("word.id != :wordId", {
             wordId: exclude.id
           })
           .andWhere("word.lang = 'en'")
@@ -447,6 +431,7 @@ export default class GameService implements OnModuleInit {
 
   public async generateTask2(forGameId: number, level: LevelType): Promise<TaskType> {
 
+    console.log("randomized level: ", level);
     let link: LinkEntity = await this.randomizeLink(level, "en");
     // link = await this.linkRepo
     //   .createQueryBuilder("link")
@@ -521,7 +506,7 @@ export default class GameService implements OnModuleInit {
       .getOne();
     console.log("meaning: ", meaning);
 
-    const plWord = this.randomizeElement(
+    const plWord = randomizeElement(
       meaning.words.filter(link => link.word.lang === "pl")
     );
 
@@ -557,12 +542,6 @@ export default class GameService implements OnModuleInit {
     return ret;
   }
 
-  private randomizeElement<T>(arr: T[]): T | null {
-    if (arr.length === 0) {
-      return null;
-    }
-    return arr[getRandomInt(0, arr.length - 1)];
-  }
 
   // public async generateTask(forGameId: number): Promise<TaskType> {
   //   const roomName = createRoomName(forGameId);

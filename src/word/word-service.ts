@@ -1,9 +1,7 @@
 import { Injectable, OnModuleInit } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { createQueryBuilder, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import { LangType, MeaningEntity } from "../meaning/meaning.entity";
-import { log } from "util";
-import { getRandomInt } from "../game/game-service";
 
 const axios = require("axios");
 

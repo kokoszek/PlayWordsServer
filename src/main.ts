@@ -12,7 +12,7 @@ async function bootstrap() {
     origin: process.env.FRONTEND_ORIGIN
   });
   app.useWebSocketAdapter(new IoAdapter(app));
-  await app.listen(3000);
+  await app.listen(Number.parseInt(process.env.HTTP_PORT));
 }
 
 bootstrap();

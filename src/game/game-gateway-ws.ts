@@ -9,7 +9,7 @@ import { from, Observable } from "rxjs";
 import { map } from "rxjs/operators";
 import { Server, Socket } from "socket.io";
 import GameService, { PlayerType } from "./game-service";
-import { createRoomName } from "./utils";
+import { createRoomName, randomizeElement } from "./utils";
 import { MeaningEntity } from "../meaning/meaning.entity";
 import { Args, Mutation } from "@nestjs/graphql";
 import { GraphQLString } from "graphql";
@@ -21,7 +21,7 @@ import { PlayerEntity } from "../player/player.entity";
 
 const MultiSemaphore = require("redis-semaphore").MultiSemaphore;
 const Redis = require("ioredis");
-const redis = new Redis(6379, process.env.REDIS_ENDPOINT);
+const redis = new Redis(6379, process.env.REDIS_HOST);
 
 const { sem } = require("./semaphore");
 
@@ -29,7 +29,7 @@ redis.on("error", (err) => {
   console.log("redis error occured: ", err);
 });
 
-@WebSocketGateway(8080, { namespace: "find-game" })
+@WebSocketGateway(Number.parseInt(process.env.WS_PORT), { namespace: "find-game" })
 export default class GameGatewayWs implements OnGatewayInit {
   @WebSocketServer()
   server: Server;
@@ -100,7 +100,9 @@ export default class GameGatewayWs implements OnGatewayInit {
   private emitNewTask(delayMs: number, gameId: number) {
     const roomName = createRoomName(gameId);
     setTimeout(async () => {
-      const task = await this.gameService.generateTask2(gameId, "A1");
+      const task = await this.gameService.generateTask2(gameId, randomizeElement(
+        process.env.MULTIPLAYER_LEVELS.split(",")
+      ));
       //const task = null;
       console.log("task: ", task);
       this.server.to(roomName).emit("newTask", task);

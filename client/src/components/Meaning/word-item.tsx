@@ -10,6 +10,7 @@ function WordExistsHint(props: any) {
   return <div className="word-exists-hint"></div>;
 }
 
+
 export default function WordItem(props: any) {
   const {
     link,
@@ -44,6 +45,8 @@ export default function WordItem(props: any) {
     skip: !word.word
   });
 
+  console.log("WORD exists DATA: ", data);
+
   if (idx === 0 && lang === "en") {
     //console.log("word(get): ", word);
   }
@@ -60,36 +63,17 @@ export default function WordItem(props: any) {
     return a;
   }
 
-  const origWordIdRef = useRef(null);
   useEffect(() => {
-    if (origWordIdRef.current === null) {
-      if (idx === 0 && lang === "en") {
-        //console.log("setting ref: ", word.id);
-      }
-      origWordIdRef.current = word.id;
+    //console.log("USE EFFECT(wordExist.id): ", data?.wordExists.id);
+    //console.log("USE EFFECT(loading): ", loading);
+    //console.log("USE EFFECT(word.id): ", word.id);
+    //setWordId(data?.wordExists.id);
+    if (data?.wordExists.id != word.id && !loading) {
+      //console.log("USE EFFECT(setWordId): ");
+      setWordId(data?.wordExists.id);
     }
-  }, [word.id]);
-
-  useEffect(() => {
-    if (data?.wordExists && !wordExistsInMeaning()) {
-      if (idx === 0 && lang === "en") {
-        //console.log("setWordId: ", data.wordExists.id);
-      }
-      setWordId(data.wordExists.id);
-    } else {
-      if (idx === 0 && lang === "en") {
-        //console.log("setWordId to orig: ", origWordIdRef.current);
-      }
-      setWordId(origWordIdRef.current);
-    }
-  }, [word.word, data?.wordExists]);
-  // useEffect(() => {
-  //   console.log('data: ', data);
-  // }, [word])
-  // console.log('unsetExistingWord: ', unsetExistingWord);
-  // console.log('word-item -> data: ', data);
-  // console.log('word: ', word);
-  // console.log('wordExistsInMeaning: ', wordExistsInMeaning());
+    //console.log("----------------");
+  }, [word.word, loading]);
 
   return (
     <li key={idx}>
