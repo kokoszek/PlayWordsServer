@@ -45,13 +45,15 @@ export default function WordItem(props: any) {
     skip: !word.word
   });
 
-  console.log("WORD exists DATA: ", data);
+  useEffect(() => {
+    if (data?.wordExists.id != word.id && !loading) {
+      setWordId(data?.wordExists.id);
+    }
+  }, [word.word, loading]);
 
   if (idx === 0 && lang === "en") {
     //console.log("word(get): ", word);
   }
-
-  //console.log("levelsData: ", levelsData);
 
   function wordExistsInMeaning(): boolean {
     if (!data) {
@@ -62,18 +64,6 @@ export default function WordItem(props: any) {
       .includes(meaning.id);
     return a;
   }
-
-  useEffect(() => {
-    //console.log("USE EFFECT(wordExist.id): ", data?.wordExists.id);
-    //console.log("USE EFFECT(loading): ", loading);
-    //console.log("USE EFFECT(word.id): ", word.id);
-    //setWordId(data?.wordExists.id);
-    if (data?.wordExists.id != word.id && !loading) {
-      //console.log("USE EFFECT(setWordId): ");
-      setWordId(data?.wordExists.id);
-    }
-    //console.log("----------------");
-  }, [word.word, loading]);
 
   return (
     <li key={idx}>
