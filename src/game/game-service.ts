@@ -520,7 +520,7 @@ export default class GameService implements OnModuleInit {
           wordId: word.id,
           word: word.word
         };
-      })
+      }).sort(() => Math.random() - 0.5)
     };
     const roomName = createRoomName(forGameId);
     /**
