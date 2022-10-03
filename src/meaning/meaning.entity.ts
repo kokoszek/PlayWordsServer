@@ -16,10 +16,16 @@ import { Request } from "express";
 import { LinkEntity } from "./link.entity";
 
 export type LangType = "pl" | "en"
-export const PartOfSpeechArray = ["verb", "phrasal verb", "noun", "adj"] as const;
+export const PartOfSpeechArray = [
+  "verb",
+  "phrasal verb",
+  "noun",
+  "adj"
+] as const;
 export const CategoryArray = [
   "general",
   "colors, shapes and sizes",
+  "emotions",
   "food",
   "law",
   "office"
