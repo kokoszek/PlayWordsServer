@@ -510,17 +510,31 @@ export default class GameService implements OnModuleInit {
       meaning.words.filter(link => link.word.lang === "pl")
     );
 
+    function shuffle(array) {
+      let currentIndex = array.length, randomIndex;
+      // While there remain elements to shuffle.
+      while (currentIndex != 0) {
+        // Pick a remaining element.
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+        // And swap it with the current element.
+        [array[currentIndex], array[randomIndex]] = [
+          array[randomIndex], array[currentIndex]];
+      }
+      return array;
+    }
+
     console.log("plWord: ", plWord);
     const ret: TaskType = {
       word: plWord?.word.word,
       word_desc: link.meaning.meaning_lang1_desc,
       meaningId: link.meaning.id,
-      wordOptions: wordsToPlay.map((word: WordEntity) => {
+      wordOptions: shuffle(wordsToPlay.map((word: WordEntity) => {
         return {
           wordId: word.id,
           word: word.word
         };
-      }).sort(() => Math.random() - 0.5)
+      }))
     };
     const roomName = createRoomName(forGameId);
     /**
