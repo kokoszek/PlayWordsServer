@@ -19,8 +19,10 @@ export type LangType = "pl" | "en"
 export const PartOfSpeechArray = [
   "verb",
   "phrasal verb",
+  "idiom",
   "noun",
-  "adj"
+  "adjective",
+  "adverb"
 ] as const;
 export const CategoryArray = [
   "general",
