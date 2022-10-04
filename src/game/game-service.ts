@@ -200,7 +200,7 @@ export default class GameService implements OnModuleInit {
       .innerJoin("word.meanings", "links")
       .innerJoin("links.meaning", "meaning")
       .innerJoin("word.wordParticles", "wordParticles", `wordParticles.wordParticle = '${wordParticle}'`)
-      .where(`meaning.partOfSpeech = 'phrasal verb'`)
+      .where(`word.isPhrasalVerb = 1`)
       .andWhere("word.id != :wordId", {
         wordId: exclude.id
       })
@@ -218,7 +218,7 @@ export default class GameService implements OnModuleInit {
           .innerJoin("word.meanings", "links")
           .innerJoin("links.meaning", "meaning")
           .innerJoin("word.wordParticles", "wordParticles", `wordParticles.wordParticle = '${wordParticle}'`)
-          .where("meaning.partOfSpeech = 'phrasal verb'")
+          .where(`word.isPhrasalVerb = 1`)
           .andWhere("word.id != :wordId", {
             wordId: exclude.id
           })
@@ -303,7 +303,7 @@ export default class GameService implements OnModuleInit {
       .select("COUNT(DISTINCT word.id) as count")
       .innerJoin("word.meanings", "links")
       .innerJoin("links.meaning", "meaning")
-      .where(`meaning.partOfSpeech = 'phrasal verb'`)
+      .where(`word.isPhrasalVerb = 1`)
       .andWhere("word.lang = 'en'")
       .getRawOne();
     const allCount = Number.parseInt(result.count);
@@ -319,7 +319,7 @@ export default class GameService implements OnModuleInit {
           .select()
           .innerJoin("word.meanings", "links")
           .innerJoin("links.meaning", "meaning")
-          .where("meaning.partOfSpeech = 'phrasal verb'")
+          .where(`word.isPhrasalVerb = 1`)
           .andWhere("word.lang = 'en'")
           .orderBy("word.id", "ASC")
           .distinct(true)
@@ -446,20 +446,16 @@ export default class GameService implements OnModuleInit {
     console.log("link: ", link);
     let wordsToPlay: WordEntity[] = [];
     const totalWordOptions = 8;
-    if (link.meaning.partOfSpeech === "phrasal verb") {
+    if (link.word.isPhrasalVerb) {
       let wordsWithParticle: WordEntity[] = [];
-      // if (this.hasSbdParticle(link.word)) {
-      //   wordsWithParticle =
-      //     await this.randomizePhrasalVerbsWithSbdParticle(3, link.word);
-      // } else {
+
+      // HERE
       wordsWithParticle =
         await this.randomizePhrasalVerbsWithParticle(
           link.word.wordParticles[0].wordParticle,
           3,
           link.word
         );
-      // }
-      //console.log("1.wordsWithParticle: ", wordsWithParticle);
       let rest = await this.randomizeRestOfPhrasalVerbs(
         totalWordOptions - 1 - wordsWithParticle.length,
         [link.word].concat(wordsWithParticle).map(word => word.id)
