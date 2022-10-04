@@ -1,9 +1,6 @@
 import { WordEntity } from "./word.entity";
 import { Field, ObjectType } from "@nestjs/graphql";
-import { GraphQLID, GraphQLInt, GraphQLString } from "graphql";
-import { Maybe } from "graphql/jsutils/Maybe";
-import { WordInputUpdate } from "./word.input.update";
-import { MeaningType } from "../meaning/meaning.type";
+import { GraphQLInt, GraphQLString } from "graphql";
 import { LinkType } from "../meaning/link.type";
 
 @ObjectType()

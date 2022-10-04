@@ -1,7 +1,6 @@
 require("dotenv").config();
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
-import { WsAdapter } from "@nestjs/platform-ws";
 
 import { IoAdapter } from "@nestjs/platform-socket.io";
 

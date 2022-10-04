@@ -1,13 +1,6 @@
-import { WordEntity } from "src/word/word.entity";
-import {
-  CategoryType,
-  LangType,
-  MeaningEntity,
-  PartOfSpeechType
-} from "./meaning.entity";
+import { CategoryType, LangType, MeaningEntity, PartOfSpeechType } from "./meaning.entity";
 import { Field, ObjectType } from "@nestjs/graphql";
 import { GraphQLInt, GraphQLString } from "graphql";
-import { WordType } from "../word/word.type";
 import { LinkType } from "./link.type";
 
 @ObjectType()

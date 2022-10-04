@@ -1,12 +1,12 @@
 import { Args, Mutation, Parent, Query, ResolveField, Resolver } from "@nestjs/graphql";
 import { CategoryArray, MeaningEntity, PartOfSpeechArray } from "./meaning.entity";
-import { GraphQLBoolean, GraphQLInt, GraphQLList, GraphQLString } from "graphql";
+import { GraphQLBoolean, GraphQLInt } from "graphql";
 import MeaningService from "./meaning.service";
 import { WordService } from "../word/word-service";
 import { NewMeaningInput } from "./meaning.input.new";
 import { MeaningType } from "./meaning.type";
 import { UpdateMeaningInput } from "./meaning.input.update";
-import { DeepPartial, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { LinkEntity } from "./link.entity";
 import { WordEntity } from "../word/word.entity";
@@ -37,9 +37,6 @@ export class MeaningResolver {
         return this.linkRepo.create({
           level: word.level,
           meaningId: "id" in input ? input.id : undefined,
-          // meaning: this.meaningRepo.create({
-          //   id: "id" in input ? input.id : undefined
-          // }),
           wordId: word.id,
           word: this.wordRepo.create({
             id: word.id,
@@ -52,10 +49,6 @@ export class MeaningResolver {
         input.words_lang2.map(word => {
           return this.linkRepo.create({
             level: word.level,
-            // meaningId: "id" in input ? input.id : undefined,
-            // meaning: this.meaningRepo.create({
-            //   id: "id" in input ? input.id : undefined
-            // }),
             wordId: word.id,
             word: this.wordRepo.create({
               id: word.id,
@@ -66,22 +59,7 @@ export class MeaningResolver {
           });
         })
       )
-      // meaning_lang1_language: input.meaning_lang1_language,
-      // meaning_lang1_desc: input.meaning_lang1_desc,
-      // meaning_lang2_language: input.meaning_lang2_language,
-      // meaning_lang2_desc: input.meaning_lang2_desc,
-      // category: input.category,
-      // partOfSpeech: input.partOfSpeech,
-      // words: input.words_lang1.map(word => ({
-      //   ...word,
-      //   lang: input.meaning_lang1_language
-      // }))
-      //   .concat(input.words_lang2.map(word => ({
-      //     ...word,
-      //     lang: input.meaning_lang2_language
-      //   })))
     });
-    //return this.meaningRepo.create()
   }
 
   @Mutation(returns => MeaningType)

@@ -1,6 +1,4 @@
-import produce from "immer";
-import { useEffect, useRef, useState } from "react";
-import { GET_WORDS } from "../List/queries";
+import { useEffect, useState } from "react";
 import { useQuery } from "@apollo/client";
 import { GET_LEVELS, WORD_EXISTS } from "./queries";
 import Select from "react-select";

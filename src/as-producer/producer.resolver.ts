@@ -1,16 +1,13 @@
-import { Args, Field, ID, Mutation, Query, Resolver, Subscription } from '@nestjs/graphql';
-import { TaskModel } from '../graphql/task/task.model';
-import { TaskService } from '../graphql/task/task.service';
-import { GraphQLInt, GraphQLString } from 'graphql';
-import { PubSub } from 'graphql-subscriptions';
-import { GameMatchModel } from './game-match.model';
+import { Resolver } from "@nestjs/graphql";
+import { PubSub } from "graphql-subscriptions";
 
 const pubSub = new PubSub();
 
 @Resolver()
 export class ProducerResolver {
 
-  constructor() {}
+  constructor() {
+  }
 
   // @Mutation(returns => Boolean)
   // subscribeForGame(

@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { GET_MEANINGS, GET_WORDS } from "./queries";
+import { GET_WORDS } from "./queries";
 import { useQuery } from "@apollo/client";
 import { ChosenEntityContext } from "../../contexts/chosen-entity";
 import "./styles.scss";

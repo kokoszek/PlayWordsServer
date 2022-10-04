@@ -1,8 +1,8 @@
-import { combineReducers } from 'redux';
-import authReducer from './authReducer';
-import blogsReducer from './blogsReducer';
+import { combineReducers } from "redux";
+import authReducer from "./authReducer";
+import blogsReducer from "./blogsReducer";
 
 export default combineReducers({
   auth: authReducer,
-  blogs: blogsReducer,
+  blogs: blogsReducer
 });

@@ -7,12 +7,10 @@ import { TaskModule } from "./graphql/task/task.module";
 import { ProducerModule } from "./as-producer/producer.module";
 import { WsModule } from "./game/game-service.module";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { MeaningEntity } from "./meaning/meaning.entity";
 import { WordModule } from "./word/word.module";
 
 import * as ormconfig from "../ormconfig";
 import { MeaningModule } from "./meaning/meaning.module";
-import PlayerService from "./player/player.service";
 import { PlayerModule } from "./player/player.module";
 
 const path = require("path");

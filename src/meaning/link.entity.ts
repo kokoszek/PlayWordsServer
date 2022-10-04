@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryColumn } from "typeorm";
 import { MeaningEntity } from "./meaning.entity";
 import { WordEntity } from "../word/word.entity";
 

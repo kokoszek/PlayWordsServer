@@ -1,18 +1,7 @@
-import {
-  SubscribeMessage,
-  WebSocketGateway,
-  WebSocketServer,
-  WsResponse,
-  OnGatewayInit
-} from "@nestjs/websockets";
-import { from, Observable } from "rxjs";
-import { map } from "rxjs/operators";
+import { OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsResponse } from "@nestjs/websockets";
 import { Server, Socket } from "socket.io";
 import GameService, { PlayerType } from "./game-service";
 import { createRoomName, randomizeElement } from "./utils";
-import { MeaningEntity } from "../meaning/meaning.entity";
-import { Args, Mutation } from "@nestjs/graphql";
-import { GraphQLString } from "graphql";
 import { WordEntity } from "../word/word.entity";
 import PlayerService from "../player/player.service";
 import { InjectRepository } from "@nestjs/typeorm";

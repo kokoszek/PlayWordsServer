@@ -1,14 +1,13 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.scss';
-import Navigation from './components/Navigation';
-import Main from './components/Main';
+import React from "react";
+import "./App.scss";
+import Navigation from "./components/Navigation";
+import Main from "./components/Main";
 
 function App() {
   return (
     <div className="App">
-      <Navigation/>
-      <Main/>
+      <Navigation />
+      <Main />
     </div>
   );
 }

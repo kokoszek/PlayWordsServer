@@ -1,12 +1,5 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  ManyToOne,
-  ManyToMany, OneToMany
-} from "typeorm";
-import { MeaningEntity } from "../meaning/meaning.entity";
-import { Field, InputType, ObjectType } from "@nestjs/graphql";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Field } from "@nestjs/graphql";
 import { GraphQLInt, GraphQLString } from "graphql";
 import { InputTypeFromEntity } from "../common/input-type";
 import WordParticle from "./word-particle.entity";

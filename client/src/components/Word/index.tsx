@@ -10,7 +10,7 @@ export default function Word() {
   console.log("entityCtx.word: ", entityCtx.word);
   return (
     <div className="word-content">
-      <h2>Znaczenia słowa: </h2>
+      <h2>{entityCtx?.word.word}, znaczenia słowa: </h2>
       <ul>
         {
           entityCtx?.word?.meanings && entityCtx.word.meanings.map((link: any) => (
@@ -19,6 +19,12 @@ export default function Word() {
             }}>
               {
                 link.meaning.meaning_lang1_desc
+              }
+              {
+                link.meaning.meaning_lang1_desc && ", "
+              }
+              {
+                link.meaning.partOfSpeech
               }
             </li>
           ))

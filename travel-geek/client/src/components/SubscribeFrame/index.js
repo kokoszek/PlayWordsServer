@@ -1,5 +1,4 @@
-
-import './subscribe-frame.scss';
+import "./subscribe-frame.scss";
 import React from "react";
 //
 // function MyPromise(fn) {
@@ -42,31 +41,31 @@ import React from "react";
 // });
 //
 export default function SubscribeFrame(props) {
-    return (
-        <section className={'subscribe-frame'}>
-            <header>
-                <h1>Travel</h1>
-                <h2>and expand your</h2>
-                <h2>horizons</h2>
-            </header>
-            <form autoComplete='off'>
-                <input autoComplete='false' name="hidden" type="text" style={{display:"none"}}/>
-                <input id='email-input' placeholder='email'/>
-                <div className='subscribe-button-wrapper'>
-                    <button className='subscribe-button' type='submit'>Subscribe now!</button>
-                </div>
-            </form>
-            <p>Over <span className='highlight-text'>20,000+</span> bloggers publishing their trips !</p>
-            <ul>
-                <li>
-                    <img src='/img/customers/customer-1.jpeg'/>
-                    <img src='/img/customers/customer-2.jpeg'/>
-                    <img src='/img/customers/customer-3.jpeg'/>
-                    <img src='/img/customers/customer-4.jpeg'/>
-                    <img src='/img/customers/customer-5.jpeg'/>
-                    <img src='/img/customers/customer-6.jpeg'/>
-                </li>
-            </ul>
-        </section>
-    );
+  return (
+    <section className={"subscribe-frame"}>
+      <header>
+        <h1>Travel</h1>
+        <h2>and expand your</h2>
+        <h2>horizons</h2>
+      </header>
+      <form autoComplete="off">
+        <input autoComplete="false" name="hidden" type="text" style={{ display: "none" }} />
+        <input id="email-input" placeholder="email" />
+        <div className="subscribe-button-wrapper">
+          <button className="subscribe-button" type="submit">Subscribe now!</button>
+        </div>
+      </form>
+      <p>Over <span className="highlight-text">20,000+</span> bloggers publishing their trips !</p>
+      <ul>
+        <li>
+          <img src="/img/customers/customer-1.jpeg" />
+          <img src="/img/customers/customer-2.jpeg" />
+          <img src="/img/customers/customer-3.jpeg" />
+          <img src="/img/customers/customer-4.jpeg" />
+          <img src="/img/customers/customer-5.jpeg" />
+          <img src="/img/customers/customer-6.jpeg" />
+        </li>
+      </ul>
+    </section>
+  );
 }

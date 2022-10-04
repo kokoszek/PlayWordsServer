@@ -1,5 +1,6 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { TaskOptionsModel } from './task-options.model';
+import { Field, Int, ObjectType } from "@nestjs/graphql";
+import { TaskOptionsModel } from "./task-options.model";
+
 //import { Post } from './post';
 
 @ObjectType()

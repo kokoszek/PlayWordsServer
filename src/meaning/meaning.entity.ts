@@ -1,18 +1,6 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  OneToMany,
-  ManyToMany,
-  JoinTable,
-  BeforeInsert,
-  AfterInsert, BeforeUpdate, AfterUpdate
-} from "typeorm";
-import { WordEntity } from "../word/word.entity";
-import { Field, InputType, Int, ObjectType } from "@nestjs/graphql";
-import { GraphQLInt, GraphQLString } from "graphql";
-import { RequestContext } from "nestjs-request-context";
-import { Request } from "express";
+import { AfterUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Field } from "@nestjs/graphql";
+import { GraphQLString } from "graphql";
 import { LinkEntity } from "./link.entity";
 
 export type LangType = "pl" | "en"

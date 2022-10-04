@@ -1,8 +1,5 @@
 import { Args, Parent, Query, ResolveField, Resolver } from "@nestjs/graphql";
-import { MeaningEntity } from "../meaning/meaning.entity";
-import { GraphQLBoolean, GraphQLInt } from "graphql";
 import { WordEntity } from "./word.entity";
-import { MeaningType } from "../meaning/meaning.type";
 import { WordType } from "./word.type";
 import { WordService } from "./word-service";
 import { InjectRepository } from "@nestjs/typeorm";

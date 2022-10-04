@@ -1,4 +1,5 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from "@nestjs/graphql";
+
 //import { Post } from './post';
 
 @ObjectType()

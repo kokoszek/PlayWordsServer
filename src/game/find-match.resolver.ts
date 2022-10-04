@@ -1,5 +1,4 @@
-import { Args, Mutation, Resolver } from '@nestjs/graphql';
-import { GraphQLInt, GraphQLString } from 'graphql';
+import { Resolver } from "@nestjs/graphql";
 
 // const MultiSemaphore = require('redis-semaphore').MultiSemaphore
 // const Redis = require('ioredis')
@@ -12,6 +11,7 @@ import { GraphQLInt, GraphQLString } from 'graphql';
 export class FindMatchResolver {
 
   private semaphore;
+
   constructor() {
   }
 

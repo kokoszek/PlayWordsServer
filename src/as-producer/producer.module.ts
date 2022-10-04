@@ -1,7 +1,8 @@
-import { Module } from '@nestjs/common';
-import { ProducerResolver } from './producer.resolver';
+import { Module } from "@nestjs/common";
+import { ProducerResolver } from "./producer.resolver";
 
 @Module({
-  providers: [ProducerResolver],
+  providers: [ProducerResolver]
 })
-export class ProducerModule {}
+export class ProducerModule {
+}

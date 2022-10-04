@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { MeaningEntity } from "./meaning.entity";
-import { DeepPartial, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import { WordEntity } from "../word/word.entity";
 import { WordService } from "../word/word-service";
 import { LinkEntity } from "./link.entity";

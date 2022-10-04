@@ -2,17 +2,14 @@ import { Injectable, OnModuleInit } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { LangType, MeaningEntity } from "../meaning/meaning.entity";
+import { parse } from "node-html-parser";
+import { WordEntity } from "./word.entity";
+import WordParticle from "./word-particle.entity";
+import { LinkEntity } from "../meaning/link.entity";
 
 const axios = require("axios");
 
-import { parse } from "node-html-parser";
-import { WordEntity } from "./word.entity";
-
 const fetch = require("node-fetch");
-
-import { getManager, getConnectionManager } from "typeorm";
-import WordParticle from "./word-particle.entity";
-import { LinkEntity } from "../meaning/link.entity";
 
 const fs = require("fs");
 const PDFParser = require("pdf2json");

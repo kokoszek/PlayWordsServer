@@ -4,12 +4,7 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 
-import {
-  ApolloClient,
-  InMemoryCache,
-  ApolloProvider,
-  gql
-} from "@apollo/client";
+import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
 import { ChosenEntityContextProvider } from "./contexts/chosen-entity";
 
 console.log("graphql endpoint: ", process.env.REACT_APP_GRAPHQL_ENDPOINT);

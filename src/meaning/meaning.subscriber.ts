@@ -1,8 +1,6 @@
-import { EntitySubscriberInterface, EventSubscriber, InsertEvent, TransactionCommitEvent, UpdateEvent } from 'typeorm';
-import { MeaningEntity } from './meaning.entity';
-import { TransactionStartEvent } from 'typeorm/subscriber/event/TransactionStartEvent';
-import { Request } from 'express';
-import { RequestContext } from 'nestjs-request-context';
+import { EntitySubscriberInterface, EventSubscriber, InsertEvent, TransactionCommitEvent, UpdateEvent } from "typeorm";
+import { MeaningEntity } from "./meaning.entity";
+import { TransactionStartEvent } from "typeorm/subscriber/event/TransactionStartEvent";
 
 @EventSubscriber()
 export class MeaningSubscriber implements EntitySubscriberInterface<MeaningEntity> {

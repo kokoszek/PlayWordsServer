@@ -1,20 +1,19 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { useMutation, useQuery } from "@apollo/client";
 import {
   CREATE_MEANING,
-  GET_MEANING,
-  UPDATE_MEANING,
   DELETE_MEANING,
-  GET_PARTS_OF_SPEECH,
   GET_CATEGORIES,
+  GET_PARTS_OF_SPEECH,
+  UPDATE_MEANING,
   WORD_EXISTS
 } from "./queries";
 import { ChosenEntityContext } from "../../contexts/chosen-entity";
-import { GET_MEANINGS, GET_WORDS } from "../List/queries";
+import { GET_WORDS } from "../List/queries";
 import "./styles.scss";
 import produce from "immer";
 import _ from "lodash";
-import { newLinkWithEmptyWord, newMeaning } from "./utils";
+import { newMeaning } from "./utils";
 import Words from "./words";
 import Select from "react-select";
 
