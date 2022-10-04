@@ -33,7 +33,9 @@ export class LinkResolver {
         id: link.wordId
       }
     });
-    return WordConverter.entityToGQL(word);
+    const word1 = WordConverter.entityToGQL(word);
+    console.log("word1: ", word1);
+    return word1;
   }
 
   @ResolveField()

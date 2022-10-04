@@ -41,6 +41,8 @@ export class MeaningResolver {
           word: this.wordRepo.create({
             id: word.id,
             word: word.word,
+            isPhrasalVerb: word.isPhrasalVerb,
+            isIdiom: word.isIdiom,
             lang: input.meaning_lang1_language,
             origin: "web-interface"
           })
@@ -53,6 +55,8 @@ export class MeaningResolver {
             word: this.wordRepo.create({
               id: word.id,
               word: word.word,
+              isPhrasalVerb: word.isPhrasalVerb,
+              isIdiom: word.isIdiom,
               lang: input.meaning_lang2_language,
               origin: "web-interface"
             })
@@ -78,6 +82,7 @@ export class MeaningResolver {
   ) {
     console.log("upsertMeaning -> input: ", meaningInput);
     let meaning: MeaningEntity = this.GraphQL2Entity(meaningInput);
+    console.log("update meaning entity:", meaning.words[0]);
     const meaningEntity = await this.meaningService.updateMeaning(meaning);
     return meaningEntity;
   }

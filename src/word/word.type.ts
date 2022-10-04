@@ -1,10 +1,16 @@
 import { WordEntity } from "./word.entity";
 import { Field, ObjectType } from "@nestjs/graphql";
-import { GraphQLInt, GraphQLString } from "graphql";
+import { GraphQLBoolean, GraphQLInt, GraphQLString } from "graphql";
 import { LinkType } from "../meaning/link.type";
 
 @ObjectType()
 export class WordType implements Omit<WordEntity, "meanings" | "wordParticles"> {
+
+  @Field(type => GraphQLBoolean)
+  isPhrasalVerb: boolean;
+
+  @Field(type => GraphQLBoolean)
+  isIdiom: boolean;
 
   @Field(type => GraphQLInt)
   id: number;

@@ -299,7 +299,24 @@ export class WordService implements OnModuleInit {
   }
 
   async onModuleInit(): Promise<any> {
-    console.log("on module init");
+    console.log("on module INIT");
+    // const allWords = await this.wordRepo
+    //   .createQueryBuilder("word")
+    //   .leftJoinAndSelect("word.meanings", "link")
+    //   .leftJoinAndSelect("link.meaning", "meaning")
+    //   .getMany();
+    // console.log("allWords: ", allWords);
+    // for (const word of allWords) {
+    //   //console.log("word: ", word);
+    //   if (word.meanings.some(link => link.meaning.partOfSpeech === "phrasal verb")) {
+    //     console.log("phrasal verb: ", word);
+    //     // word.isPhrasalVerb = true;
+    //     await this.wordRepo.update({ id: word.id }, {
+    //       isPhrasalVerb: true
+    //     });
+    //     // await this.wordRepo.save(word);
+    //   }
+    // }
     // const allWords = await this.wordRepo
     //   .createQueryBuilder("word")
     //   .select()

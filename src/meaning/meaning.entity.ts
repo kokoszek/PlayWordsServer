@@ -6,8 +6,6 @@ import { LinkEntity } from "./link.entity";
 export type LangType = "pl" | "en"
 export const PartOfSpeechArray = [
   "verb",
-  "phrasal verb",
-  "idiom",
   "noun",
   "adjective",
   "adverb"

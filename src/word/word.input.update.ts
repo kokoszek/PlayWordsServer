@@ -1,9 +1,15 @@
 import { Field, InputType } from "@nestjs/graphql";
-import { GraphQLInt, GraphQLString } from "graphql";
+import { GraphQLBoolean, GraphQLInt, GraphQLString } from "graphql";
 import { WordType } from "./word.type";
 
 @InputType()
 export class WordInputUpdate implements Omit<WordType, "lang" | "meanings"> {
+
+  @Field(type => GraphQLBoolean, { nullable: true })
+  isPhrasalVerb: boolean;
+
+  @Field(type => GraphQLBoolean, { nullable: true })
+  isIdiom: boolean;
 
   @Field(type => GraphQLInt, { nullable: true })
   id: number | null;

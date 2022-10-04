@@ -1,6 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Field } from "@nestjs/graphql";
-import { GraphQLInt, GraphQLString } from "graphql";
+import { GraphQLBoolean, GraphQLInt, GraphQLString } from "graphql";
 import { InputTypeFromEntity } from "../common/input-type";
 import WordParticle from "./word-particle.entity";
 import { LinkEntity } from "../meaning/link.entity";
@@ -42,6 +42,18 @@ export class WordEntity {
   })
   @Field((type) => GraphQLString)
   origin: string;
+
+  @Column({
+    nullable: false,
+    default: false
+  })
+  isPhrasalVerb: boolean;
+
+  @Column({
+    nullable: false,
+    default: false
+  })
+  isIdiom: boolean;
 
   @OneToMany(() => LinkEntity, (link) => link.word, {
     onDelete: "CASCADE"

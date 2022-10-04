@@ -52,7 +52,26 @@
         position: relative;
         list-style: none;
         display: flex;
-        margin-bottom: 10px;
+        flex-direction: column;
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid gainsboro;
+
+        .word-main-settings {
+          display: flex;
+        }
+
+        .checkboxes {
+          .checkbox-group {
+
+          }
+
+          label {
+            display: inline-block;
+            margin-top: 0;
+            font-size: 0.9rem;
+          }
+        }
 
         .word-input {
           margin-right: 20px;
@@ -80,7 +99,8 @@
     .words {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      border: 1px solid styles.$color1;
+      border: 1px solid gainsboro;
+      background-color: #fffdf7;
       border-radius: 10px;
       padding: 20px;
 

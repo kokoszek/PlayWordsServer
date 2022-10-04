@@ -45,6 +45,8 @@ export const CREATE_MEANING = gql`
                     id
                     origin
                     word
+                    isIdiom
+                    isPhrasalVerb
                 }
             }
             words_lang2 {
@@ -53,6 +55,8 @@ export const CREATE_MEANING = gql`
                     id
                     origin
                     word
+                    isIdiom
+                    isPhrasalVerb
                 }
             }
         }
@@ -74,6 +78,8 @@ export const UPDATE_MEANING = gql`
                     id
                     origin
                     word
+                    isIdiom
+                    isPhrasalVerb
                 }
             }
             words_lang2 {
@@ -82,6 +88,8 @@ export const UPDATE_MEANING = gql`
                     id
                     origin
                     word
+                    isIdiom
+                    isPhrasalVerb
                 }
             }
         }

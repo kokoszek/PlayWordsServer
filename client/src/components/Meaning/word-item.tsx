@@ -19,10 +19,11 @@ export default function WordItem(props: any) {
     onRemoveClicked,
     setWordId,
     lang,
-    onLevelChange
+    onLevelChange,
+    onWordPropertyChange
   } = props;
   const word = link?.word;
-  //console.log("word: ", word);
+  console.log("word.isPhrasalVerb: ", word.isPhrasalVerb);
 
   const { data: levelsData } = useQuery(GET_LEVELS);
   const [level, setLevel] = useState<any>(null);
@@ -65,38 +66,62 @@ export default function WordItem(props: any) {
 
   return (
     <li key={idx}>
-      {!wordExistsInMeaning() && !!word.word && <WordExistsHint />}
-      <input
-        className="word-input"
-        type="text"
-        value={word.word}
-        tabIndex={0}
-        onChange={(e) => {
-          onInputChange(e.target.value);
-        }}
-      />
-      <Select
-        className="level-select"
-        options={levelsData?.getLevels.map((level: any) => ({
-          label: level, value: level
-        })).concat([{ label: "none", value: null }])}
-        value={level}
-        onChange={(event: any) => {
-          console.log("event: ", event);
-          setLevel(event);
-          onLevelChange(event.value);
-        }}
-      />
-      {showRemoveButtom && (
-        <button
-          tabIndex={-1}
-          onClick={() => {
-            onRemoveClicked();
+      <div className="word-main-settings">
+        {!wordExistsInMeaning() && !!word.word && <WordExistsHint />}
+        <input
+          className="word-input"
+          type="text"
+          value={word.word}
+          tabIndex={0}
+          onChange={(e) => {
+            onInputChange(e.target.value);
           }}
-        >
-          usuń
-        </button>
-      )}
+        />
+        <Select
+          className="level-select"
+          options={levelsData?.getLevels.map((level: any) => ({
+            label: level, value: level
+          })).concat([{ label: "none", value: null }])}
+          value={level}
+          onChange={(event: any) => {
+            console.log("event: ", event);
+            setLevel(event);
+            onLevelChange(event.value);
+          }}
+        />
+        {showRemoveButtom && (
+          <button
+            tabIndex={-1}
+            onClick={() => {
+              onRemoveClicked();
+            }}
+          >
+            usuń
+          </button>
+        )}
+      </div>
+      <div className="checkboxes">
+        <div className="checkbox-group">
+          <label>is phrasal verb:</label>
+          <input
+            type="checkbox"
+            checked={word.isPhrasalVerb}
+            onChange={() => {
+              onWordPropertyChange(!word.isPhrasalVerb, "isPhrasalVerb");
+            }}
+          />
+        </div>
+        <div className="checkbox-group">
+          <label>is idiom:</label>
+          <input
+            type="checkbox"
+            checked={word.isIdiom}
+            onChange={() => {
+              onWordPropertyChange(!word.isIdiom, "isIdiom");
+            }}
+          />
+        </div>
+      </div>
     </li>
   );
 }

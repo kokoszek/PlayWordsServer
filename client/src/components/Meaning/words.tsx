@@ -44,6 +44,13 @@ export default function Words(props: any) {
                     })
                   );
                 }}
+                onWordPropertyChange={(value: any, prop: string) => {
+                  setMeaning(
+                    produce(meaning, (draft: any) => {
+                      draft.words_lang1[idx].word[prop] = value;
+                    })
+                  );
+                }}
                 setExistingWord={(word: object) => {
                   // setMeaning(
                   //   produce(meaning, (draft: any) => {
@@ -95,6 +102,13 @@ export default function Words(props: any) {
                   setMeaning(
                     produce(meaning, (draft: any) => {
                       draft.words_lang2[idx].word.word = value;
+                    })
+                  );
+                }}
+                onWordPropertyChange={(value: any, prop: string) => {
+                  setMeaning(
+                    produce(meaning, (draft: any) => {
+                      draft.words_lang2[idx].word[prop] = value;
                     })
                   );
                 }}

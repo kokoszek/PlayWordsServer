@@ -79,6 +79,8 @@ input WordInputUpdate {
   desc: String
   freq: Int
   id: Int
+  isIdiom: Boolean
+  isPhrasalVerb: Boolean
   level: String
   origin: String
   word: String
@@ -88,6 +90,8 @@ type WordType {
   desc: String!
   freq: Int!
   id: Int!
+  isIdiom: Boolean!
+  isPhrasalVerb: Boolean!
   lang: String!
   level: String!
   meanings: [LinkType!]!
