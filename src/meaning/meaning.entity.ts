@@ -8,7 +8,8 @@ export const PartOfSpeechArray = [
   "verb",
   "noun",
   "adjective",
-  "adverb"
+  "adverb",
+  "preposition"
 ] as const;
 export const CategoryArray = [
   "general",
