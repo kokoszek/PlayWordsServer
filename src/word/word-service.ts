@@ -34,6 +34,9 @@ export class WordService implements OnModuleInit {
       .where("wordParticles.wordParticle LIKE :search", {
         search: search + "%"
       })
+      .orWhere("word.word LIKE :search", {
+        search: search + "%"
+      })
       .take(20)
       .getMany();
     return result;
