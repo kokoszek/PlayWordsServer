@@ -29,10 +29,12 @@ export class WordService implements OnModuleInit {
 
   public async searchByText(search: string): Promise<WordEntity[]> {
     const result: WordEntity[] = await this.wordRepo
-      .createQueryBuilder()
-      .where("word LIKE :search", {
+      .createQueryBuilder("word")
+      .innerJoinAndSelect("word.wordParticles", "wordParticles")
+      .where("wordParticles.wordParticle LIKE :search", {
         search: search + "%"
       })
+      .take(20)
       .getMany();
     return result;
   }

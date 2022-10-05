@@ -51,6 +51,7 @@ export class MeaningResolver {
         input.words_lang2.map(word => {
           return this.linkRepo.create({
             level: word.level,
+            meaningId: "id" in input ? input.id : undefined,
             wordId: word.id,
             word: this.wordRepo.create({
               id: word.id,
