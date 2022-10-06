@@ -37,7 +37,8 @@ export class WordService implements OnModuleInit {
       .orWhere("word.word LIKE :search", {
         search: search + "%"
       })
-      .take(20)
+      .take(40)
+      .orderBy("word.id", "DESC")
       .getMany();
     return result;
   }
