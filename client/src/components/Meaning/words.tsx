@@ -14,7 +14,8 @@ export default function Words(props: any) {
             return (
               <LinkItem
                 link={link}
-                key={link.word.id}
+                key={idx}
+                lang="pl"
                 meaning={meaning}
                 idx={idx}
                 showRemoveButtom={true}
@@ -50,24 +51,6 @@ export default function Words(props: any) {
                       draft.words_lang1[idx].word[prop] = value;
                     })
                   );
-                }}
-                setExistingWord={(word: object) => {
-                  // setMeaning(
-                  //   produce(meaning, (draft: any) => {
-                  //     draft.words_lang1[idx] = word;
-                  //   })
-                  // );
-                }}
-                unsetExistingWord={() => {
-                  // console.log("UNSET EXISTING MEANING");
-                  // setMeaning(
-                  //   produce(meaning, (draft: any) => {
-                  //     if (draft.words_lang1[idx]) {
-                  //       //delete draft.words_lang1[idx].id;
-                  //       delete draft.words_lang1[idx].meanings;
-                  //     }
-                  //   })
-                  // );
                 }}
               />
             );

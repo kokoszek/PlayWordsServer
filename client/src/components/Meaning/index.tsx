@@ -54,7 +54,7 @@ export default function Meaning() {
       mutateObjDelete.data.deleteMeaning
     ) {
       console.log("set new meaning");
-      setMeaning(newMeaning());
+      setMeaning(newMeaning(undefined, undefined));
     }
   }, [mutateObjDelete.called, mutateObjDelete.loading]);
 
@@ -137,7 +137,7 @@ export default function Meaning() {
       <footer>
         <button
           onClick={() => {
-            setMeaning(newMeaning());
+            setMeaning(newMeaning(meaning.partOfSpeech, meaning.category));
           }}
           tabIndex={-1}
         >

@@ -186,50 +186,54 @@ export default class GameService implements OnModuleInit {
   async onModuleInit(): Promise<any> {
     // let words = await this.randomizePhrasalVerbsWithSbdParticle(7);
     // let words = await this.randomizeRestOfPhrasalVerbs(4, [12, 24, 25]);
-    //await this.generateTask2(2, "A1");
+    await this.generateTask2(2, "A1");
   }
 
   private async randomizePhrasalVerbsWithParticle(
     wordParticle: string,
     amount: number,
-    exclude: WordEntity
+    excludeIds: number[]
   ) {
     let result: any = await this.wordRepo
       .createQueryBuilder("word")
       .select("COUNT(DISTINCT word.id) as count")
-      .innerJoin("word.meanings", "links")
-      .innerJoin("links.meaning", "meaning")
       .innerJoin("word.wordParticles", "wordParticles", `wordParticles.wordParticle = '${wordParticle}'`)
       .where(`word.isPhrasalVerb = 1`)
-      .andWhere("word.id != :wordId", {
-        wordId: exclude.id
+      .andWhere(`word.id NOT IN (:excludeIds)`, {
+        excludeIds
       })
       .getRawOne();
     const count = Number.parseInt(result.count);
+    console.log("COUNT: ", count);
     const counterOrig = Math.min(amount, count);
     let counter = counterOrig;
     const words: WordEntity[] = [];
+    let maxLoop = 15;
     while (counter--) {
       while (true) {
+        // if (maxLoop-- <= 0) {
+        //   break;
+        // }
         const randomInt = getRandomInt(0, counterOrig - 1);
         let result: any = await this.wordRepo
           .createQueryBuilder("word")
           .select()
-          .innerJoin("word.meanings", "links")
-          .innerJoin("links.meaning", "meaning")
           .innerJoin("word.wordParticles", "wordParticles", `wordParticles.wordParticle = '${wordParticle}'`)
           .where(`word.isPhrasalVerb = 1`)
-          .andWhere("word.id != :wordId", {
-            wordId: exclude.id
+          .andWhere(`word.id NOT IN (:excludeIds)`, {
+            excludeIds
           })
           .distinct(true)
           .orderBy("word.id", "ASC")
           .limit(1)
           .offset(randomInt)
           .getOne();
-        if (!words.concat([exclude]).map(word => word.id).includes(result.id)) {
+        if (!words.map(word => word.id).concat(excludeIds).includes(result.id)) {
+          console.log("adding word: ", result, "to words list");
           words.push(result);
           break;
+        } else {
+          console.log("word: ", result, " already exists");
         }
       }
     }
@@ -240,7 +244,7 @@ export default class GameService implements OnModuleInit {
     amount: number,
     exclude: WordEntity
   ): Promise<WordEntity[]> {
-    return await this.randomizePhrasalVerbsWithParticle("somebody", amount, exclude);
+    return await this.randomizePhrasalVerbsWithParticle("somebody", amount, [exclude.id]);
   }
 
   private async randomizeRestOfWords(amount: number, excludeWordIds: number[]) {
@@ -251,8 +255,6 @@ export default class GameService implements OnModuleInit {
     let result: any = await this.wordRepo
       .createQueryBuilder("word")
       .select("COUNT(DISTINCT word.id) as count")
-      .innerJoin("word.meanings", "links")
-      .innerJoin("links.meaning", "meaning")
       .where("word.lang = 'en'")
       .getRawOne();
     const allCount = Number.parseInt(result.count);
@@ -266,8 +268,6 @@ export default class GameService implements OnModuleInit {
         let result: WordEntity = await this.wordRepo
           .createQueryBuilder("word")
           .select()
-          .innerJoin("word.meanings", "links")
-          .innerJoin("links.meaning", "meaning")
           .where("word.lang = 'en'")
           .orderBy("word.id", "ASC")
           .distinct(true)
@@ -295,18 +295,18 @@ export default class GameService implements OnModuleInit {
 
   private async randomizeRestOfPhrasalVerbs(amount: number, excludeWordIds: number[]) {
     console.log("randomizeRestOfPhrasalVerbs -> amount: ", amount);
+    console.log("excludeWordIds: ", excludeWordIds);
     if (amount <= 0) {
       return [];
     }
     let result: any = await this.wordRepo
       .createQueryBuilder("word")
       .select("COUNT(DISTINCT word.id) as count")
-      .innerJoin("word.meanings", "links")
-      .innerJoin("links.meaning", "meaning")
       .where(`word.isPhrasalVerb = 1`)
       .andWhere("word.lang = 'en'")
       .getRawOne();
     const allCount = Number.parseInt(result.count);
+    console.log("allCount: ", allCount);
     const counterOrig = amount;
     let counter = counterOrig;
     const words: WordEntity[] = [];
@@ -317,8 +317,6 @@ export default class GameService implements OnModuleInit {
         let result: WordEntity = await this.wordRepo
           .createQueryBuilder("word")
           .select()
-          .innerJoin("word.meanings", "links")
-          .innerJoin("links.meaning", "meaning")
           .where(`word.isPhrasalVerb = 1`)
           .andWhere("word.lang = 'en'")
           .orderBy("word.id", "ASC")
@@ -387,10 +385,13 @@ export default class GameService implements OnModuleInit {
       .createQueryBuilder("word")
       .select("COUNT(DISTINCT word.id) as count")
       .innerJoin("word.meanings", "links")
-      .innerJoin("links.meaning", "meaning", "meaning.category = :category AND meaning.partOfSpeech = :partOfSpeech", {
-        category,
-        partOfSpeech
-      })
+      .innerJoin(
+        "links.meaning",
+        "meaning",
+        "meaning.category = :category AND meaning.partOfSpeech = :partOfSpeech", {
+          category,
+          partOfSpeech
+        })
       .where("word.id != :wordId", {
         wordId: exclude.id
       })
@@ -407,10 +408,13 @@ export default class GameService implements OnModuleInit {
           .createQueryBuilder("word")
           .select()
           .innerJoin("word.meanings", "links")
-          .innerJoin("links.meaning", "meaning", "meaning.category = :category AND meaning.partOfSpeech = :partOfSpeech", {
-            category,
-            partOfSpeech
-          })
+          .innerJoin(
+            "links.meaning",
+            "meaning",
+            "meaning.category = :category AND meaning.partOfSpeech = :partOfSpeech", {
+              category,
+              partOfSpeech
+            })
           .where("word.id != :wordId", {
             wordId: exclude.id
           })
@@ -433,16 +437,17 @@ export default class GameService implements OnModuleInit {
 
     console.log("randomized level: ", level);
     let link: LinkEntity = await this.randomizeLink(level, "en");
-    // link = await this.linkRepo
-    //   .createQueryBuilder("link")
-    //   .leftJoinAndSelect("link.word", "word")
-    //   .leftJoinAndSelect("link.meaning", "meaning")
-    //   .leftJoinAndSelect("word.wordParticles", "wordParticles")
-    //   .where({
-    //     meaningId: 25,
-    //     wordId: 60
-    //   })
-    //   .getOne();
+    link = await this.linkRepo
+      .createQueryBuilder("link")
+      .select()
+      .leftJoinAndSelect("link.word", "word")
+      .leftJoinAndSelect("link.meaning", "meaning")
+      .leftJoinAndSelect("word.wordParticles", "wordParticles")
+      .where({
+        meaningId: 3,
+        wordId: 4
+      })
+      .getOne();
     console.log("link: ", link);
     let wordsToPlay: WordEntity[] = [];
     const totalWordOptions = 8;
@@ -450,16 +455,25 @@ export default class GameService implements OnModuleInit {
       let wordsWithParticle: WordEntity[] = [];
 
       // HERE
+
+      function findFirstNonTOParticle(word: WordEntity): string {
+        let particles = word.word.split(/ +/);
+        const found = particles.find(particle => particle !== "to");
+        return found;
+      }
+
       wordsWithParticle =
         await this.randomizePhrasalVerbsWithParticle(
-          link.word.wordParticles[0].wordParticle,
-          3,
-          link.word
+          findFirstNonTOParticle(link.word),
+          totalWordOptions - 1,
+          [link.word.id]
         );
+      console.log("wordsWithParticle: ", wordsWithParticle);
       let rest = await this.randomizeRestOfPhrasalVerbs(
         totalWordOptions - 1 - wordsWithParticle.length,
         [link.word].concat(wordsWithParticle).map(word => word.id)
       );
+      console.log("restOfPhrasalVerbs: ", rest);
 
       function findSomebodyParticle(word: WordEntity) {
         for (let wordParticle of word.wordParticles) {
@@ -476,22 +490,18 @@ export default class GameService implements OnModuleInit {
       }
       wordsToPlay = [link.word, ...rest, ...wordsWithParticle];
     } else {
-      console.log("randomize NOT phrasal verb");
-      let words =
-        await this.randomizeWords(7, link.meaning.category, link.meaning.partOfSpeech, link.word);
-      console.log("WORDS: ", words);
-      let restOfWords =
-        await this.randomizeRestOfWords(7 - words.length,
-          [link.word].concat(words).map(word => word.id)
-        );
+      let words = await this.randomizeWords(
+        totalWordOptions - 1,
+        link.meaning.category,
+        link.meaning.partOfSpeech,
+        link.word
+      );
+      let restOfWords = await this.randomizeRestOfWords(
+        totalWordOptions - 1 - words.length,
+        [link.word].concat(words).map(word => word.id)
+      );
       wordsToPlay = [link.word, ...words, ...restOfWords];
     }
-
-    console.log("wordsToPlay: ", wordsToPlay);
-    //console.log("wordsToPlay: ", wordsToPlay);
-    // let plWord = this.getPolishWordFromMeaning(link);
-    //link.meaning.words.
-    console.log("id: ", link.meaning.id);
     const meaning = await this.meaningRepo
       .createQueryBuilder("meaning")
       .leftJoinAndSelect("meaning.words", "links")
@@ -500,8 +510,6 @@ export default class GameService implements OnModuleInit {
         id: link.meaning.id
       })
       .getOne();
-    console.log("meaning: ", meaning);
-
     const plWord = randomizeElement(
       meaning.words.filter(link => link.word.lang === "pl")
     );
@@ -520,7 +528,6 @@ export default class GameService implements OnModuleInit {
       return array;
     }
 
-    console.log("plWord: ", plWord);
     const ret: TaskType = {
       word: plWord?.word.word,
       word_desc: link.meaning.meaning_lang1_desc,
@@ -545,10 +552,10 @@ export default class GameService implements OnModuleInit {
   }[];
 };
      */
-    this.games[roomName].tasks.push({
-      ...ret,
-      correctWord: link.word
-    });
+    // this.games[roomName].tasks.push({
+    //   ...ret,
+    //   correctWord: link.word
+    // });
     return ret;
   }
 
