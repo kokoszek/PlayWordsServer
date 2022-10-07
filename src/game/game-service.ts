@@ -186,7 +186,7 @@ export default class GameService implements OnModuleInit {
   async onModuleInit(): Promise<any> {
     // let words = await this.randomizePhrasalVerbsWithSbdParticle(7);
     // let words = await this.randomizeRestOfPhrasalVerbs(4, [12, 24, 25]);
-    //await this.generateTask2(2, "A1");
+    await this.generateTask2(2, "A1");
   }
 
   private async randomizePhrasalVerbsWithParticle(
@@ -214,7 +214,7 @@ export default class GameService implements OnModuleInit {
         // if (maxLoop-- <= 0) {
         //   break;
         // }
-        const randomInt = getRandomInt(0, counterOrig - 1);
+        const randomInt = getRandomInt(0, count - 1);
         let result: any = await this.wordRepo
           .createQueryBuilder("word")
           .select()
@@ -403,7 +403,7 @@ export default class GameService implements OnModuleInit {
     const words: WordEntity[] = [];
     while (counter--) {
       while (true) {
-        const randomInt = getRandomInt(0, counterOrig - 1);
+        const randomInt = getRandomInt(0, count - 1);
         let result: any = await this.wordRepo
           .createQueryBuilder("word")
           .select()
@@ -437,17 +437,17 @@ export default class GameService implements OnModuleInit {
 
     console.log("randomized level: ", level);
     let link: LinkEntity = await this.randomizeLink(level, "en");
-    // link = await this.linkRepo
-    //   .createQueryBuilder("link")
-    //   .select()
-    //   .leftJoinAndSelect("link.word", "word")
-    //   .leftJoinAndSelect("link.meaning", "meaning")
-    //   .leftJoinAndSelect("word.wordParticles", "wordParticles")
-    //   .where({
-    //     meaningId: 3,
-    //     wordId: 4
-    //   })
-    //   .getOne();
+    link = await this.linkRepo
+      .createQueryBuilder("link")
+      .select()
+      .leftJoinAndSelect("link.word", "word")
+      .leftJoinAndSelect("link.meaning", "meaning")
+      .leftJoinAndSelect("word.wordParticles", "wordParticles")
+      .where({
+        meaningId: 126,
+        wordId: 250
+      })
+      .getOne();
     console.log("link: ", link);
     let wordsToPlay: WordEntity[] = [];
     const totalWordOptions = 8;
@@ -496,10 +496,12 @@ export default class GameService implements OnModuleInit {
         link.meaning.partOfSpeech,
         link.word
       );
+      console.log("WORDS2: ", words);
       let restOfWords = await this.randomizeRestOfWords(
         totalWordOptions - 1 - words.length,
         [link.word].concat(words).map(word => word.id)
       );
+      console.log("REST_OF_WORDS2: ", restOfWords);
       wordsToPlay = [link.word, ...words, ...restOfWords];
     }
     const meaning = await this.meaningRepo
@@ -552,10 +554,10 @@ export default class GameService implements OnModuleInit {
   }[];
 };
      */
-    this.games[roomName].tasks.push({
-      ...ret,
-      correctWord: link.word
-    });
+    // this.games[roomName].tasks.push({
+    //   ...ret,
+    //   correctWord: link.word
+    // });
     return ret;
   }
 
