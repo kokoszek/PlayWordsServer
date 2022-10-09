@@ -469,7 +469,7 @@ export class WordService implements OnModuleInit {
     // });
     //await this.deleteOrphanWords(5);
     // await this.testDiki();
-    await this.processPdfFile();
+    //await this.processPdfFile();
 
     // await this.translateWords();
     // try {
