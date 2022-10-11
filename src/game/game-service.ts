@@ -554,13 +554,13 @@ export default class GameService implements OnModuleInit {
       console.log("REST_OF_WORDS2: ", restOfWords);
       wordsToPlay = [link.word, ...words, ...restOfWords];
     }
-    if (link.meaning.partOfSpeech === "verb") {
-      for (let word of wordsToPlay) {
-        if (!/^to.*$/.test(word.word)) {
-          word.word = "to " + word.word;
-        }
-      }
-    }
+    // if (link.meaning.partOfSpeech === "verb") {
+    //   for (let word of wordsToPlay) {
+    //     if (!/^to.*$/.test(word.word)) {
+    //       word.word = "to " + word.word;
+    //     }
+    //   }
+    // }
     console.log("WORDS TO PLAY: ", wordsToPlay);
     const meaning = await this.meaningRepo
       .createQueryBuilder("meaning")
@@ -612,10 +612,10 @@ export default class GameService implements OnModuleInit {
   }[];
 };
      */
-    // this.games[roomName].tasks.push({
-    //   ...ret,
-    //   correctWord: link.word
-    // });
+    this.games[roomName].tasks.push({
+      ...ret,
+      correctWord: link.word
+    });
     return ret;
   }
 

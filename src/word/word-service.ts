@@ -398,7 +398,6 @@ export class WordService implements OnModuleInit {
 
   async onModuleInit(): Promise<any> {
     console.log("on module INIT");
-
   }
 
 }
