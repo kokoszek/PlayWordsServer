@@ -191,10 +191,10 @@ export default class GameService implements OnModuleInit {
     //   .innerJoinAndSelect("meaning.words", "links")
     //   .innerJoinAndSelect("links.word", "word")
     //   .where({
-    //     id: 114
+    //     id: 87
     //   })
     //   .getOne();
-    // console.log("meaning 114: ", m);
+    // console.log("meaning 87: ", m);
     // await this.generateTask2(2, "A1");
   }
 
@@ -283,15 +283,55 @@ export default class GameService implements OnModuleInit {
           .limit(1)
           .offset(randomInt)
           .getOne();
-        // console.log("randomInt: ", randomInt);
-        //console.log("result: ", result);
-        //console.log("words: ", words);
-        //console.log("excludeWordIds: ", excludeWordIds);
-        // console.log("words: ", words);
         if (
           (!words.map(word => word?.id).includes(result?.id) &&
             !excludeWordIds.includes(result?.id)) ||
-          result == null
+          result == null // ??
+        ) {
+          console.log("break");
+          words.push(result);
+          break;
+        }
+      }
+    }
+    return words;
+  }
+
+  private async randomizeRestIdioms(amount: number, excludeWord: WordEntity) {
+    console.log("randomizeRestOfIdioms -> amount: ", amount);
+    console.log("excludeWord: ", excludeWord);
+    if (amount <= 0) {
+      return [];
+    }
+    let result: any = await this.wordRepo
+      .createQueryBuilder("word")
+      .select("COUNT(DISTINCT word.id) as count")
+      .where(`word.isIdiom = 1`)
+      .andWhere("word.lang = 'en'")
+      .getRawOne();
+    const allCount = Number.parseInt(result.count);
+    console.log("allCount: ", allCount);
+    const counterOrig = amount;
+    let counter = counterOrig;
+    const words: WordEntity[] = [];
+    while (counter--) {
+      while (true) {
+        const randomInt = getRandomInt(0, allCount - 1);
+        console.log("randomInt: ", randomInt);
+        let result: WordEntity = await this.wordRepo
+          .createQueryBuilder("word")
+          .select()
+          .where(`word.isIdiom = 1`)
+          .andWhere("word.lang = 'en'")
+          .orderBy("word.id", "ASC")
+          .distinct(true)
+          .limit(1)
+          .offset(randomInt)
+          .getOne();
+        console.log("result:", result);
+        if (
+          !words.concat(excludeWord).map(word => word?.id).includes(result?.id) &&
+          result !== null
         ) {
           console.log("break");
           words.push(result);
@@ -451,8 +491,8 @@ export default class GameService implements OnModuleInit {
       .leftJoinAndSelect("link.meaning", "meaning")
       .leftJoinAndSelect("word.wordParticles", "wordParticles")
       .where({
-        meaningId: 114,
-        wordId: 225
+        meaningId: 87,
+        wordId: 165
       })
       .getOne();
     console.log("link: ", link);
@@ -495,6 +535,10 @@ export default class GameService implements OnModuleInit {
         });
       }
       wordsToPlay = [link.word, ...rest, ...wordsWithParticle];
+    } else if (link.word.isIdiom === true) {
+      const idioms = await this.randomizeRestIdioms(totalWordOptions - 1, link.word);
+      console.log("rest of idioms: ", idioms);
+      wordsToPlay = [link.word, ...idioms];
     } else {
       let words = await this.randomizeWords(
         totalWordOptions - 1,
@@ -568,10 +612,10 @@ export default class GameService implements OnModuleInit {
   }[];
 };
      */
-    this.games[roomName].tasks.push({
-      ...ret,
-      correctWord: link.word
-    });
+    // this.games[roomName].tasks.push({
+    //   ...ret,
+    //   correctWord: link.word
+    // });
     return ret;
   }
 
