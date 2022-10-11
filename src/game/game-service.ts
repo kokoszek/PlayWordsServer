@@ -484,17 +484,17 @@ export default class GameService implements OnModuleInit {
 
     console.log("randomized level: ", level);
     let link: LinkEntity = await this.randomizeLink(level, "en");
-    link = await this.linkRepo
-      .createQueryBuilder("link")
-      .select()
-      .leftJoinAndSelect("link.word", "word")
-      .leftJoinAndSelect("link.meaning", "meaning")
-      .leftJoinAndSelect("word.wordParticles", "wordParticles")
-      .where({
-        meaningId: 87,
-        wordId: 165
-      })
-      .getOne();
+    // link = await this.linkRepo
+    //   .createQueryBuilder("link")
+    //   .select()
+    //   .leftJoinAndSelect("link.word", "word")
+    //   .leftJoinAndSelect("link.meaning", "meaning")
+    //   .leftJoinAndSelect("word.wordParticles", "wordParticles")
+    //   .where({
+    //     meaningId: 87,
+    //     wordId: 165
+    //   })
+    //   .getOne();
     console.log("link: ", link);
     let wordsToPlay: WordEntity[] = [];
     const totalWordOptions = 8;
