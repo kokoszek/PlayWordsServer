@@ -186,7 +186,16 @@ export default class GameService implements OnModuleInit {
   async onModuleInit(): Promise<any> {
     // let words = await this.randomizePhrasalVerbsWithSbdParticle(7);
     // let words = await this.randomizeRestOfPhrasalVerbs(4, [12, 24, 25]);
-    //await this.generateTask2(2, "A1");
+    // let m = await this.meaningRepo
+    //   .createQueryBuilder("meaning")
+    //   .innerJoinAndSelect("meaning.words", "links")
+    //   .innerJoinAndSelect("links.word", "word")
+    //   .where({
+    //     id: 114
+    //   })
+    //   .getOne();
+    // console.log("meaning 114: ", m);
+    // await this.generateTask2(2, "A1");
   }
 
   private async randomizePhrasalVerbsWithParticle(
@@ -433,17 +442,17 @@ export default class GameService implements OnModuleInit {
 
     console.log("randomized level: ", level);
     let link: LinkEntity = await this.randomizeLink(level, "en");
-    // link = await this.linkRepo
-    //   .createQueryBuilder("link")
-    //   .select()
-    //   .leftJoinAndSelect("link.word", "word")
-    //   .leftJoinAndSelect("link.meaning", "meaning")
-    //   .leftJoinAndSelect("word.wordParticles", "wordParticles")
-    //   .where({
-    //     meaningId: 126,
-    //     wordId: 250
-    //   })
-    //   .getOne();
+    link = await this.linkRepo
+      .createQueryBuilder("link")
+      .select()
+      .leftJoinAndSelect("link.word", "word")
+      .leftJoinAndSelect("link.meaning", "meaning")
+      .leftJoinAndSelect("word.wordParticles", "wordParticles")
+      .where({
+        meaningId: 114,
+        wordId: 225
+      })
+      .getOne();
     console.log("link: ", link);
     let wordsToPlay: WordEntity[] = [];
     const totalWordOptions = 8;
@@ -451,7 +460,6 @@ export default class GameService implements OnModuleInit {
       let wordsWithParticle: WordEntity[] = [];
 
       // HERE
-
       function findFirstNonTOParticle(word: WordEntity): string {
         let particles = word.word.split(/ +/);
         const found = particles.find(particle => particle !== "to");
@@ -480,7 +488,7 @@ export default class GameService implements OnModuleInit {
       }
 
       if (this.hasSbdParticle(link.word)) {
-        rest.forEach((word: WordEntity) => {
+        rest.concat(wordsWithParticle).forEach((word: WordEntity) => {
           word.word += " " + findSomebodyParticle(link.word);
         });
       }
@@ -500,6 +508,14 @@ export default class GameService implements OnModuleInit {
       console.log("REST_OF_WORDS2: ", restOfWords);
       wordsToPlay = [link.word, ...words, ...restOfWords];
     }
+    if (link.meaning.partOfSpeech === "verb") {
+      for (let word of wordsToPlay) {
+        if (!/^to.*$/.test(word.word)) {
+          word.word = "to " + word.word;
+        }
+      }
+    }
+    console.log("WORDS TO PLAY: ", wordsToPlay);
     const meaning = await this.meaningRepo
       .createQueryBuilder("meaning")
       .leftJoinAndSelect("meaning.words", "links")
@@ -550,88 +566,12 @@ export default class GameService implements OnModuleInit {
   }[];
 };
      */
-    this.games[roomName].tasks.push({
-      ...ret,
-      correctWord: link.word
-    });
+    // this.games[roomName].tasks.push({
+    //   ...ret,
+    //   correctWord: link.word
+    // });
     return ret;
   }
-
-
-  // public async generateTask(forGameId: number): Promise<TaskType> {
-  //   const roomName = createRoomName(forGameId);
-  //   const result = await this.meaningRepo
-  //     .createQueryBuilder()
-  //     .select("COUNT(*) as count")
-  //     .getRawOne();
-  //   const count = Number.parseInt(result.count);
-  //   // const randomInt = getRandomInt(0, count - 1);
-  //
-  //   const numberOfWordsToRandomize = 8;
-  //   let counter = numberOfWordsToRandomize;
-  //   const randomizedMeanings: MeaningEntity[] = [];
-  //   while (counter--) {
-  //     let randomizedMeaning: MeaningEntity;
-  //     while (true) {
-  //       const randomInt = getRandomInt(0, count - 1);
-  //       randomizedMeaning = (
-  //         await this.meaningRepo
-  //           .createQueryBuilder("meaning")
-  //           .leftJoinAndSelect("meaning.words", "words")
-  //           .orderBy("meaning.id", "ASC")
-  //           .skip(randomInt)
-  //           .take(1)
-  //           .getOne()
-  //       );
-  //       if (
-  //         // haven't been already played
-  //         !this.games[roomName]
-  //           .tasks
-  //           .map(task => task.meaningId)
-  //           .includes(randomizedMeaning.id)
-  //         &&
-  //         // and not in words of randomizedMeanings (not already randomized), so that the randomized word list is unique
-  //         randomizedMeanings
-  //           .flatMap(meaning => meaning.words)
-  //           .map(word => word.id)
-  //           .every(wordId => !randomizedMeaning.words.map(word => word.id).includes(wordId))
-  //       ) {
-  //         break; // break if successfuly picked 'randomizedMeaning' ( conditions present is above 'if' )
-  //       }
-  //     }
-  //     randomizedMeanings.push(randomizedMeaning);
-  //   }
-  //   const randomizedMeaningToPlay =
-  //     randomizedMeanings[getRandomInt(0, numberOfWordsToRandomize - 1)];
-  //   const randomizedPolishWord: WordEntity = this.randomizeElement(
-  //     randomizedMeaningToPlay.words.filter((el) => el.lang === "pl")
-  //   );
-  //
-  //
-  //   let correctWord: WordEntity;
-  //   const ret = {
-  //     word: randomizedPolishWord?.word,
-  //     word_desc: randomizedMeaningToPlay.meaning_lang1_desc,
-  //     meaningId: randomizedMeaningToPlay.id,
-  //     wordOptions: randomizedMeanings.map((meaning) => {
-  //       const randomizedWord: WordEntity = this.randomizeElement(
-  //         meaning.words.filter((el) => el.lang === "en")
-  //       );
-  //       if (meaning.id === randomizedMeaningToPlay.id) {
-  //         correctWord = randomizedWord;
-  //       }
-  //       return {
-  //         wordId: randomizedWord.id,
-  //         word: randomizedWord.word
-  //       };
-  //     })
-  //   };
-  //   this.games[roomName].tasks.push({
-  //     ...ret,
-  //     correctWord
-  //   });
-  //   return ret;
-  // }
 
   public async getCorrectWordInLatestTask(gameId: number): Promise<{ word: string, wordId: number }> {
     const roomName = createRoomName(gameId);
@@ -641,21 +581,6 @@ export default class GameService implements OnModuleInit {
       word: task.correctWord.word,
       wordId: task.correctWord.id
     };
-    // const meaning = await this.meaningRepo.findOne({
-    //   where: {
-    //     id: task.meaningId
-    //   }
-    // });
-    // let ret = null;
-    // task.wordOptions.forEach(wordOption => {
-    //   if (meaning.words.map(word => word.id).includes(wordOption.wordId)) {
-    //     ret = {
-    //       word: wordOption.word,
-    //       wordId: wordOption.wordId
-    //     };
-    //   }
-    // });
-    // return ret;
   }
 
   public async checkTaskSolution(

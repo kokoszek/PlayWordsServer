@@ -34,10 +34,10 @@ export class WordService implements OnModuleInit {
       .createQueryBuilder("word")
       .innerJoinAndSelect("word.wordParticles", "wordParticles")
       .where("wordParticles.wordParticle LIKE :search", {
-        search: search
+        search: search + "%"
       })
       .orWhere("word.word LIKE :search", {
-        search: search
+        search: search + "%"
       })
       .take(40)
       .orderBy("word.id", "DESC")
@@ -357,41 +357,6 @@ export class WordService implements OnModuleInit {
     //console.log('translated: ', translated);
   }
 
-  // async translateWords() {
-  //   let words: MeaningEntity[] = await this.wordRepo
-  //     .createQueryBuilder("user")
-  //     .getMany();
-  //   words.forEach(async word => {
-  //     word.lang_polish = await this.translateWord(word.lang_english);
-  //     console.log('waord.lang.polish: ', word.lang_polish);
-  //     await this.wordRepo.save(word);
-  //   })
-  // }
-
-  // async test() {
-  //   let result = await this.wordRepo
-  //     .createQueryBuilder()
-  //     .select('COUNT(*) as count')
-  //     .getRawOne();
-  //   let count = Number.parseInt(result.count);
-  //
-  //   let counter = 10;
-  //   let randomizedWordIds = [];
-  //   while(counter--) {
-  //     let randomInt;
-  //     let ordered = await this.wordRepo
-  //       .createQueryBuilder()
-  //       .orderBy('lang_english', 'ASC')
-  //       .limit(1)
-  //       .offset(randomInt)
-  //       .getOne();
-  //
-  //     randomizedWordIds.push(ordered.id);
-  //     console.log(ordered);
-  //   }
-  //
-  // }
-
   async testDiki() {
 
     fetch("https://www.diki.pl/slownik-angielskiego?q=ograniczony")
@@ -433,52 +398,7 @@ export class WordService implements OnModuleInit {
 
   async onModuleInit(): Promise<any> {
     console.log("on module INIT");
-    // const allWords = await this.wordRepo
-    //   .createQueryBuilder("word")
-    //   .leftJoinAndSelect("word.meanings", "link")
-    //   .leftJoinAndSelect("link.meaning", "meaning")
-    //   .getMany();
-    // console.log("allWords: ", allWords);
-    // for (const word of allWords) {
-    //   //console.log("word: ", word);
-    //   if (word.meanings.some(link => link.meaning.partOfSpeech === "phrasal verb")) {
-    //     console.log("phrasal verb: ", word);
-    //     // word.isPhrasalVerb = true;
-    //     await this.wordRepo.update({ id: word.id }, {
-    //       isPhrasalVerb: true
-    //     });
-    //     // await this.wordRepo.save(word);
-    //   }
-    // }
-    // const allWords = await this.wordRepo
-    //   .createQueryBuilder("word")
-    //   .select()
-    //   .leftJoinAndSelect("word.wordParticles", "particles")
-    //   .getMany();
-    // console.log("allWords: ", allWords);
 
-    //console.log("allWords: ", allWords);
-    // allWords.forEach(async word => {
-    //   let particles: string[] = word.word.split(/ +/);
-    //   //console.log("particles: ", particles);
-    //   word.wordParticles =
-    //     particles.map(particle =>
-    //       this.wordParticleRepo.create({ wordParticle: particle })
-    //     );
-    //   await this.wordRepo.save(word);
-    // });
-    //await this.deleteOrphanWords(5);
-    // await this.testDiki();
-    // await this.processPdfFile();
-
-    // await this.translateWords();
-    // try {
-    //   let result = await this.translateWord("accept");
-    //   console.log("result: ", result);
-    // } catch (e) {
-    //   console.log("error: ", e);
-    // }
-    // await this.test();
   }
 
 }
