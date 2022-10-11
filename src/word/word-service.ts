@@ -34,10 +34,10 @@ export class WordService implements OnModuleInit {
       .createQueryBuilder("word")
       .innerJoinAndSelect("word.wordParticles", "wordParticles")
       .where("wordParticles.wordParticle LIKE :search", {
-        search: search + "%"
+        search: search
       })
       .orWhere("word.word LIKE :search", {
-        search: search + "%"
+        search: search
       })
       .take(40)
       .orderBy("word.id", "DESC")
@@ -204,7 +204,7 @@ export class WordService implements OnModuleInit {
 
   counter = 0;
 
-  sem = require("semaphore")(1);
+  sem = require("semaphore")(2);
 
   async processPdfFile() {
     const pdfParser = new PDFParser();
@@ -469,7 +469,7 @@ export class WordService implements OnModuleInit {
     // });
     //await this.deleteOrphanWords(5);
     // await this.testDiki();
-    //await this.processPdfFile();
+    // await this.processPdfFile();
 
     // await this.translateWords();
     // try {

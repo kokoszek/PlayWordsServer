@@ -352,9 +352,6 @@ export default class GameService implements OnModuleInit {
       .getRawOne();
     const count = Number.parseInt(resultCount.count);
     let randomInt = getRandomInt(0, count - 1);
-    //randomInt = 1;
-    //console.log("count: ", count);
-    //console.log("randomInt: ", randomInt);
     const randomizedLink = await this.linkRepo.createQueryBuilder("link")
       .select()
       .innerJoin("link.word", "word")
@@ -363,7 +360,6 @@ export default class GameService implements OnModuleInit {
       .limit(1)
       .offset(randomInt)
       .getOne();
-
     const ranomizedLinkWithJoins = (
       await this.linkRepo
         .createQueryBuilder("link")
