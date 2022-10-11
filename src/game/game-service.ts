@@ -438,6 +438,8 @@ export default class GameService implements OnModuleInit {
     return words;
   }
 
+  //private randomizePhrasalVerbs
+
   public async generateTask2(forGameId: number, level: LevelType): Promise<TaskType> {
 
     console.log("randomized level: ", level);
@@ -566,10 +568,10 @@ export default class GameService implements OnModuleInit {
   }[];
 };
      */
-    // this.games[roomName].tasks.push({
-    //   ...ret,
-    //   correctWord: link.word
-    // });
+    this.games[roomName].tasks.push({
+      ...ret,
+      correctWord: link.word
+    });
     return ret;
   }
 
