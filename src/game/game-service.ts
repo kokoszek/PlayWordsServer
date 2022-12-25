@@ -118,7 +118,7 @@ export default class GameService implements OnModuleInit {
     return null;
   }
 
-  private taskLimit = 3;
+  private taskLimit = 8;
 
   public shouldSendNextTask(gameId: number) {
     const roomName = createRoomName(gameId);
