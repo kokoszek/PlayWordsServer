@@ -116,7 +116,11 @@ export default class GameGatewayWs implements OnGatewayInit {
     allList = await redis.lrange("findMatchQueue", 0, -1);
     console.log("allList after pushing: ", allList);
     console.log("semaphore before leaving: ", sem.current);
-    sem.leave();
+    const current = sem.current;
+    do {
+      sem.leave();
+      console.log("DO");
+    } while (sem.current === current);
     console.log("semaphore after leaving: ", sem.current);
     return true;
   }
