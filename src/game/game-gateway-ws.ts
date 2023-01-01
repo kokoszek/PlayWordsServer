@@ -8,15 +8,10 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { PlayerEntity } from "../player/player.entity";
 
-const MultiSemaphore = require("redis-semaphore").MultiSemaphore;
-const Redis = require("ioredis");
-const redis = new Redis(6379, process.env.REDIS_HOST);
+//const MultiSemaphore = require("redis-semaphore").MultiSemaphore;
+import { redis } from "./redis";
 
 const { sem } = require("./semaphore");
-
-redis.on("error", (err) => {
-  console.log("redis error occured: ", err);
-});
 
 @WebSocketGateway(Number.parseInt(process.env.WS_PORT), { namespace: "find-game" })
 export default class GameGatewayWs implements OnGatewayInit {

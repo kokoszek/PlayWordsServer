@@ -1,0 +1,1 @@
+ssh -L 3366:wordgame.caqshc0xhamu.eu-central-1.rds.amazonaws.com:3306 ec2-user@3.68.131.17
