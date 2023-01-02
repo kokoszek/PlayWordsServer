@@ -11,7 +11,7 @@ import { PlayerEntity } from "../player/player.entity";
 //const MultiSemaphore = require("redis-semaphore").MultiSemaphore;
 import { redis } from "./redis";
 
-const { sem } = require("./semaphore");
+//const { sem } = require("./semaphore");
 
 @WebSocketGateway(Number.parseInt(process.env.WS_PORT), { namespace: "find-game" })
 export default class GameGatewayWs implements OnGatewayInit {
@@ -32,51 +32,20 @@ export default class GameGatewayWs implements OnGatewayInit {
     let counter = 0;
     await redis.del("findMatchQueue");
     setTimeout(async () => {
-      await new Promise<void>((resolve) => {
-        sem.take(10, function() {
-          resolve();
-        });
-      });
+      // await new Promise<void>((resolve) => {
+      //   sem.take(10, function() {
+      //     resolve();
+      //   });
+      // });
       setTimeout(async () => {
-        while (true) {
-          await new Promise<void>((resolve) => {
-            sem.take(2, function() {
-              resolve();
-            });
-          });
-          //console.log("found two matching players, loop counter: ", ++counter);
-          let allList = await redis.lrange("findMatchQueue", 0, -1);
-          console.log("allList: ", allList);
-          const player1Str = await redis.lpop("findMatchQueue");
-          const player2Str = await redis.lpop("findMatchQueue");
-
-          const player1 = Number.parseInt(player1Str);
-          const player2 = Number.parseInt(player2Str);
-
-          const player1Entity = await this.playerRepo.findOne({ where: { id: player1 } });
-          const player2Entity = await this.playerRepo.findOne({ where: { id: player2 } });
-
-          // console.log("player1Entity: ", player1Entity);
-          // console.log("player2Entity: ", player2Entity);
-
-          console.log("players poped from queue: ", player1, " and ", player2);
-          const game = this.gameService.createGame(player1, player2);
-          console.log("emiting event: ", "game-found-for-" + player1);
-
-          this.server.emit("game-found-for-" + player1, {
-            matchFound: true,
-            opponentId: player2,
-            opponentName: player2Entity.playerName,
-            gameId: game.gameId
-          });
-          console.log("emiting event: ", "game-found-for-" + player2);
-          this.server.emit("game-found-for-" + player2, {
-            matchFound: true,
-            opponentId: player1,
-            opponentName: player1Entity.playerName,
-            gameId: game.gameId
-          });
-        }
+        //while (true) {
+        // await new Promise<void>((resolve) => {
+        //   sem.take(2, function() {
+        //     resolve();
+        //   });
+        // });
+        //console.log("found two matching players, loop counter: ", ++counter);
+        //}
       }, 2000);
     }, 0);
   }
@@ -115,13 +84,40 @@ export default class GameGatewayWs implements OnGatewayInit {
     await redis.rpush("findMatchQueue", playerId);
     allList = await redis.lrange("findMatchQueue", 0, -1);
     console.log("allList after pushing: ", allList);
-    console.log("semaphore before leaving: ", sem.current);
-    const current = sem.current;
-    do {
-      sem.leave();
-      console.log("DO");
-    } while (sem.current === current);
-    console.log("semaphore after leaving: ", sem.current);
+
+    if (allList.length >= 2) {
+      console.log("allList: ", allList);
+      const player1Str = await redis.lpop("findMatchQueue");
+      const player2Str = await redis.lpop("findMatchQueue");
+
+      const player1 = Number.parseInt(player1Str);
+      const player2 = Number.parseInt(player2Str);
+
+      const player1Entity = await this.playerRepo.findOne({ where: { id: player1 } });
+      const player2Entity = await this.playerRepo.findOne({ where: { id: player2 } });
+
+      // console.log("player1Entity: ", player1Entity);
+      // console.log("player2Entity: ", player2Entity);
+
+      console.log("players poped from queue: ", player1, " and ", player2);
+      const game = this.gameService.createGame(player1, player2);
+      console.log("emiting event: ", "game-found-for-" + player1);
+
+      this.server.emit("game-found-for-" + player1, {
+        matchFound: true,
+        opponentId: player2,
+        opponentName: player2Entity.playerName,
+        gameId: game.gameId
+      });
+      console.log("emiting event: ", "game-found-for-" + player2);
+      this.server.emit("game-found-for-" + player2, {
+        matchFound: true,
+        opponentId: player1,
+        opponentName: player1Entity.playerName,
+        gameId: game.gameId
+      });
+    }
+
     return true;
   }
 
@@ -132,9 +128,6 @@ export default class GameGatewayWs implements OnGatewayInit {
   ) {
     const { playerId } = data;
     await redis.lrem("findMatchQueue", 0, playerId);
-    console.log("sem.current: ", sem.current);
-    sem.take(1, () => {
-    });
     return true;
   }
 
