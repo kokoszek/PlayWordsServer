@@ -53,6 +53,12 @@ export class WordEntity {
     nullable: false,
     default: false
   })
+  needsTranslation: boolean;
+
+  @Column({
+    nullable: false,
+    default: false
+  })
   isIdiom: boolean;
 
   @OneToMany(() => LinkEntity, (link) => link.word, {

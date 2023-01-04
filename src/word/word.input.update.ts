@@ -3,7 +3,7 @@ import { GraphQLBoolean, GraphQLInt, GraphQLString } from "graphql";
 import { WordType } from "./word.type";
 
 @InputType()
-export class WordInputUpdate implements Omit<WordType, "lang" | "meanings"> {
+export class WordInputUpdate implements Omit<WordType, "lang" | "meanings" | "needsTranslation"> {
 
   @Field(type => GraphQLBoolean, { nullable: true })
   isPhrasalVerb: boolean;

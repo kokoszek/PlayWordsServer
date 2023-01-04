@@ -7,6 +7,9 @@ import { LinkType } from "../meaning/link.type";
 export class WordType implements Omit<WordEntity, "meanings" | "wordParticles"> {
 
   @Field(type => GraphQLBoolean)
+  needsTranslation: boolean;
+
+  @Field(type => GraphQLBoolean)
   isPhrasalVerb: boolean;
 
   @Field(type => GraphQLBoolean)

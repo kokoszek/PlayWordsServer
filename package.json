@@ -36,6 +36,7 @@
     "axios": "^0.27.2",
     "detect-ts-node": "^1.0.5",
     "dotenv": "^16.0.2",
+    "gauss-random": "^1.0.1",
     "graphql": "^16.5.0",
     "graphql-subscriptions": "^2.0.0",
     "graphql-ws": "^5.10.0",

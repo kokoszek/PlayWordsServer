@@ -14,6 +14,8 @@ const fetch = require("node-fetch");
 const fs = require("fs");
 const PDFParser = require("pdf2json");
 
+var nrand = require("gauss-random");
+
 
 @Injectable()
 export class WordService implements OnModuleInit {
@@ -178,26 +180,91 @@ export class WordService implements OnModuleInit {
 
   extractWords(page): { word: string, partOfSpeechRaw: string }[] {
     let words = [];
-    let prevLine;
-    page.Texts.forEach(rawLine => {
-      let line: string = rawLine.R[0].T.split("%20");
+    let prevTxt;
+    page.Texts.forEach(rawLine_ => {
+      let rawLine = rawLine_.R[0].T;
+      let line: string = rawLine.split("%20");
+      const txt = rawLine.R[0].T;
+      //console.log("rawLine: ", txt);
       //console.log("=======");
-      // console.log("line: ", line);
-      // console.log("prevLine: ", prevLine);
-      if (/\(.*\)/.test(line)) {
+      // if (line[1]?.startsWith("%2F")) {
+      //   console.log("prevline: ", prevLine);
+      //   words.push({
+      //     word: prevLine.join(" ")
+      //   });
+      // }
+      //console.log("prevLine: ", prevLine);
+      if (/\((.*)\)/.test(txt)) {
         try {
           let regexp = new RegExp(/\((.*)\)/);
-          let partOfSpeechRaw = regexp.exec(line)[1];
-          let word = prevLine[0];
+          let partOfSpeech = regexp.exec(txt)[1];
+          let word = prevTxt.split("%")[0];
+          if (/[()]/.test(word)) {
+            return;
+          }
+          if (word.length === 1) {
+            return;
+          }
+          // console.log("word: ", word);
+          // console.log("partOfSpeech: ", partOfSpeech);
+          // console.log("=================");
           words.push({
-            word,
-            partOfSpeechRaw
+            word: word,
+            partOfSpeech: partOfSpeech
           });
         } catch (e) {
           console.log("ERR: ", e);
         }
       }
-      prevLine = line;
+      prevTxt = txt;
+    });
+    return words;
+  }
+
+  extractWordsForMacedonianPdf(page): { word: string, partOfSpeechRaw: string }[] {
+    let words = [];
+    let prevRawLine;
+    let wordFound = false;
+    let foundWord = null;
+    page.Texts.forEach(rawLine_ => {
+      let rawLine = rawLine_.R[0].T;
+      let line: string = rawLine.split("%20");
+      //console.log("rawLine: ", rawLine);
+      //console.log("rawLine: ", txt);
+      //console.log("=======");
+      // if (line[1]?.startsWith("%2F")) {
+      //   console.log("prevline: ", prevLine);
+      //   words.push({
+      //     word: prevLine.join(" ")
+      //   });
+      // }
+      //console.log("line: ", line);
+      if (/%20%.*F$/.test(rawLine) && !wordFound) {
+        //console.log("word: ", prevRawLine);
+        //wordObj.word = prevRawLine;
+        wordFound = true;
+        foundWord = prevRawLine;
+        return;
+      }
+      if (wordFound) {
+        //console.log("word found: ", rawLine);
+        if (/^[A-Z]+$/.test(rawLine)) {
+          //console.log("partOfSpeech: ", rawLine);
+          foundWord = foundWord.replaceAll("%20", " ");
+          if (
+            !/%/.test(foundWord) &&
+            !!foundWord &&
+            !/[)(]/.test(foundWord)
+          ) {
+            words.push({
+              word: foundWord,
+              partOfSpeechRaw: rawLine
+            });
+            wordFound = false;
+          }
+        }
+      }
+      prevRawLine = rawLine;
     });
     return words;
   }
@@ -205,18 +272,14 @@ export class WordService implements OnModuleInit {
   counter = 0;
 
   sem = require("semaphore")(2);
+  semOuter = require("semaphore")(2);
 
   async processPdfFile() {
     const pdfParser = new PDFParser();
     pdfParser.on("readable", meta => console.log("PDF Metadata", meta));
     pdfParser.on("data", async page => {
-      //console.log(page ? "One page paged" : "All pages parsed", page)
+      // console.log(page ? "One page paged" : "All pages parsed", page)
 
-      await new Promise<void>((resolve) => {
-        this.sem.take(1, function() {
-          resolve();
-        });
-      });
 
       if (page == null) {
         return;
@@ -235,35 +298,49 @@ export class WordService implements OnModuleInit {
         "n": "noun",
         "adj": "adjective",
         "adv": "adverb",
-        "prep": "preposition"
+        "prep": "preposition",
+        "pron": "pronoun"
       };
 
-      let words = this.extractWords(page);
+      let words = [];
+      console.log("page number " + this.counter);
+      words = this.extractWords(page);
       this.counter++;
+      // if (this.counter > 2) {
+      //   return;
+      // }
       for (let wordObj of words) {
+        await new Promise<void>((resolve) => {
+          this.sem.take(1, function() {
+            resolve();
+          });
+        });
         console.log("wordObj: ", wordObj);
         let word = wordObj.word;
+
         let partOfSpeechRaw = wordObj.partOfSpeechRaw;
 
         function removeDotAtTheEnd(word: string) {
           return word.replaceAll(".", "");
         }
 
-        word = removeDotAtTheEnd(word);
-
-        let existingWords = await this.wordRepo
+        // word = removeDotAtTheEnd(word);
+        let existingWord = await this.wordRepo
           .createQueryBuilder("word")
           .select()
+          .innerJoinAndSelect("word.meanings", "links")
+          .innerJoinAndSelect("links.meaning", "meaning")
+          .innerJoinAndSelect("meaning.words", "words")
           .where("word.word = :word", {
             word
           })
-          .getMany();
+          .getOne();
 
-        if (existingWords.length > 0) {
+        if (existingWord) {
           console.log("word: ", word, " already exist, skipping...");
           continue;
         } else {
-          console.log("word does not exist, adding: ", word);
+          console.log("new word: ", word);
         }
 
         // if (this.counter > 10) {
@@ -277,61 +354,63 @@ export class WordService implements OnModuleInit {
           console.log("partOfSpeechRaw exists in map, continue...");
         }
         //let plWord = "polskie_slowo";
-        console.log("BEFORE translate word: ", word);
-        let plWord = await this.translateWord(word);
-        console.log("AFTER translate word: ", word);
-        let plWordEntity = this.wordRepo.create({
-          lang: "pl",
-          word: plWord,
-          isIdiom: false,
-          isPhrasalVerb: false,
-          origin: "b1-cambridge-list",
-          freq: 1
-        });
-        let engWordEntity = this.wordRepo.create({
-          lang: "en",
-          word: word,
-          isIdiom: false,
-          isPhrasalVerb: false,
-          origin: "b1-cambridge-list",
-          freq: 1
-        });
-        let plWordSaved = await this.wordRepo.save(plWordEntity);
-        let polishParticle = this.wordParticleRepo.create({
-          wordParticle: plWord,
-          wordEntity: plWordSaved
-        });
-        await this.wordParticleRepo.save(polishParticle);
+        //console.log("BEFORE translate word: ", word);
+        //let plWord = await this.translateWord(word);
+        //console.log("AFTER translate word: ", word);
+        // let plWordEntity = this.wordRepo.create({
+        //   lang: "pl",
+        //   word: plWord,
+        //   isIdiom: false,
+        //   isPhrasalVerb: false,
+        //   origin: "b1-cambridge-list",
+        //   freq: 1
+        // });
+        // let plWordSaved = await this.wordRepo.save(plWordEntity);
+        // let polishParticle = this.wordParticleRepo.create({
+        //   wordParticle: plWord,
+        //   wordEntity: plWordSaved
+        // });
+        // await this.wordParticleRepo.save(polishParticle);
 
-        let enWordSaved = await this.wordRepo.save(engWordEntity);
-        let englishParticle = this.wordParticleRepo.create({
-          wordParticle: word,
-          wordEntity: enWordSaved
-        });
-        await this.wordParticleRepo.save(englishParticle);
-
-        let meaning = this.meaningRepo.create({
-          partOfSpeech: partsOfSpeechMap[partOfSpeechRaw],
-          meaning_lang1_language: "pl",
-          meaning_lang2_language: "en",
-          category: "general"
-        });
-        let savedMeaning = await this.meaningRepo.save(meaning);
-        let plLink = this.linkRepo.create({
-          meaningId: savedMeaning.id,
-          wordId: plWordSaved.id,
-          level: "B1"
-        });
-        await this.linkRepo.save(plLink);
-        let enLink = this.linkRepo.create({
-          meaningId: savedMeaning.id,
-          wordId: enWordSaved.id,
-          level: "B1"
-        });
-        await this.linkRepo.save(enLink);
+        // let engWordEntity = this.wordRepo.create({
+        //   lang: "en",
+        //   word: word,
+        //   isIdiom: false,
+        //   isPhrasalVerb: false,
+        //   needsTranslation: true,
+        //   origin: "a2-list",
+        //   freq: 1
+        // });
+        // console.log("created: ", engWordEntity);
+        // let enWordSaved = await this.wordRepo.save(engWordEntity);
+        // let englishParticle = this.wordParticleRepo.create({
+        //   wordParticle: word,
+        //   wordEntity: enWordSaved
+        // });
+        // await this.wordParticleRepo.save(englishParticle);
+        //
+        // let meaning = this.meaningRepo.create({
+        //   partOfSpeech: partsOfSpeechMap[partOfSpeechRaw],
+        //   meaning_lang1_language: "pl",
+        //   meaning_lang2_language: "en",
+        //   category: "general"
+        // });
+        // let savedMeaning = await this.meaningRepo.save(meaning);
+        // // let plLink = this.linkRepo.create({
+        // //   meaningId: savedMeaning.id,
+        // //   wordId: plWordSaved.id,
+        // //   level: "B1"
+        // // });
+        // // await this.linkRepo.save(plLink);
+        // let enLink = this.linkRepo.create({
+        //   meaningId: savedMeaning.id,
+        //   wordId: enWordSaved.id,
+        //   level: "A2"
+        // });
+        // await this.linkRepo.save(enLink);
+        this.sem.leave();
       }
 
-      this.sem.leave();
       // words.forEach(async word => {
       //   const wordEntity = this.wordRepo.create({
       //     word
@@ -352,7 +431,150 @@ export class WordService implements OnModuleInit {
     });
 
     //pdfParser.loadPDF("./pdfs/sample.pdf");
-    pdfParser.loadPDF("./pdfs/b1-cut.pdf");
+    pdfParser.loadPDF("./pdfs/a2-words.pdf");
+
+    //console.log('translated: ', translated);
+  }
+
+  async processMacedonianPdf(level: string) {
+    const pdfParser = new PDFParser();
+    pdfParser.on("readable", meta => console.log("PDF Metadata", meta));
+    pdfParser.on("data", async page => {
+      // console.log(page ? "One page paged" : "All pages parsed", page)
+
+      await new Promise<void>((resolve) => {
+        this.semOuter.take(1, function() {
+          resolve();
+        });
+      });
+
+
+      if (page == null) {
+        return;
+      }
+      console.log("====================== ", this.counter);
+      //let words = this.extractWords(page, this.processSamplePdfLine);
+      /**
+       "verb",
+       "noun",
+       "adjective",
+       "adverb",
+       "preposition"
+       */
+      const partsOfSpeechMap = {
+        "VERB": "verb",
+        "NOUN": "noun",
+        "ADJECTIVE": "adjective",
+        "ADVERB": "adverb",
+        "PREPOSITION": "preposition",
+        "PRONOUN": "pronoun"
+      };
+
+      let words = [];
+      console.log("page number " + this.counter);
+      // if (this.counter > 30) {
+      //   return;
+      // }
+      words = this.extractWordsForMacedonianPdf(page);
+      console.log("words: ", words);
+      this.counter++;
+      // if (this.counter > 4) {
+      //   return;
+      // }
+      for (let wordObj of words) {
+        //console.log("wordObj: ", wordObj);
+        await new Promise<void>((resolve) => {
+          this.sem.take(1, function() {
+            resolve();
+          });
+        });
+        let word = wordObj.word;
+        let partOfSpeechRaw = wordObj.partOfSpeechRaw;
+
+        // word = removeDotAtTheEnd(word);
+        let existingWord = await this.wordRepo
+          .createQueryBuilder("word")
+          .select()
+          .innerJoinAndSelect("word.meanings", "links")
+          .innerJoinAndSelect("links.meaning", "meaning")
+          .innerJoinAndSelect("meaning.words", "words")
+          .where("word.word = :word", {
+            word
+          })
+          .getOne();
+
+        if (existingWord) {
+          console.log("word: ", word, " already exist, setting to " + level);
+          for (let link of existingWord.meanings) {
+            const meaning = link.meaning;
+            meaning.partOfSpeech = partsOfSpeechMap[partOfSpeechRaw];
+            await this.meaningRepo.save(meaning);
+            for (let link2 of link.meaning.words) {
+              link2.level = level;
+              await this.linkRepo.save(link2);
+            }
+          }
+        } else {
+          let engWordEntity = this.wordRepo.create({
+            lang: "en",
+            word: word,
+            isIdiom: false,
+            isPhrasalVerb: false,
+            needsTranslation: true,
+            origin: "b2-macedonia-cut",
+            freq: 1
+          });
+          console.log("created: ", engWordEntity);
+          let enWordSaved = await this.wordRepo.save(engWordEntity);
+          for (let particle of word.split(" ")) {
+            let englishParticle = this.wordParticleRepo.create({
+              wordParticle: particle,
+              wordEntity: enWordSaved
+            });
+            await this.wordParticleRepo.save(englishParticle);
+          }
+          console.log("NEW word: ", word);
+
+          let meaning = this.meaningRepo.create({
+            partOfSpeech: partsOfSpeechMap[partOfSpeechRaw],
+            meaning_lang1_language: "pl",
+            meaning_lang2_language: "en",
+            category: "general"
+          });
+          let savedMeaning = await this.meaningRepo.save(meaning);
+
+          let enLink = this.linkRepo.create({
+            meaningId: savedMeaning.id,
+            wordId: enWordSaved.id,
+            level: level
+          });
+          await this.linkRepo.save(enLink);
+        }
+        this.sem.leave();
+      }
+
+      // words.forEach(async word => {
+      //   const wordEntity = this.wordRepo.create({
+      //     word
+      //   });
+      //   try {
+      //     await this.wordRepo.save(wordEntity);
+      //   } catch (err) {
+      //     //console.log('err: ', err);
+      //   }
+      // });
+      this.semOuter.leave();
+    });
+    pdfParser.on("error", err => console.error("Parser Error", err));
+    pdfParser.on("pdfParser_dataError", errData => console.error(errData.parserError));
+    pdfParser.on("pdfParser_dataReady", pdfData => {
+      fs.writeFile("./pdf2json/test/F1040EZ.fields.json", JSON.stringify(pdfParser.getAllFieldsTypes()), () => {
+        console.log("Done.");
+      });
+    });
+
+    //pdfParser.loadPDF("./pdfs/sample.pdf");
+    pdfParser.loadPDF("./pdfs/a1-macedonia-cut.pdf");
 
     //console.log('translated: ', translated);
   }
@@ -398,6 +620,21 @@ export class WordService implements OnModuleInit {
 
   async onModuleInit(): Promise<any> {
     console.log("on module INIT");
+    // await this.processPdfFile();
+    // await this.processMacedonianPdf("A1");
+    // let meaning = await this.meaningRepo.createQueryBuilder("meaning")
+    //   .select()
+    //   .innerJoinAndSelect("meaning.words", "words")
+    //   .innerJoinAndSelect("words.word", "word")
+    //   .where({
+    //     id: 3395
+    //   })
+    //   .getOne();
+    // console.log("meaning: ", JSON.stringify(meaning));
+    // for (var i = 0; i < 10; ++i) {
+    //   console.log(nrand());
+    // }
+
   }
 
 }

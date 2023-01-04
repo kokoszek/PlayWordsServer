@@ -95,6 +95,7 @@ type WordType {
   lang: String!
   level: String!
   meanings: [LinkType!]!
+  needsTranslation: Boolean!
   origin: String!
   word: String!
 }
