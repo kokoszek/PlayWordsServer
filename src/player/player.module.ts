@@ -2,6 +2,7 @@ import { PlayerEntity } from "./player.entity";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import PlayerService from "./player.service";
 import { Module } from "@nestjs/common";
+import { PlayerResolver } from "./player.resolver";
 
 @Module({
   imports: [
@@ -9,7 +10,7 @@ import { Module } from "@nestjs/common";
       PlayerEntity
     ])
   ],
-  providers: [PlayerService],
+  providers: [PlayerService, PlayerResolver],
   exports: [PlayerService]
 })
 export class PlayerModule {

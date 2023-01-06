@@ -290,7 +290,9 @@ export default class GameGatewayWs implements OnGatewayInit {
         this.sendTaskResultMsg(opponent.id, "tie!", opponent, me);
       } else {
         this.sendTaskResultMsg(winner.id, "game-won!", winner, loser);
+        await this.playerService.incrementPlayersWonGame(winner.id);
         this.sendTaskResultMsg(loser.id, "game-lost!", loser, winner);
+        await this.playerService.incrementPlayersLostGame(loser.id);
       }
     }
 

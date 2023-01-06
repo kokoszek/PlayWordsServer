@@ -22,5 +22,30 @@ export default class PlayerService {
       playerName: "Gość-" + savedPlayer.id
     });
   }
+
+  public async incrementPlayersWonGame(playerId: number) {
+    const player = await this.playerRepo
+      .createQueryBuilder("player")
+      .select()
+      .where({
+        id: playerId
+      })
+      .getOne();
+    player.won += 1;
+    console.log("player inc: ", player);
+    await this.playerRepo.save(player);
+  }
+
+  public async incrementPlayersLostGame(playerId: number) {
+    const player = await this.playerRepo
+      .createQueryBuilder("player")
+      .select()
+      .where({
+        id: playerId
+      })
+      .getOne();
+    player.lost += 1;
+    await this.playerRepo.save(player);
+  }
 }
 

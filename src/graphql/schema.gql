@@ -25,6 +25,7 @@ type MeaningType {
 type Mutation {
   createMeaning(meaningInput: NewMeaningInput!): MeaningType!
   deleteMeaning(meaningId: Int!): Boolean!
+  setPlayerName(playerId: Int!, playerName: String!): Boolean!
   submitTask(answer: String!, taskId: Int!): Boolean!
   upsertMeaning(meaningInput: UpdateMeaningInput!): MeaningType!
 }
@@ -40,11 +41,20 @@ input NewMeaningInput {
   words_lang2: [WordInputUpdate!]!
 }
 
+type PlayerType {
+  id: Int!
+  lost: Int!
+  playerName: String
+  won: Int!
+}
+
 type Query {
   getCategories: [String!]!
   getLevels: [String!]!
   getMeaning(id: Int!): MeaningType!
   getPartsOfSpeech: [String!]!
+  getPlayerById(playerId: Int!): PlayerType!
+  getPlayers: [PlayerType!]!
   getTask: TaskModel!
   searchMeaning(search: String!): [MeaningType!]!
   searchWord(search: String!): [WordType!]!
