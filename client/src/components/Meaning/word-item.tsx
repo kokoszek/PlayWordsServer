@@ -37,7 +37,8 @@ export default function WordItem(props: any) {
 
   const { data, loading, error } = useQuery(WORD_EXISTS, {
     variables: {
-      word: word.word
+      word: word.word,
+      lang: lang
     },
     fetchPolicy: "no-cache",
     //skip: !!word.id,

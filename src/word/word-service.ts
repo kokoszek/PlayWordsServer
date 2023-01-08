@@ -47,11 +47,13 @@ export class WordService implements OnModuleInit {
     return result;
   }
 
-  public async wordExists(word: string): Promise<WordEntity> {
+  public async wordExists(word: string, lang: string): Promise<WordEntity> {
+    console.log("wordExists: ", word, lang);
     let wordEntity = await this.wordRepo
       .createQueryBuilder()
       .where({
-        word
+        word,
+        lang
       })
       .getOne();
     console.log("word text: ", word);
@@ -618,8 +620,164 @@ export class WordService implements OnModuleInit {
       });
   }
 
+  async translateWordsWithNeedsTranslationFlag() {
+
+    let meanings = await this.meaningRepo.createQueryBuilder("meaning")
+      .select()
+      .innerJoinAndSelect("meaning.words", "link")
+      .innerJoinAndSelect("link.word", "word", "word.needsTranslation = 1")
+      .getMany();
+
+
+    //meanings = meanings.slice(0, 2);
+
+    for (let meaning of meanings) {
+      //console.log("meaning: ", JSON.stringify(row, null, 2));
+      const encodedParams = new URLSearchParams();
+      ;
+      if (meaning.words[0].word.lang !== "en") {
+        continue;
+      }
+      console.log("now translating: ", meaning.words[0].word.word);
+      encodedParams.append("q", meaning.words[0].word.word);
+      encodedParams.append("target", "pl");
+      encodedParams.append("source", "en");
+
+      const options = {
+        method: "POST",
+        url: "https://google-translate1.p.rapidapi.com/language/translate/v2",
+        headers: {
+          "content-type": "application/x-www-form-urlencoded",
+          "Accept-Encoding": "application/gzip",
+          "X-RapidAPI-Key": "9955f8dc65mshea2d9990a9ad31fp10acebjsn8052d4e2a1a6",
+          "X-RapidAPI-Host": "google-translate1.p.rapidapi.com"
+        },
+        data: encodedParams
+      };
+
+      let res_ = await axios.request(options);
+      let translated = res_.data.data.translations[0].translatedText;
+      console.log("translated: ", translated);
+      console.log("level: ", meaning.words[0].level);
+      console.log("===================================");
+
+      let word = this.wordRepo.create({
+        word: translated,
+        lang: "pl",
+        needsTranslation: false,
+        isPhrasalVerb: false,
+        isIdiom: false,
+        freq: 1,
+        origin: "rapid-api-google-translate"
+      });
+      let savedWord = await this.wordRepo.save(word);
+
+      let link = this.linkRepo.create({
+        wordId: savedWord.id,
+        meaningId: meaning.id,
+        level: meaning.words[0].level
+      });
+      await this.linkRepo.save(link);
+
+      let englishWord = meaning.words[0].word;
+      englishWord.needsTranslation = false;
+      await this.wordRepo.save(englishWord);
+    }
+  }
+
   async onModuleInit(): Promise<any> {
     console.log("on module INIT");
+
+    // let moc = await this.meaningRepo
+    //   .createQueryBuilder("meaning")
+    //   .select()
+    //   .innerJoinAndSelect("meaning.words", "words")
+    //   .innerJoinAndSelect("words.word", "word")
+    //   .innerJoinAndSelect("word.wordParticles", "wordParticles")
+    //   .where({
+    //     id: 3591
+    //   })
+    //   .getOne();
+    //
+    // console.log("moc meaning: ", JSON.stringify(moc, null, 2));
+
+    // let mocWord = await this.wordRepo
+    //   .createQueryBuilder("word")
+    //   .select()
+    //   .where({
+    //     id: 9720
+    //   })
+    //   .getOne();
+    // console.log("mocWord: ", mocWord);
+
+    // let mocParticle = this.wordParticleRepo.create({
+    //   wordParticle: "moc",
+    //   wordEntity: mocWord
+    // });
+    // await this.wordParticleRepo.save(mocParticle);
+    //
+    // console.log("moc: ", JSON.stringify(moc, null, 2));
+
+    // let mocWord = this.wordRepo.create({
+    //   word: "moc",
+    //   needsTranslation: false,
+    //   origin: "backend-generation",
+    //   freq: 1,
+    //   isIdiom: false,
+    //   isPhrasalVerb: false,
+    //   desc: ""
+    // });
+    // let savedMoc = await this.wordRepo.save(mocWord);
+    //
+    // let link = this.linkRepo.create({
+    //   wordId: savedMoc.id,
+    //   meaningId: moc.id,
+    //   level: "B1"
+    // });
+    // await this.linkRepo.save(link);
+    // console.log("saved");
+
+    // let words = await this.wordRepo.createQueryBuilder("word")
+    //   .select()
+    //   .where({
+    //     origin: "rapid-api-google-translate"
+    //   })
+    //   .getMany();
+
+    // words = words.slice(0, 2);
+    // console.log("words: ", words);
+
+
+    // for (let word of words) {
+    //   let result = await this.wordParticleRepo.manager.query(`
+    //     DELETE FROM word_particle WHERE wordEntityId = ${word.id}
+    //   `);
+    //   console.log("result: ", result);
+    // }
+
+
+    // console.log("words.length: ", words.length);
+    // for (let word of words) {
+    //   console.log("word: ", word);
+    //   for (let particle of word.word.split(/ +/)) {
+    //     let wordParticle = this.wordParticleRepo.create({
+    //       wordEntity: word,
+    //       wordParticle: particle
+    //     });
+    //     await this.wordParticleRepo.save(wordParticle);
+    //     console.log("saving word particlce: ", particle);
+    //   }
+    // }
+
+
+//     let result = await this.meaningRepo.manager.query(`
+//    SELECT COUNT(meaning_entity.id) as count, MAX(meaning_entity.id) as id FROM meaning_entity
+// INNER JOIN meaning_word_jointable as link ON link.meaningId = meaning_entity.id
+// group by meaning_entity.id
+// HAVING count = 1 AND MIN(meaning_entity.id) = MAX(meaning_entity.id)
+//     `);
+    //console.log("result: ", result);
+    return;
     // await this.processPdfFile();
     // await this.processMacedonianPdf("A1");
     // let meaning = await this.meaningRepo.createQueryBuilder("meaning")

@@ -58,7 +58,7 @@ type Query {
   getTask: TaskModel!
   searchMeaning(search: String!): [MeaningType!]!
   searchWord(search: String!): [WordType!]!
-  wordExists(word: String!): WordType
+  wordExists(lang: String!, word: String!): WordType
 }
 
 type TaskModel {

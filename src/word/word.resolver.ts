@@ -38,9 +38,11 @@ export class WordResolver {
     nullable: true
   })
   async wordExists(
-    @Args("word", { type: () => String }) word: string
+    @Args("word", { type: () => String }) word: string,
+    @Args("lang", { type: () => String }) lang: string
   ): Promise<WordType> {
-    let result = await this.wordService.wordExists(word);
+    console.log("--------");
+    let result = await this.wordService.wordExists(word, lang);
     return WordConverter.entityToGQL(result);
   }
 
@@ -49,7 +51,7 @@ export class WordResolver {
     @Args("search", { type: () => String }) search: string
   ): Promise<WordType[]> {
     let result = await this.wordService.searchByText(search);
-    //console.log("searchWord: ", result);
+    console.log("searchWord: ", result);
     return result.map(WordConverter.entityToGQL);
   }
 }

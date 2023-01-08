@@ -103,8 +103,8 @@ export const DELETE_MEANING = gql`
 `;
 
 export const WORD_EXISTS = gql`
-    query WordExists($word: String!) {
-        wordExists(word: $word) {
+    query WordExists($word: String!, $lang: String!) {
+        wordExists(word: $word, lang: $lang) {
             id
             word
             meanings {
