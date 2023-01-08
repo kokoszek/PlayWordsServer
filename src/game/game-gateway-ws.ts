@@ -9,7 +9,7 @@ import { Repository } from "typeorm";
 import { PlayerEntity } from "../player/player.entity";
 
 //const MultiSemaphore = require("redis-semaphore").MultiSemaphore;
-import { redis } from "./redis";
+//import { redis } from "./redis";
 
 //const { sem } = require("./semaphore");
 
@@ -17,6 +17,8 @@ import { redis } from "./redis";
 export default class GameGatewayWs implements OnGatewayInit {
   @WebSocketServer()
   server: Server;
+
+  gameQueue: Array<string> = [];
 
   constructor(
     private gameService: GameService,
@@ -30,7 +32,7 @@ export default class GameGatewayWs implements OnGatewayInit {
 
   async afterInit(server: any): Promise<any> {
     let counter = 0;
-    await redis.del("findMatchQueue");
+    //await redis.del("findMatchQueue");
     setTimeout(async () => {
       // await new Promise<void>((resolve) => {
       //   sem.take(10, function() {
@@ -75,20 +77,25 @@ export default class GameGatewayWs implements OnGatewayInit {
   ) {
     const { playerId } = data;
     console.log(playerId + " started to find a game");
-    let allList: string[] = await redis.lrange("findMatchQueue", 0, -1);
+    //let allList: string[] = await redis.lrange("findMatchQueue", 0, -1);
+    let allList: string[] = this.gameQueue;
+    console.log("this.gameQueeu:", this.gameQueue);
+
     if (allList.some(el => Number.parseInt(el) === playerId)) {
       console.log("player " + playerId + " already in queue, skipping....");
       return;
     }
     console.log("startFindGame push type: ", typeof playerId);
-    await redis.rpush("findMatchQueue", playerId);
-    allList = await redis.lrange("findMatchQueue", 0, -1);
+    await this.gameQueue.push(playerId.toString());
+    allList = this.gameQueue;
     console.log("allList after pushing: ", allList);
 
     if (allList.length >= 2) {
       console.log("allList: ", allList);
-      const player1Str = await redis.lpop("findMatchQueue");
-      const player2Str = await redis.lpop("findMatchQueue");
+      // const player1Str = await redis.lpop("findMatchQueue");
+      // const player2Str = await redis.lpop("findMatchQueue");
+      const player1Str = this.gameQueue.shift();
+      const player2Str = this.gameQueue.shift();
 
       const player1 = Number.parseInt(player1Str);
       const player2 = Number.parseInt(player2Str);
@@ -127,7 +134,10 @@ export default class GameGatewayWs implements OnGatewayInit {
     data: { playerId: string; }
   ) {
     const { playerId } = data;
-    await redis.lrem("findMatchQueue", 0, playerId);
+    //await redis.lrem("findMatchQueue", 0, playerId);
+    let idx = this.gameQueue.indexOf(playerId);
+    this.gameQueue.splice(idx, 1);
+    console.log("current Queue: ", this.gameQueue);
     return true;
   }
 

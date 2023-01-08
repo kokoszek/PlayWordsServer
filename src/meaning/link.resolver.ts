@@ -34,7 +34,6 @@ export class LinkResolver {
       }
     });
     const word1 = WordConverter.entityToGQL(word);
-    console.log("word1: ", word1);
     return word1;
   }
 
