@@ -198,6 +198,8 @@ export default class GameService implements OnModuleInit {
   }
 
   async onModuleInit(): Promise<any> {
+    let result = await this.generateTask2(2, "B1");
+    console.log("result: ", result);
     // let words = await this.randomizePhrasalVerbsWithSbdParticle(7);
     // let words = await this.randomizeRestOfPhrasalVerbs(4, [12, 24, 25]);
     // let m = await this.meaningRepo
@@ -270,7 +272,7 @@ export default class GameService implements OnModuleInit {
     return await this.randomizePhrasalVerbsWithParticle("somebody", amount, [exclude.id]);
   }
 
-  private async randomizeRestOfWords(amount: number, excludeWordIds: number[]) {
+  private async randomizeRestOfWords(amount: number, level: LevelType, excludeWordIds: number[]) {
     console.log("randomizeRestOfWords -> amount: ", amount);
     if (amount <= 0) {
       return [];
@@ -278,6 +280,9 @@ export default class GameService implements OnModuleInit {
     let result: any = await this.wordRepo
       .createQueryBuilder("word")
       .select("COUNT(DISTINCT word.id) as count")
+      .innerJoin("word.meanings", "links", "links.level = :level", {
+        level
+      })
       .where("word.lang = 'en'")
       .getRawOne();
     const allCount = Number.parseInt(result.count);
@@ -291,6 +296,9 @@ export default class GameService implements OnModuleInit {
         let result: WordEntity = await this.wordRepo
           .createQueryBuilder("word")
           .select()
+          .innerJoin("word.meanings", "links", "links.level = :level", {
+            level
+          })
           .where("word.lang = 'en'")
           .orderBy("word.id", "ASC")
           .distinct(true)
@@ -438,12 +446,14 @@ export default class GameService implements OnModuleInit {
     return ranomizedLinkWithJoins;
   }
 
-  async randomizeWords(amount: number, category: CategoryType, partOfSpeech: PartOfSpeechType, exclude: WordEntity) {
+  async randomizeWords(amount: number, category: CategoryType, partOfSpeech: PartOfSpeechType, level: LevelType, exclude: WordEntity) {
 
     let result: any = await this.wordRepo
       .createQueryBuilder("word")
       .select("COUNT(DISTINCT word.id) as count")
-      .innerJoin("word.meanings", "links")
+      .innerJoin("word.meanings", "links", "links.level = :level", {
+        level: level
+      })
       .innerJoin(
         "links.meaning",
         "meaning",
@@ -466,7 +476,9 @@ export default class GameService implements OnModuleInit {
         let result: any = await this.wordRepo
           .createQueryBuilder("word")
           .select()
-          .innerJoin("word.meanings", "links")
+          .innerJoin("word.meanings", "links", "links.level = :level", {
+            level: level
+          })
           .innerJoin(
             "links.meaning",
             "meaning",
@@ -505,8 +517,8 @@ export default class GameService implements OnModuleInit {
     //   .leftJoinAndSelect("link.meaning", "meaning")
     //   .leftJoinAndSelect("word.wordParticles", "wordParticles")
     //   .where({
-    //     meaningId: 87,
-    //     wordId: 165
+    //     meaningId: 20,
+    //     wordId: 37
     //   })
     //   .getOne();
     console.log("link: ", link);
@@ -558,11 +570,14 @@ export default class GameService implements OnModuleInit {
         totalWordOptions - 1,
         link.meaning.category,
         link.meaning.partOfSpeech,
+        level,
         link.word
       );
+      words = words.slice(0, 4);
       console.log("WORDS2: ", words);
       let restOfWords = await this.randomizeRestOfWords(
         totalWordOptions - 1 - words.length,
+        level,
         [link.word].concat(words).map(word => word.id)
       );
       console.log("REST_OF_WORDS2: ", restOfWords);
@@ -626,10 +641,12 @@ export default class GameService implements OnModuleInit {
   }[];
 };
      */
-    this.games[roomName].tasks.push({
-      ...ret,
-      correctWord: link.word
-    });
+    if (this.games[roomName]) {
+      this.games[roomName].tasks.push({
+        ...ret,
+        correctWord: link.word
+      });
+    }
     return ret;
   }
 

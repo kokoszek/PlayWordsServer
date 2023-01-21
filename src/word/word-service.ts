@@ -240,8 +240,10 @@ export class WordService implements OnModuleInit {
       //     word: prevLine.join(" ")
       //   });
       // }
-      //console.log("line: ", line);
-      if (/%20%.*F$/.test(rawLine) && !wordFound) {
+      // console.log("line: ", rawLine);
+      // console.log("test: ", /^%20%2F/.test(rawLine));
+      // console.log("wordFound: ", wordFound);
+      if (/^%20%2F/.test(rawLine) && !wordFound) {
         //console.log("word: ", prevRawLine);
         //wordObj.word = prevRawLine;
         wordFound = true;
@@ -480,7 +482,7 @@ export class WordService implements OnModuleInit {
       words = this.extractWordsForMacedonianPdf(page);
       console.log("words: ", words);
       this.counter++;
-      // if (this.counter > 4) {
+      // if (this.counter > 3) {
       //   return;
       // }
       for (let wordObj of words) {
@@ -506,24 +508,26 @@ export class WordService implements OnModuleInit {
           .getOne();
 
         if (existingWord) {
-          console.log("word: ", word, " already exist, setting to " + level);
-          for (let link of existingWord.meanings) {
-            const meaning = link.meaning;
-            meaning.partOfSpeech = partsOfSpeechMap[partOfSpeechRaw];
-            await this.meaningRepo.save(meaning);
-            for (let link2 of link.meaning.words) {
-              link2.level = level;
-              await this.linkRepo.save(link2);
-            }
-          }
+          console.log("word ", word, " already exists");
+          // console.log("word: ", word, " already exist, setting to " + level);
+          // for (let link of existingWord.meanings) {
+          //   const meaning = link.meaning;
+          //   meaning.partOfSpeech = partsOfSpeechMap[partOfSpeechRaw];
+          //   await this.meaningRepo.save(meaning);
+          //   for (let link2 of link.meaning.words) {
+          //     link2.level = level;
+          //     await this.linkRepo.save(link2);
+          //   }
+          // }
         } else {
+          console.log("creating word: ", word);
           let engWordEntity = this.wordRepo.create({
             lang: "en",
             word: word,
             isIdiom: false,
             isPhrasalVerb: false,
             needsTranslation: true,
-            origin: "b2-macedonia-cut",
+            origin: "a1-macedonia-cut",
             freq: 1
           });
           console.log("created: ", engWordEntity);
@@ -626,13 +630,22 @@ export class WordService implements OnModuleInit {
       let word = this.wordRepo.create({
         word: translated,
         lang: "pl",
-        needsTranslation: false,
+        needsTranslation: true,
         isPhrasalVerb: false,
         isIdiom: false,
         freq: 1,
         origin: "rapid-api-google-translate"
       });
       let savedWord = await this.wordRepo.save(word);
+
+      for (let particle of word.word.split(/ +/)) {
+        let wordParticle = this.wordParticleRepo.create({
+          wordEntity: word,
+          wordParticle: particle
+        });
+        await this.wordParticleRepo.save(wordParticle);
+        console.log("saving word particlce: ", particle);
+      }
 
       let link = this.linkRepo.create({
         wordId: savedWord.id,
@@ -653,7 +666,8 @@ export class WordService implements OnModuleInit {
       "rzeczownik": "noun",
       "czasownik": "verb",
       "przysłówek": "adverb",
-      "przyimek": "preposition"
+      "przyimek": "preposition",
+      "liczebnik": "numeral"
     };
     return await new Promise((resolve, reject) => {
       fetch("https://www.diki.pl/slownik-angielskiego?q=" + word)
@@ -707,23 +721,24 @@ export class WordService implements OnModuleInit {
       .innerJoinAndSelect("word.meanings", "links")
       .innerJoinAndSelect("links.meaning", "meaning")
       .where({
-        lang: "pl"
+        lang: "pl",
+        needsTranslation: true
       })
-      .andWhere("word.id < 400")
+      .andWhere("word.id < 11900")
       .orderBy("word.id", "DESC")
       .getMany();
     //plWords = plWords.slice(0, 3);
     console.log("polish words: ", plWords);
     for (let word of plWords) {
       try {
-        //console.log("word.word: ", word.word);
+        console.log("word.word: ", word.word);
         let result = await this.testDiki(word.word);
         console.log("result: ", word.word, word.id, result);
         for (let link of word.meanings) {
           let meaning = link.meaning;
           // @ts-ignore
           meaning.partOfSpeech = result;
-          console.log("mmeaning: ", meaning);
+          //console.log("mmeaning: ", meaning);
           await this.meaningRepo.save(meaning);
         }
       } catch (e) {
@@ -734,6 +749,10 @@ export class WordService implements OnModuleInit {
 
   async onModuleInit(): Promise<any> {
     console.log("on module INIT");
+    //await this.processMacedonianPdf("A1");
+    //await this.translateWordsWithNeedsTranslationFlag();
+
+    // await this.populatePartOfSpeechWithDiki();
 
     // let plWords = await this.meaningRepo
     //   .createQueryBuilder("meaning")
