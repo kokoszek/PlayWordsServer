@@ -41,6 +41,7 @@ export default class GameService implements OnModuleInit {
 
   private games: Record<string,
     {
+      gameId: number;
       player1?: PlayerType;
       player2?: PlayerType;
       tasks: Array<TaskType & { correctWord: WordEntity }>;
@@ -69,7 +70,20 @@ export default class GameService implements OnModuleInit {
       tasks: []
     };
     this.games[roomName] = newGame;
+    console.log("createGame->games: ", this.games);
     return newGame;
+  }
+
+  removeGame(gameId: number) {
+    Object.keys(this.games).forEach(key => {
+      if (this.games[key].gameId === gameId) {
+        delete this.games[key];
+      }
+    });
+  }
+
+  public printGames() {
+    console.log("printGames: ", this.games);
   }
 
   public acceptGame(playerId: number, gameId: number) {

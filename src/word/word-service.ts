@@ -1,6 +1,6 @@
 import { Injectable, OnModuleInit } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { IsNull, MoreThan, Repository } from "typeorm";
 import { LangType, MeaningEntity } from "../meaning/meaning.entity";
 import { parse } from "node-html-parser";
 import { WordEntity } from "./word.entity";
@@ -581,44 +581,6 @@ export class WordService implements OnModuleInit {
     //console.log('translated: ', translated);
   }
 
-  async testDiki() {
-
-    fetch("https://www.diki.pl/slownik-angielskiego?q=ograniczony")
-      .then(async result => {
-        let html = await result.text();
-        const root = parse(html);
-        let dictionaryEntity = root.querySelector(".dictionaryEntity");
-        let titleNode = root.querySelector(".dictionaryEntity .hws .hw");
-        const title = titleNode.childNodes[0].rawText;
-        console.log("title: ", title);
-
-        let partOfSpeechNode = root.querySelector(".dictionaryEntity");
-        //console.log('node: ', partOfSpeechNode);
-        partOfSpeechNode.childNodes.map(el => {
-          let parsed = parse(el.toString());
-          if (parsed) {
-            let el = parsed.querySelector(".partOfSpeechSectionHeader .partOfSpeech")?.rawText;
-            if (el) {
-              console.log("el: ", el);
-            }
-            let list = parsed.querySelector(".nativeToForeignEntrySlices");
-            if (list) {
-              let filteredList = list?.childNodes.map(el => el.rawText);
-              filteredList = filteredList.map(el => el.replaceAll(/\n +/ig, ""));
-              filteredList = filteredList.filter(el => !!el);
-              filteredList = filteredList.map(el => {
-                let regexpMatch = /^(\w+) .*/;
-                let match = el.match(regexpMatch);
-                return match ? match[1] : "";
-              });
-              console.log("list: ", filteredList);
-            }
-          }
-        });
-        //console.log('partOfSpeech: ', partOfSpeech);
-        //console.log('.dictionaryEntity', dictionaryEntity.toString());
-      });
-  }
 
   async translateWordsWithNeedsTranslationFlag() {
 
@@ -685,8 +647,104 @@ export class WordService implements OnModuleInit {
     }
   }
 
+  async testDiki(word: string) {
+    const dict = {
+      "przymiotnik": "adjective",
+      "rzeczownik": "noun",
+      "czasownik": "verb",
+      "przysłówek": "adverb",
+      "przyimek": "preposition"
+    };
+    return await new Promise((resolve, reject) => {
+      fetch("https://www.diki.pl/slownik-angielskiego?q=" + word)
+        .then(async result => {
+          try {
+            let html = await result.text();
+            const root = parse(html);
+            let dictionaryEntity = root.querySelector(".dictionaryEntity");
+            let titleNode = root.querySelector(".dictionaryEntity .hws .hw");
+            const title = titleNode.childNodes[0].rawText;
+            //console.log("title: ", title);
+
+            let partOfSpeechNode = root.querySelector(".dictionaryEntity");
+            //console.log('node: ', partOfSpeechNode);
+            partOfSpeechNode.childNodes.map(el => {
+              let parsed = parse(el.toString());
+              if (parsed) {
+                let el = parsed.querySelector(".partOfSpeechSectionHeader .partOfSpeech")?.rawText;
+                if (dict[el]) {
+                  //console.log("el: ", dict[el]);
+                  resolve(dict[el]);
+                  return;
+                }
+                let list = parsed.querySelector(".nativeToForeignEntrySlices");
+                if (list) {
+                  let filteredList = list?.childNodes.map(el => el.rawText);
+                  filteredList = filteredList.map(el => el.replaceAll(/\n +/ig, ""));
+                  filteredList = filteredList.filter(el => !!el);
+                  filteredList = filteredList.map(el => {
+                    let regexpMatch = /^(\w+) .*/;
+                    let match = el.match(regexpMatch);
+                    return match ? match[1] : "";
+                  });
+                  //console.log("list: ", filteredList);
+                }
+              }
+            });
+            reject();
+
+          } catch (e) {
+            reject();
+          }
+          //console.log('.dictionaryEntity', dictionaryEntity.toString());
+        });
+    });
+  }
+
+  async populatePartOfSpeechWithDiki() {
+    let plWords = await this.wordRepo
+      .createQueryBuilder("word")
+      .innerJoinAndSelect("word.meanings", "links")
+      .innerJoinAndSelect("links.meaning", "meaning")
+      .where({
+        lang: "pl"
+      })
+      .andWhere("word.id < 400")
+      .orderBy("word.id", "DESC")
+      .getMany();
+    //plWords = plWords.slice(0, 3);
+    console.log("polish words: ", plWords);
+    for (let word of plWords) {
+      try {
+        //console.log("word.word: ", word.word);
+        let result = await this.testDiki(word.word);
+        console.log("result: ", word.word, word.id, result);
+        for (let link of word.meanings) {
+          let meaning = link.meaning;
+          // @ts-ignore
+          meaning.partOfSpeech = result;
+          console.log("mmeaning: ", meaning);
+          await this.meaningRepo.save(meaning);
+        }
+      } catch (e) {
+        console.log("error: ", e);
+      }
+    }
+  }
+
   async onModuleInit(): Promise<any> {
     console.log("on module INIT");
+
+    // let plWords = await this.meaningRepo
+    //   .createQueryBuilder("meaning")
+    //   .leftJoinAndSelect("meaning.words", "links")
+    //   .leftJoinAndSelect("links.word", "word")
+    //   .where({
+    //     partOfSpeech: IsNull()
+    //   })
+    //   .getMany();
+    //
+    // console.log("words: ", JSON.stringify(plWords, null, 2));
 
     // let moc = await this.meaningRepo
     //   .createQueryBuilder("meaning")

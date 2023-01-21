@@ -125,6 +125,7 @@ export default class GameGatewayWs implements OnGatewayInit {
       });
     }
 
+
     return true;
   }
 
@@ -146,8 +147,13 @@ export default class GameGatewayWs implements OnGatewayInit {
     this.server.to(roomName).emit("bothReady");
   }
 
-  @SubscribeMessage("joinGame")
-  joinGame(
+  private gameCanceled(gameId: number) {
+    const roomName = createRoomName(gameId);
+    this.server.to(roomName).emit("gameCanceled");
+  }
+
+  @SubscribeMessage("joinGameSockets")
+  joinGameSockets(
     client: Socket,
     data: {
       gameId: number;
@@ -191,18 +197,13 @@ export default class GameGatewayWs implements OnGatewayInit {
   }
 
   @SubscribeMessage("rejectGame")
-  rejectGame(
-    client: Socket,
-    data: {
-      gameId: number;
-      playerId: number;
-    }
-  ): WsResponse<boolean> {
-
+  rejectGame(client: Socket, data: { gameId: number; playerId: number; }): WsResponse<boolean> {
     const opponent: PlayerType = this.gameService.getOpponentOfPlayer(data.gameId, data.playerId);
     this.server.to(opponent.id.toString()).emit("game-rejected");
-    this.leaveGame(client, data);
+    this.leaveGameSockets(data);
+    this.gameService.removeGame(data.gameId);
     console.log("sockets left");
+    this.gameService.printGames();
     return {
       event: "rejectGame",
       data: true
@@ -211,17 +212,23 @@ export default class GameGatewayWs implements OnGatewayInit {
 
   @SubscribeMessage("leaveGame")
   leaveGame(client: Socket, data: { gameId: number, playerId: number }): WsResponse<boolean> {
-    const opponent = this.gameService.getOpponentOfPlayer(data.gameId, data.playerId);
-    this.server.socketsLeave(opponent.id.toString());
-    this.server.socketsLeave(data.playerId.toString());
-    const roomName = createRoomName(data.gameId);
-    this.server.socketsLeave(roomName);
-    console.log("LEAVING GAME (room): ", roomName);
+    const opponent: PlayerType = this.gameService.getOpponentOfPlayer(data.gameId, data.playerId);
+    this.server.to(opponent.id.toString()).emit("player-left");
+    this.leaveGameSockets(data);
+    this.gameService.removeGame(data.gameId);
     //this.games[roomName] = null;
     return {
       event: "leaveGame",
       data: true
     };
+  }
+
+  leaveGameSockets(data: { gameId: number, playerId: number }) {
+    const opponent = this.gameService.getOpponentOfPlayer(data.gameId, data.playerId);
+    this.server.socketsLeave(opponent.id.toString());
+    this.server.socketsLeave(data.playerId.toString());
+    const roomName = createRoomName(data.gameId);
+    this.server.socketsLeave(roomName);
   }
 
   private sendTaskResultMsg(
