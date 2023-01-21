@@ -55,9 +55,10 @@ export default class GameGatewayWs implements OnGatewayInit {
   private emitNewTask(delayMs: number, gameId: number) {
     const roomName = createRoomName(gameId);
     setTimeout(async () => {
-      const task = await this.gameService.generateTask2(gameId, randomizeElement(
+      const task = await this.gameService.generateTask2(randomizeElement(
         process.env.MULTIPLAYER_LEVELS.split(",")
       ));
+      this.gameService.addTaskToGame(gameId, task);
       //const task = null;
       console.log("task: ", task);
       this.server.to(roomName).emit("newTask", task);
@@ -213,6 +214,7 @@ export default class GameGatewayWs implements OnGatewayInit {
   @SubscribeMessage("leaveGame")
   leaveGame(client: Socket, data: { gameId: number, playerId: number }): WsResponse<boolean> {
     const opponent: PlayerType = this.gameService.getOpponentOfPlayer(data.gameId, data.playerId);
+    console.log("LEAVE GAME: ", opponent.id);
     this.server.to(opponent.id.toString()).emit("player-left");
     this.leaveGameSockets(data);
     this.gameService.removeGame(data.gameId);

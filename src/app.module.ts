@@ -5,13 +5,14 @@ import { GraphQLModule } from "@nestjs/graphql";
 import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
 import { TaskModule } from "./graphql/task/task.module";
 import { ProducerModule } from "./as-producer/producer.module";
-import { WsModule } from "./game/game-service.module";
+import { GameModule } from "./game/game-service.module";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { WordModule } from "./word/word.module";
 
 import * as ormconfig from "../ormconfig";
 import { MeaningModule } from "./meaning/meaning.module";
 import { PlayerModule } from "./player/player.module";
+import { SinglePlayerGameModule } from "./single-player-game/single-player-game.module";
 
 const path = require("path");
 
@@ -23,7 +24,8 @@ const path = require("path");
     PlayerModule,
     TaskModule,
     ProducerModule,
-    WsModule,
+    GameModule,
+    SinglePlayerGameModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: path.join(process.cwd(), "src/graphql/schema.gql"),

@@ -15,7 +15,8 @@ import WordParticle from "../word/word-particle.entity";
     TypeOrmModule.forFeature([MeaningEntity, WordEntity, PlayerEntity, LinkEntity, WordParticle]),
     PlayerModule
   ],
-  providers: [GameGatewayWs, FindMatchResolver, GameService]
+  providers: [GameGatewayWs, FindMatchResolver, GameService],
+  exports: [GameService]
 })
-export class WsModule {
+export class GameModule {
 }

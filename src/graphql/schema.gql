@@ -49,6 +49,7 @@ type PlayerType {
 }
 
 type Query {
+  generateTask: TaskType
   getCategories: [String!]!
   getLevels: [String!]!
   getMeaning(id: Int!): MeaningType!
@@ -71,6 +72,14 @@ type TaskModel {
 type TaskOptionsModel {
   id: Int!
   name: String!
+}
+
+type TaskType {
+  correctWord: WordType!
+  meaningId: Int!
+  word: String!
+  wordOptions: [WordType!]!
+  word_desc: String
 }
 
 input UpdateMeaningInput {

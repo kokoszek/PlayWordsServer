@@ -6,6 +6,8 @@ import { Repository } from "typeorm";
 import { WordEntity } from "../word/word.entity";
 import WordParticle from "../word/word-particle.entity";
 import { LevelType, LinkEntity } from "../meaning/link.entity";
+import { WordType } from "../word/word.type";
+import WordConverter from "../word/word.converter";
 
 export type PlayerType = {
   id: number;
@@ -16,12 +18,14 @@ export type PlayerType = {
 
 export type TaskType = {
   word: string;
+  correctWord: WordType;
   word_desc: string;
   meaningId: number;
-  wordOptions: {
-    wordId: number;
-    word: string;
-  }[];
+  // wordOptions: {
+  //   wordId: number;
+  //   word: string;
+  // }[];
+  wordOptions: WordType[];
 };
 
 
@@ -44,7 +48,7 @@ export default class GameService implements OnModuleInit {
       gameId: number;
       player1?: PlayerType;
       player2?: PlayerType;
-      tasks: Array<TaskType & { correctWord: WordEntity }>;
+      tasks: Array<TaskType & { correctWord: WordType }>;
     }> = {};
 
   gameId = 1;
@@ -198,8 +202,8 @@ export default class GameService implements OnModuleInit {
   }
 
   async onModuleInit(): Promise<any> {
-    let result = await this.generateTask2(2, "B1");
-    console.log("result: ", result);
+    // let result = await this.generateTask2("B1");
+    // console.log("result: ", result);
     // let words = await this.randomizePhrasalVerbsWithSbdParticle(7);
     // let words = await this.randomizeRestOfPhrasalVerbs(4, [12, 24, 25]);
     // let m = await this.meaningRepo
@@ -506,7 +510,7 @@ export default class GameService implements OnModuleInit {
 
   //private randomizePhrasalVerbs
 
-  public async generateTask2(forGameId: number, level: LevelType): Promise<TaskType> {
+  public async generateTask2(level: LevelType): Promise<TaskType> {
 
     console.log("randomized level: ", level);
     let link: LinkEntity = await this.randomizeLink(level, "en");
@@ -573,7 +577,6 @@ export default class GameService implements OnModuleInit {
         level,
         link.word
       );
-      words = words.slice(0, 4);
       console.log("WORDS2: ", words);
       let restOfWords = await this.randomizeRestOfWords(
         totalWordOptions - 1 - words.length,
@@ -621,14 +624,20 @@ export default class GameService implements OnModuleInit {
       word: plWord?.word.word,
       word_desc: link.meaning.meaning_lang1_desc,
       meaningId: link.meaning.id,
+      correctWord: WordConverter.entityToGQL(link.word),
       wordOptions: shuffle(wordsToPlay.map((word: WordEntity) => {
-        return {
-          wordId: word.id,
-          word: word.word
-        };
+        return WordConverter.entityToGQL(word);
+        // return {
+        //   wordId: word.id,
+        //   word: word.word
+        // };
       }))
     };
-    const roomName = createRoomName(forGameId);
+    return ret;
+  }
+
+  public addTaskToGame(gameId: number, task: TaskType) {
+    const roomName = createRoomName(gameId);
     /**
      *
      export type TaskType = {
@@ -642,17 +651,14 @@ export default class GameService implements OnModuleInit {
 };
      */
     if (this.games[roomName]) {
-      this.games[roomName].tasks.push({
-        ...ret,
-        correctWord: link.word
-      });
+      this.games[roomName].tasks.push(task);
     }
-    return ret;
+
   }
 
   public async getCorrectWordInLatestTask(gameId: number): Promise<{ word: string, wordId: number }> {
     const roomName = createRoomName(gameId);
-    const task: TaskType & { correctWord: WordEntity } =
+    const task: TaskType & { correctWord: WordType } =
       this.games[roomName].tasks[this.games[roomName].tasks.length - 1];
     return {
       word: task.correctWord.word,
