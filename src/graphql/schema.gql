@@ -26,7 +26,7 @@ type Mutation {
   createMeaning(meaningInput: NewMeaningInput!): MeaningType!
   deleteMeaning(meaningId: Int!): Boolean!
   setPlayerName(playerId: Int!, playerName: String!): Boolean!
-  submitTask(answer: String!, taskId: Int!): Boolean!
+  submitTask(meaningId: Int!, playerId: Int!, wordIdSolution: Int!): Boolean!
   upsertMeaning(meaningInput: UpdateMeaningInput!): MeaningType!
 }
 
