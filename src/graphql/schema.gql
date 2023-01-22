@@ -26,7 +26,7 @@ type Mutation {
   createMeaning(meaningInput: NewMeaningInput!): MeaningType!
   deleteMeaning(meaningId: Int!): Boolean!
   setPlayerName(playerId: Int!, playerName: String!): Boolean!
-  submitTask(meaningId: Int!, playerId: Int!, wordIdSolution: Int!): Boolean!
+  submitTask(meaningId: Int!, playerId: Int!, wordIdSolution: Int!): WordType
   upsertMeaning(meaningInput: UpdateMeaningInput!): MeaningType!
 }
 
@@ -49,7 +49,7 @@ type PlayerType {
 }
 
 type Query {
-  generateTask: TaskType
+  generateTask(level: String!, playerId: Int!): TaskType
   getCategories: [String!]!
   getLevels: [String!]!
   getMeaning(id: Int!): MeaningType!
@@ -77,7 +77,7 @@ type TaskOptionsModel {
 type TaskType {
   correctWord: WordType!
   meaningId: Int!
-  word: String!
+  word: String
   wordOptions: [WordType!]!
   word_desc: String
 }

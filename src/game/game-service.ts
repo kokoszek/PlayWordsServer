@@ -8,6 +8,7 @@ import WordParticle from "../word/word-particle.entity";
 import { LevelType, LinkEntity } from "../meaning/link.entity";
 import { WordType } from "../word/word.type";
 import WordConverter from "../word/word.converter";
+import { TaskType } from "../single-player-game/task.type";
 
 export type PlayerType = {
   id: number;
@@ -16,17 +17,17 @@ export type PlayerType = {
   gameAccepted: boolean;
 };
 
-export type TaskType = {
-  word: string;
-  correctWord: WordType;
-  word_desc: string;
-  meaningId: number;
-  // wordOptions: {
-  //   wordId: number;
-  //   word: string;
-  // }[];
-  wordOptions: WordType[];
-};
+// export type TaskType = {
+//   word: string;
+//   correctWord: WordType;
+//   word_desc: string;
+//   meaningId: number;
+//   // wordOptions: {
+//   //   wordId: number;
+//   //   word: string;
+//   // }[];
+//   wordOptions: WordType[];
+// };
 
 
 @Injectable()
@@ -521,11 +522,11 @@ export default class GameService implements OnModuleInit {
     //   .leftJoinAndSelect("link.meaning", "meaning")
     //   .leftJoinAndSelect("word.wordParticles", "wordParticles")
     //   .where({
-    //     meaningId: 20,
-    //     wordId: 37
+    //     meaningId: 10,
+    //     wordId: 19
     //   })
     //   .getOne();
-    console.log("link: ", link);
+    //console.log("link: ", link);
     let wordsToPlay: WordEntity[] = [];
     const totalWordOptions = 8;
     if (link.word.isPhrasalVerb) {
@@ -544,12 +545,13 @@ export default class GameService implements OnModuleInit {
           totalWordOptions - 1,
           [link.word.id]
         );
-      console.log("wordsWithParticle: ", wordsWithParticle);
+      //console.log("wordsWithParticle: ", wordsWithParticle);
       let rest = await this.randomizeRestOfPhrasalVerbs(
         totalWordOptions - 1 - wordsWithParticle.length,
         [link.word].concat(wordsWithParticle).map(word => word.id)
       );
-      console.log("restOfPhrasalVerbs: ", rest);
+
+      //console.log("restOfPhrasalVerbs: ", rest);
 
       function findSomebodyParticle(word: WordEntity) {
         for (let wordParticle of word.wordParticles) {
@@ -567,7 +569,7 @@ export default class GameService implements OnModuleInit {
       wordsToPlay = [link.word, ...rest, ...wordsWithParticle];
     } else if (link.word.isIdiom === true) {
       const idioms = await this.randomizeRestIdioms(totalWordOptions - 1, link.word);
-      console.log("rest of idioms: ", idioms);
+      //console.log("rest of idioms: ", idioms);
       wordsToPlay = [link.word, ...idioms];
     } else {
       let words = await this.randomizeWords(
@@ -577,13 +579,13 @@ export default class GameService implements OnModuleInit {
         level,
         link.word
       );
-      console.log("WORDS2: ", words);
+      //console.log("WORDS2: ", words);
       let restOfWords = await this.randomizeRestOfWords(
         totalWordOptions - 1 - words.length,
         level,
         [link.word].concat(words).map(word => word.id)
       );
-      console.log("REST_OF_WORDS2: ", restOfWords);
+      //console.log("REST_OF_WORDS2: ", restOfWords);
       wordsToPlay = [link.word, ...words, ...restOfWords];
     }
     // if (link.meaning.partOfSpeech === "verb") {
@@ -593,7 +595,7 @@ export default class GameService implements OnModuleInit {
     //     }
     //   }
     // }
-    console.log("WORDS TO PLAY: ", wordsToPlay);
+    //console.log("WORDS TO PLAY: ", wordsToPlay);
     const meaning = await this.meaningRepo
       .createQueryBuilder("meaning")
       .leftJoinAndSelect("meaning.words", "links")
