@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { EncounteredWordEntity } from "../single-player-game/encountered-word.entity";
 
 @Entity()
 export class PlayerEntity {
@@ -20,4 +21,13 @@ export class PlayerEntity {
     default: 0
   })
   lost: number;
+
+  @OneToMany(
+    () => EncounteredWordEntity,
+    link => link.player,
+    {
+      cascade: false
+    }
+  )
+  encounteredWords: EncounteredWordEntity[];
 }

@@ -55,9 +55,10 @@ export default class GameGatewayWs implements OnGatewayInit {
   private emitNewTask(delayMs: number, gameId: number) {
     const roomName = createRoomName(gameId);
     setTimeout(async () => {
-      const task = await this.gameService.generateTask2(randomizeElement(
+      const link = await this.gameService.randomizeLink(randomizeElement(
         process.env.MULTIPLAYER_LEVELS.split(",")
-      ));
+      ), "en");
+      const task = await this.gameService.generateTask2(link);
       this.gameService.addTaskToGame(gameId, task);
       //const task = null;
       console.log("task: ", task);

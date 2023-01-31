@@ -5,12 +5,18 @@ import WordConverter from "../word/word.converter";
 import { GraphQLBoolean, GraphQLInt } from "graphql";
 import { WordType } from "../word/word.type";
 import { randomizeElement } from "../game/utils";
+import { EncounteredWordEntity } from "./encountered-word.entity";
+import { Repository } from "typeorm";
+import { InjectRepository } from "@nestjs/typeorm";
+import { LinkEntity } from "../meaning/link.entity";
 
 @Resolver(of => TaskType)
 export class SinglePlayerGameResolver {
 
   constructor(
-    private gameService: GameService
+    private gameService: GameService,
+    @InjectRepository(EncounteredWordEntity)
+    private encounteredWordEntityRepository: Repository<EncounteredWordEntity>
   ) {
   }
 
@@ -23,7 +29,39 @@ export class SinglePlayerGameResolver {
   ): Promise<TaskType> {
     console.log("level: ", level);
     console.log("playerId: ", playerId);
-    let task = await this.gameService.generateTask2(randomizeElement(level.split(",")));
+    //let link: LinkEntity = await this.randomizeLink(level, "en");
+    const enc: EncounteredWordEntity = await this.encounteredWordEntityRepository
+      .createQueryBuilder("enc")
+      .innerJoinAndSelect("enc.link", "link")
+      .leftJoinAndSelect("link.word", "word")
+      .leftJoinAndSelect("link.meaning", "meaning")
+      .leftJoinAndSelect("word.wordParticles", "wordParticles")
+      .where({
+        playerId: Number.parseInt(playerId)
+      })
+      .getOne();
+    await this.encounteredWordEntityRepository.delete({
+      playerId: Number.parseInt(playerId),
+      linkWordId: enc.linkWordId,
+      linkMeaningId: enc.linkMeaningId
+    });
+    //let task = await this.gameService.generateTask2(randomizeElement(level.split(",")));
+    let task = await this.gameService.generateTask2(enc.link);
+    const encounteredWord = await this.encounteredWordEntityRepository
+      .createQueryBuilder("enc")
+      .where({
+        playerId: Number.parseInt(playerId),
+        linkWordId: task.link.wordId,
+        linkMeaningId: task.link.meaningId
+      })
+      .getOne();
+    if (!encounteredWord) {
+      const encountered = this.encounteredWordEntityRepository.create({
+        playerId: Number.parseInt(playerId),
+        link: task.link
+      });
+      await this.encounteredWordEntityRepository.save(encountered);
+    }
     console.log("--------", task);
     if (!this.playersTasks[playerId]) {
       this.playersTasks[playerId] = { task: null };
@@ -59,7 +97,17 @@ export class SinglePlayerGameResolver {
       console.log("good answer");
       return null;
     } else {
-      console.log("wrond answer");
+      console.log("wrong answer");
+      const encounteredWord = await this.encounteredWordEntityRepository
+        .createQueryBuilder("enc")
+        .where({
+          playerId: playerId,
+          linkWordId: task.link.wordId,
+          linkMeaningId: task.link.meaningId
+        })
+        .getOne();
+      encounteredWord.misses += 1;
+      await this.encounteredWordEntityRepository.save(encounteredWord);
       return task.correctWord;
     }
     /**
@@ -69,7 +117,7 @@ export class SinglePlayerGameResolver {
   }
 
   playersTasks: Record<number, {
-    task: TaskType
+    task: TaskType & { link: LinkEntity }
   }> = {};
 
   public async getCorrectWordInTask(playerId: number, taskId: number): Promise<WordType> {

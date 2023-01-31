@@ -419,7 +419,7 @@ export default class GameService implements OnModuleInit {
     return words;
   }
 
-  private async randomizeLink(level: LevelType, lang: string): Promise<LinkEntity> {
+  public async randomizeLink(level: LevelType, lang: string): Promise<LinkEntity> {
     const resultCount = await this.linkRepo.createQueryBuilder("link")
       .select("COUNT(*) as count")
       .innerJoin("link.word", "word")
@@ -511,10 +511,9 @@ export default class GameService implements OnModuleInit {
 
   //private randomizePhrasalVerbs
 
-  public async generateTask2(level: LevelType): Promise<TaskType> {
+  public async generateTask2(link: LinkEntity): Promise<TaskType & { link: LinkEntity }> {
 
-    console.log("randomized level: ", level);
-    let link: LinkEntity = await this.randomizeLink(level, "en");
+    const level = link.level;
     // link = await this.linkRepo
     //   .createQueryBuilder("link")
     //   .select()
@@ -522,8 +521,8 @@ export default class GameService implements OnModuleInit {
     //   .leftJoinAndSelect("link.meaning", "meaning")
     //   .leftJoinAndSelect("word.wordParticles", "wordParticles")
     //   .where({
-    //     meaningId: 10,
-    //     wordId: 19
+    //     meaningId: 3563,
+    //     wordId: 6219
     //   })
     //   .getOne();
     //console.log("link: ", link);
@@ -622,11 +621,12 @@ export default class GameService implements OnModuleInit {
       return array;
     }
 
-    const ret: TaskType = {
+    const ret: TaskType & { link: LinkEntity } = {
       word: plWord?.word.word,
       word_desc: link.meaning.meaning_lang1_desc,
       meaningId: link.meaning.id,
       correctWord: WordConverter.entityToGQL(link.word),
+      link: link,
       wordOptions: shuffle(wordsToPlay.map((word: WordEntity) => {
         return WordConverter.entityToGQL(word);
         // return {

@@ -3,7 +3,7 @@ import { Field, ObjectType } from "@nestjs/graphql";
 import { GraphQLInt, GraphQLString } from "graphql";
 
 @ObjectType()
-export class PlayerType implements PlayerEntity {
+export class PlayerType implements Omit<PlayerEntity, "encounteredWords"> {
 
   @Field((type) => GraphQLInt, { nullable: false })
   id: number;
