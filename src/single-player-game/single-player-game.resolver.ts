@@ -100,16 +100,16 @@ export class SinglePlayerGameResolver {
       return null;
     } else {
       console.log("wrong answer");
-      const encounteredWord = await this.encounteredWordEntityRepository
-        .createQueryBuilder("enc")
-        .where({
-          playerId: playerId,
-          linkWordId: task.link.wordId,
-          linkMeaningId: task.link.meaningId
-        })
-        .getOne();
-      encounteredWord.misses += 1;
-      await this.encounteredWordEntityRepository.save(encounteredWord);
+      // const encounteredWord = await this.encounteredWordEntityRepository
+      //   .createQueryBuilder("enc")
+      //   .where({
+      //     playerId: playerId,
+      //     linkWordId: task.link.wordId,
+      //     linkMeaningId: task.link.meaningId
+      //   })
+      //   .getOne();
+      // encounteredWord.misses += 1;
+      // await this.encounteredWordEntityRepository.save(encounteredWord);
       return task.correctWord;
     }
     /**
