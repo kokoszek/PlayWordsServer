@@ -29,39 +29,41 @@ export class SinglePlayerGameResolver {
   ): Promise<TaskType> {
     console.log("level: ", level);
     console.log("playerId: ", playerId);
-    //let link: LinkEntity = await this.randomizeLink(level, "en");
-    const enc: EncounteredWordEntity = await this.encounteredWordEntityRepository
-      .createQueryBuilder("enc")
-      .innerJoinAndSelect("enc.link", "link")
-      .leftJoinAndSelect("link.word", "word")
-      .leftJoinAndSelect("link.meaning", "meaning")
-      .leftJoinAndSelect("word.wordParticles", "wordParticles")
-      .where({
-        playerId: Number.parseInt(playerId)
-      })
-      .getOne();
-    await this.encounteredWordEntityRepository.delete({
-      playerId: Number.parseInt(playerId),
-      linkWordId: enc.linkWordId,
-      linkMeaningId: enc.linkMeaningId
-    });
-    //let task = await this.gameService.generateTask2(randomizeElement(level.split(",")));
-    let task = await this.gameService.generateTask2(enc.link);
-    const encounteredWord = await this.encounteredWordEntityRepository
-      .createQueryBuilder("enc")
-      .where({
-        playerId: Number.parseInt(playerId),
-        linkWordId: task.link.wordId,
-        linkMeaningId: task.link.meaningId
-      })
-      .getOne();
-    if (!encounteredWord) {
-      const encountered = this.encounteredWordEntityRepository.create({
-        playerId: Number.parseInt(playerId),
-        link: task.link
-      });
-      await this.encounteredWordEntityRepository.save(encountered);
-    }
+    const link: LinkEntity = await this.gameService.randomizeLink(
+        randomizeElement(level.split(',')),
+        'en');
+    // const enc: EncounteredWordEntity = await this.encounteredWordEntityRepository
+    //   .createQueryBuilder("enc")
+    //   .innerJoinAndSelect("enc.link", "link")
+    //   .leftJoinAndSelect("link.word", "word")
+    //   .leftJoinAndSelect("link.meaning", "meaning")
+    //   .leftJoinAndSelect("word.wordParticles", "wordParticles")
+    //   .where({
+    //     playerId: Number.parseInt(playerId)
+    //   })
+    //   .getOne();
+    // await this.encounteredWordEntityRepository.delete({
+    //   playerId: Number.parseInt(playerId),
+    //   linkWordId: enc.linkWordId,
+    //   linkMeaningId: enc.linkMeaningId
+    // });
+    let task = await this.gameService.generateTask2(link);
+    //let task = await this.gameService.generateTask2(enc.link);
+    // const encounteredWord = await this.encounteredWordEntityRepository
+    //   .createQueryBuilder("enc")
+    //   .where({
+    //     playerId: Number.parseInt(playerId),
+    //     linkWordId: task.link.wordId,
+    //     linkMeaningId: task.link.meaningId
+    //   })
+    //   .getOne();
+    // if (!encounteredWord) {
+    //   const encountered = this.encounteredWordEntityRepository.create({
+    //     playerId: Number.parseInt(playerId),
+    //     link: task.link
+    //   });
+    //   await this.encounteredWordEntityRepository.save(encountered);
+    // }
     console.log("--------", task);
     if (!this.playersTasks[playerId]) {
       this.playersTasks[playerId] = { task: null };
