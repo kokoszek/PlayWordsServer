@@ -9,6 +9,7 @@ import { EncounteredWordEntity } from "./encountered-word.entity";
 import { Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { LinkEntity } from "../meaning/link.entity";
+import {PlayerEntity} from "../player/player.entity";
 
 @Resolver(of => TaskType)
 export class SinglePlayerGameResolver {
@@ -16,7 +17,9 @@ export class SinglePlayerGameResolver {
   constructor(
     private gameService: GameService,
     @InjectRepository(EncounteredWordEntity)
-    private encounteredWordEntityRepository: Repository<EncounteredWordEntity>
+    private encounteredWordEntityRepository: Repository<EncounteredWordEntity>,
+    @InjectRepository(PlayerEntity)
+    private playerRepo: Repository<PlayerEntity>
   ) {
   }
 
@@ -91,9 +94,18 @@ export class SinglePlayerGameResolver {
     @Args({ name: "meaningId", type: () => GraphQLInt }) meaningId: number,
     @Args({ name: "wordIdSolution", type: () => GraphQLInt }) wordIdSolution: number
   ): Promise<WordType> {
-
     // let task = this.playersTasks[playerId];
     // console.log("task: ", task);
+    const player = await this.playerRepo
+        .createQueryBuilder('player')
+        .select()
+        .where({
+          id: playerId
+        })
+        .getOne();
+    player.playedTasks += 1;
+    await this.playerRepo.save(player);
+
     const task = this.playersTasks[playerId].task;
     if (task.correctWord.id === wordIdSolution) {
       console.log("good answer");

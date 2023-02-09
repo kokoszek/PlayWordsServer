@@ -22,6 +22,12 @@ export class PlayerEntity {
   })
   lost: number;
 
+  @Column({
+    nullable: false,
+    default: 0
+  })
+  playedTasks: number;
+
   @OneToMany(
     () => EncounteredWordEntity,
     link => link.player,
