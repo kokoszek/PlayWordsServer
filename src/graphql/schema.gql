@@ -44,6 +44,7 @@ input NewMeaningInput {
 type PlayerType {
   id: Int!
   lost: Int!
+  playedTasks: Int!
   playerName: String
   won: Int!
 }

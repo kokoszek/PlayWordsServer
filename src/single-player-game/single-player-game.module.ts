@@ -4,12 +4,14 @@ import { Module } from "@nestjs/common";
 import { SinglePlayerGameResolver } from "./single-player-game.resolver";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { EncounteredWordEntity } from "./encountered-word.entity";
+import {PlayerEntity} from "../player/player.entity";
 
 @Module({
   imports: [
     GameModule,
     TypeOrmModule.forFeature([
-      EncounteredWordEntity
+      EncounteredWordEntity,
+      PlayerEntity
     ])
   ],
   providers: [SinglePlayerGameResolver]

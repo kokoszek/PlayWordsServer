@@ -16,4 +16,7 @@ export class PlayerType implements Omit<PlayerEntity, "encounteredWords"> {
 
   @Field((type) => GraphQLInt, { nullable: false })
   won: number;
+
+  @Field((type) => GraphQLInt, { nullable: false })
+  playedTasks: number;
 }
