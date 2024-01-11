@@ -33,17 +33,34 @@ export class WordService implements OnModuleInit {
 
   public async searchByText(search: string): Promise<WordEntity[]> {
     const result: WordEntity[] = await this.wordRepo
-      .createQueryBuilder("word")
-      .innerJoinAndSelect("word.wordParticles", "wordParticles")
-      .where("wordParticles.wordParticle LIKE :search", {
-        search: search + "%"
-      })
-      .orWhere("word.word LIKE :search", {
-        search: search + "%"
-      })
-      .take(40)
-      .orderBy("word.id", "DESC")
-      .getMany();
+        .createQueryBuilder("word")
+        .select()
+        .addSelect('CHAR_LENGTH(word.word)', 'wordLength')
+        .innerJoinAndSelect("word.wordParticles", "wordParticles")
+        .where("wordParticles.wordParticle LIKE :search", {
+          search: search + "%"
+        })
+        .orWhere("word.word LIKE :search", {
+          search: search + "%"
+        })
+        .take(40)
+        .orderBy("wordLength", "ASC")
+        .getMany();
+    const query: string = this.wordRepo
+        .createQueryBuilder("word")
+        .select()
+        .addSelect('CHAR_LENGTH(word.word)', 'wordLength')
+        .innerJoinAndSelect("word.wordParticles", "wordParticles")
+        .where("wordParticles.wordParticle LIKE :search", {
+          search: search + "%"
+        })
+        .orWhere("word.word LIKE :search", {
+          search: search + "%"
+        })
+        .take(40)
+        .orderBy("wordLength", "ASC")
+        .getQuery();
+    console.log('query: ', query);
     return result;
   }
 
@@ -644,7 +661,7 @@ export class WordService implements OnModuleInit {
           wordParticle: particle
         });
         await this.wordParticleRepo.save(wordParticle);
-        console.log("saving word particlce: ", particle);
+        console.log("saving word particle: ", particle);
       }
 
       let link = this.linkRepo.create({
@@ -747,8 +764,86 @@ export class WordService implements OnModuleInit {
     }
   }
 
+  async createSentence() {
+
+    const options = {
+      method: "GET",
+      url: "https://sentencedict.com/guitar.html",
+    };
+
+    try {
+      let result = await axios.request(options);
+      //console.log('result.data: ', result.data);
+      let html = result.data;
+      const root = parse(html);
+      let dictionaryEntity = root.querySelector("#all div");
+      const title = dictionaryEntity.childNodes[0];
+      let buildSentence = [];
+      for(let node of title.parentNode.childNodes) {
+        if(node.rawText) {
+          console.log('node.rawText: ', node.rawText);
+          buildSentence.push(node.rawText);
+        } else {
+          console.log('else: ');
+          for(let node_ of node.childNodes) {
+            console.log('node_: ', node_);
+          }
+        }
+      }
+      console.log('sentence: ', buildSentence.join(''));
+    } catch(e) {
+      console.log('error: ', e);
+
+    }
+  }
+
+  async createSentence2() {
+
+    const options = {
+      method: "GET",
+      url: "https://sentence.yourdictionary.com/carpet",
+    };
+
+    try {
+      let result = await axios.request(options);
+      //console.log('result.data: ', result.data);
+      let html = result.data;
+      const root = parse(html);
+      let dictionaryEntity = root.querySelector(".sentences-list li div div div p");
+      //console.log('dict: ', dictionaryEntity.parentNode.childNodes);
+      //console.log('dict: ', dictionaryEntity.childNodes);
+      let builtSentence = [];
+      dictionaryEntity.childNodes.forEach(el => {
+        //console.log('rawText: ', el.rawText);
+        builtSentence.push(el.rawText);
+      })
+      console.log('sentence: ', builtSentence.join(''));
+      // let obj = (dictionaryEntity.parentNode.childNodes[0] .childNodes as any);
+      // console.log('first li: ', obj[0]);
+      // const title = dictionaryEntity.childNodes[0];
+      // let buildSentence = [];
+      // for(let node of title.parentNode.childNodes) {
+      //   if(node.rawText) {
+      //     console.log('node.rawText: ', node.rawText);
+      //     buildSentence.push(node.rawText);
+      //   } else {
+      //     console.log('else: ');
+      //     for(let node_ of node.childNodes) {
+      //       console.log('node_: ', node_);
+      //     }
+      //   }
+      // }
+      //console.log('sentence: ', buildSentence.join(''));
+    } catch(e) {
+      console.log('error: ', e);
+
+    }
+  }
+
   async onModuleInit(): Promise<any> {
     console.log("on module INIT");
+
+    await this.createSentence2();
     //await this.processMacedonianPdf("A1");
     //await this.translateWordsWithNeedsTranslationFlag();
 

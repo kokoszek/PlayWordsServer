@@ -51,7 +51,7 @@ export class WordResolver {
     @Args("search", { type: () => String }) search: string
   ): Promise<WordType[]> {
     let result = await this.wordService.searchByText(search);
-    console.log("searchWord: ", result);
+    //console.log("searchWord: ", result);
     return result.map(WordConverter.entityToGQL);
   }
 }
